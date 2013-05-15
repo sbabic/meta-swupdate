@@ -1,0 +1,77 @@
+#
+# Automatically generated make config: don't edit
+# Busybox version: 0.1.0.git
+# Sun Oct 27 15:59:59 2013
+#
+CONFIG_HAVE_DOT_CONFIG=y
+
+#
+# Swupdate Settings
+#
+
+#
+# General Configuration
+#
+CONFIG_SCRIPTS=y
+CONFIG_HW_COMPATIBILITY=y
+CONFIG_HW_COMPATIBILITY_FILE="/etc/hwrevision"
+# CONFIG_FEATURE_SYSLOG is not set
+
+#
+# Build Options
+#
+# CONFIG_STATIC is not set
+CONFIG_CROSS_COMPILER_PREFIX=""
+CONFIG_SYSROOT=""
+CONFIG_EXTRA_CFLAGS=""
+CONFIG_EXTRA_LDFLAGS=""
+CONFIG_EXTRA_LDLIBS=""
+
+#
+# Debugging Options
+#
+# CONFIG_DEBUG is not set
+# CONFIG_DEBUG_PESSIMIZE is not set
+# CONFIG_WERROR is not set
+CONFIG_WEBSERVER=y
+
+#
+# Webserver Features
+#
+CONFIG_MONGOOSE=y
+
+#
+# Mongoose Feature
+#
+CONFIG_MONGOOSELUA=y
+# CONFIG_MONGOOSESQL is not set
+CONFIG_MONGOOSEIPV6=y
+CONFIG_MONGOOSESSL=y
+
+#
+# Archival Features
+#
+CONFIG_CPIO=y
+CONFIG_GUNZIP=y
+
+#
+# Parser Features
+#
+CONFIG_LIBCONFIG=y
+CONFIG_LUAEXTERNAL=y
+# CONFIG_SETSWDESCRIPTION is not set
+CONFIG_SWDESCRIPTION=""
+
+#
+# Image Handlers
+#
+CONFIG_UBIVOL=y
+CONFIG_CFI=y
+CONFIG_RAW=y
+CONFIG_LUASCRIPTHANDLER=y
+CONFIG_UBOOT=y
+
+#
+# LUA Features
+#
+CONFIG_LUA=y

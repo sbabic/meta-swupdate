@@ -1,0 +1,99 @@
+#!/bin/sh
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+USB=/mnt/card
+
+umask 022
+mount -t proc proc /proc
+mount sysfs /sys -t sysfs
+if [ -e /proc/cpu/alignment ]; then
+   echo "3" > /proc/cpu/alignment
+fi
+mount tmpfs -t tmpfs $TMPDIR -o,size=40k
+
+echo 0 > /proc/sys/kernel/printk
+
+mount_usb() {
+found=0
+for i in /dev/sda?;do
+	if [ $i == "/dev/sda?" ];then
+		break
+	fi
+	mount $i ${USB} 2>/dev/null
+
+	if [ $? != 0 ];then 
+		continue
+	fi
+
+	return 0
+done
+
+# Try to mount a USB without partition table
+	mount /dev/sda  ${USB} 2>/dev/null
+	return $?
+
+}
+
+rotation=0
+if [ -e /etc/rotation ]; then
+	read rotation < /etc/rotation
+fi
+
+
+# wait until the device node is created
+reset
+echo "Checking for application software"
+echo "---------------------------------"
+echo "  "
+
+cp /etc/fw_env.config /tmp/.
+
+while [ 1 ];do
+	echo "Waiting for USB Pen..."
+	sleep 3
+
+	mount_usb
+	if [ $? == 0 ];then
+		break
+	fi
+done
+
+if [ -f ${USB}/software*.img ];then
+	found=1
+	break
+fi
+
+if [ $found == 0 ];then
+	echo "No Software Image found....exiting !"
+fi
+
+
+for file in ${USB}/software*.img;do
+	echo " "
+	echo "Starting Software Update"
+	echo "------------------------"
+	echo Image found : $file
+	echo " "
+	swupdate -i $file -v	
+	if [ $? == 0 ];then
+		echo "SUCCESS !"
+	else
+		echo "FAILURE !"
+	fi
+	sleep 5
+	break
+done
+
+console=`cat /sys/class/tty/console/active`
+
+echo "console is $console"
+
+if [ x$console != "xttyO0" ];then
+	while [ 1 ]; do
+		echo "Please reboot the system !"
+		sleep 90
+		reboot
+	done
+fi
+/bin/sh
+exit 0

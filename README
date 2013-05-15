@@ -1,0 +1,16 @@
+meta-swupdate, Yocto layer for deploy tool
+==========================================
+
+This layer's purpose is to add support for a deployment
+mechanism of Yocto's images based on swupdate project.
+
+Layer dependencies
+------------------
+
+meta and meta-yocto must be added to the layer definitions.
+Tested with the meta-eldk layer, but not strictly required.
+
+Maintainer
+----------
+
+Stefano Babic <sbabic@denx.de>
