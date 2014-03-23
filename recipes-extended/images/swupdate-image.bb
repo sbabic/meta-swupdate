@@ -8,16 +8,12 @@ DESCRIPTION = "Root FS includes the following functionality: 				\
 		initscripts: modified standard script for ELDK 5.2			\
 		"
 
-
-SRC_URI = "file://rcS.swupdate \
-	"
-
 IMAGE_INSTALL = "base-files \
 		busybox \
 		mtd-utils \
 		libconfig \
-		tinylogin \
 		swupdate \
+		swupdate-www \
 		sysvinit \
 		initscripts-swupdate \
 		 "
@@ -62,7 +58,6 @@ exchange_rcs () {
 }
 	 
 # remove not needed ipkg informations
-ROOTFS_POSTPROCESS_COMMAND += "remove_packaging_data_files ; "
 ROOTFS_POSTPROCESS_COMMAND += "remove_locale_data_files ; "
 ROOTFS_POSTPROCESS_COMMAND += "fix_inittab_swupdate ; "
 ROOTFS_POSTPROCESS_COMMAND += "exchange_rcs ; "
