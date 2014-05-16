@@ -1,7 +1,7 @@
 SUMMARY="Image updater for Yocto projects"
 DESCRIPTION = "Application for automatic software update from USB Pen"
 SECTION="swupdate"
-DEPENDS = "mtd-utils libconfig"
+DEPENDS = "mtd-utils libconfig openssl"
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=0636e73ff0215e8d672dc4c32c317bb3"
 
