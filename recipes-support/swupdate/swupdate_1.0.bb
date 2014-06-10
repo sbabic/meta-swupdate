@@ -11,7 +11,9 @@ inherit cml1 update-rc.d
 
 
 SRCREV = "${AUTOREV}"
-SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=git \
+#SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=git
+
+SRC_URI = "git:///opt/tools/Projects/swupdate;protocol=file \
 	   file://defconfig \
 	   file://swupdate \
 	   "

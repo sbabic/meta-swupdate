@@ -22,3 +22,6 @@ FILES_${PN} = "/"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 CONFFILES_${PN} = ""
+
+INITSCRIPT_NAME = "swupdate"
+INITSCRIPT_PARAMS = "defaults 70"

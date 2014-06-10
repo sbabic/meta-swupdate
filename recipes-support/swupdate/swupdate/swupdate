@@ -31,7 +31,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="swupdate"
 NAME="swupdate"
 DAEMON=/usr/bin/swupdate
-DAEMON_ARGS="-document_root /www"
+DAEMON_ARGS="-w '-document_root /www'"
 PIDFILE=/var/run/$NAME.pid
 
 . /etc/init.d/functions || exit 1
@@ -58,8 +58,6 @@ do_start() {
 	*)
 		echo "Starting $DESC ..."
 		cd /home/root
-# Reset bootcounter
-		echo 0 > /sys/devices/virtual/misc/bootcount/bootcount
 		exec $DAEMON $DAEMON_ARGS >/dev/null 2>&1 &
 		exit 0
 		;;

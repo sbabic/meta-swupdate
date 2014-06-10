@@ -11,11 +11,12 @@ DESCRIPTION = "Root FS includes the following functionality: 				\
 IMAGE_INSTALL = "base-files \
 		busybox \
 		mtd-utils \
+		mtd-utils-ubifs \
 		libconfig \
 		swupdate \
 		swupdate-www \
 		sysvinit \
-		initscripts-swupdate \
+		initscripts \
 		 "
 
 USE_DEVFS = "1"
@@ -61,4 +62,4 @@ exchange_rcs () {
 # remove not needed ipkg informations
 ROOTFS_POSTPROCESS_COMMAND += "remove_locale_data_files ; "
 ROOTFS_POSTPROCESS_COMMAND += "fix_inittab_swupdate ; "
-ROOTFS_POSTPROCESS_COMMAND += "exchange_rcs ; "
+#ROOTFS_POSTPROCESS_COMMAND += "exchange_rcs ; "
