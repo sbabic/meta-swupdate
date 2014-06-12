@@ -1,7 +1,7 @@
 SUMMARY="Image updater for Yocto projects"
 DESCRIPTION = "Application for automatic software update from USB Pen"
 SECTION="swupdate"
-DEPENDS = "mtd-utils libconfig openssl"
+DEPENDS = "mtd-utils libconfig openssl lua"
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=0636e73ff0215e8d672dc4c32c317bb3"
 
@@ -11,9 +11,7 @@ inherit cml1 update-rc.d
 
 
 SRCREV = "${AUTOREV}"
-#SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=git
-
-SRC_URI = "git:///opt/tools/Projects/swupdate;protocol=file \
+SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=git \
 	   file://defconfig \
 	   file://swupdate \
 	   "
