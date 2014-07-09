@@ -16,6 +16,7 @@ IMAGE_INSTALL = "base-files \
 		swupdate \
 		swupdate-www \
 		sysvinit \
+		util-linux-sfdisk \
 		initscripts \
 		 "
 
