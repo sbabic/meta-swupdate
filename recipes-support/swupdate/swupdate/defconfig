@@ -1,0 +1,73 @@
+#
+# Automatically generated make config: don't edit
+# swupdate version: 2014.07.0-rc1
+# Wed Jul  9 11:50:30 2014
+#
+CONFIG_HAVE_DOT_CONFIG=y
+
+#
+# Swupdate Settings
+#
+
+#
+# General Configuration
+#
+CONFIG_SCRIPTS=y
+# CONFIG_HW_COMPATIBILITY is not set
+CONFIG_HW_COMPATIBILITY_FILE=""
+CONFIG_LUA=y
+# CONFIG_FEATURE_SYSLOG is not set
+
+#
+# Build Options
+#
+# CONFIG_STATIC is not set
+CONFIG_CROSS_COMPILER_PREFIX=""
+CONFIG_SYSROOT=""
+CONFIG_EXTRA_CFLAGS=""
+CONFIG_EXTRA_LDFLAGS=""
+CONFIG_EXTRA_LDLIBS=""
+
+#
+# Debugging Options
+#
+# CONFIG_DEBUG is not set
+# CONFIG_DEBUG_PESSIMIZE is not set
+# CONFIG_WERROR is not set
+# CONFIG_NOCLEANUP is not set
+# CONFIG_WEBSERVER is not set
+# CONFIG_MONGOOSE is not set
+# CONFIG_MONGOOSELUA is not set
+# CONFIG_MONGOOSESQL is not set
+# CONFIG_MONGOOSEIPV6 is not set
+# CONFIG_MONGOOSESSL is not set
+
+#
+# Archival Features
+#
+CONFIG_CPIO=y
+CONFIG_GUNZIP=y
+
+#
+# Parser Features
+#
+CONFIG_LIBCONFIG=y
+# CONFIG_LUAEXTERNAL is not set
+# CONFIG_SETEXTPARSERNAME is not set
+CONFIG_EXTPARSERNAME=""
+# CONFIG_SETSWDESCRIPTION is not set
+CONFIG_SWDESCRIPTION=""
+
+#
+# Image Handlers
+#
+# CONFIG_UBIVOL is not set
+CONFIG_UBIBLACKLIST=""
+CONFIG_UBIVIDOFFSET=0
+# CONFIG_CFI is not set
+# CONFIG_RAW is not set
+# CONFIG_LUASCRIPTHANDLER is not set
+# CONFIG_SHELLSCRIPTHANDLER is not set
+# CONFIG_HANDLER_IN_LUA is not set
+# CONFIG_UBOOT is not set
+CONFIG_UBOOT_FWENV=""
