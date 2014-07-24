@@ -9,6 +9,7 @@ DESCRIPTION = "Root FS includes the following functionality: 				\
 		"
 
 IMAGE_INSTALL = "base-files \
+		base-passwd \
 		busybox \
 		mtd-utils \
 		mtd-utils-ubifs \
