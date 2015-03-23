@@ -49,7 +49,5 @@ do_compile() {
 	cp swupdate_unstripped swupdate
 }
 
-PARALLEL_MAKE = ""
-
 INITSCRIPT_NAME = "swupdate"
 INITSCRIPT_PARAMS = "defaults 70"
