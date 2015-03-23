@@ -36,7 +36,7 @@ do_install () {
 	install -m 0755 swupdate ${D}${bindir}/
 
 	install -m 0755 -d ${D}/www
-        install -m 0755 ${S}www/* ${D}/www
+	install -m 0755 ${S}www/* ${D}/www
 
 	install -d ${D}${sysconfdir}/init.d
 	install -m 755 ${WORKDIR}/swupdate ${D}${sysconfdir}/init.d
