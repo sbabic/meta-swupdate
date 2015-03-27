@@ -14,6 +14,8 @@ SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=git \
 PACKAGES =+ "${PN}-www"
 
 FILES_${PN}-www = "/www/*"
+FILES_${PN}-dev = "${includedir}"
+FILES_${PN}-staticdev = "${libdir}"
 FILES_${PN} = "${bindir}/* /etc/init.d"
 CONFFILES_${PN} += "${sysconfdir}/init.d/recovery"
 
@@ -32,6 +34,11 @@ do_install () {
 
   install -m 0755 -d ${D}/www
   install -m 0755 ${S}www/* ${D}/www
+
+  install -d ${D}${libdir}/
+  install -d ${D}${includedir}/
+  install -m 0644 ${S}include/network_ipc.h ${D}${includedir}
+  install -m 0755 ${S}ipc/lib.a ${D}${libdir}/libswupdate.a
 }
 
 do_compile() {
