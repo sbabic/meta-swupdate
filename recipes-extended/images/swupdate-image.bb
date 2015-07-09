@@ -1,11 +1,5 @@
-SUMMARY = "Root file system image for MCX board"
-DESCRIPTION = "Root FS includes the following functionality: 				\
-		Busybox: standard for ELDK 5.2 (syslogd removed) 			\
-		mtd-utils: standard for ELDK 5.2 					\
-		base-files: standard script for ELDK 5.2 (/var/log placement changed) 	\
-		tinylogin: standard for ELDK 5.2 					\
-		sysvinit: standard for ELDK 5.2 (bootlogd removed)			\
-		initscripts: modified standard script for ELDK 5.2			\
+SUMMARY = "Root filesystem for swuupdate as rescue system"
+DESCRIPTION = "Root FS to start swupdate in rescue mode	\
 		"
 
 IMAGE_INSTALL = "base-files \
@@ -16,13 +10,11 @@ IMAGE_INSTALL = "base-files \
 		libconfig \
 		swupdate \
 		swupdate-www \
-		sysvinit \
+                ${@bb.utils.contains('SWUPDATE_INIT', 'tiny', 'initscripts-swupdate u-boot-fw-utils', 'initscripts sysvinit', d)} \
 		util-linux-sfdisk \
-		initscripts \
 		 "
 
 USE_DEVFS = "1"
-#IMAGE_DEVICE_TABLES = "files/device_table-minimal.txt"
 
 LIC_FILES_CHKSUM = "file://${COREBASE}/LICENSE;md5=3f40d7994397109285ec7b81fdeb3b58 \
                     file://${COREBASE}/meta/COPYING.MIT;md5=3da9cfbcb788c80a0384361b4de20420 \
@@ -55,13 +47,6 @@ fix_inittab_swupdate () {
 	mv ${IMAGE_ROOTFS}${sysconfdir}/inittab.swupdate ${IMAGE_ROOTFS}${sysconfdir}/inittab
 }
 
-exchange_rcs () {
-	rm ${IMAGE_ROOTFS}${sysconfdir}/init.d/rcS
-	mv ${IMAGE_ROOTFS}${sysconfdir}/init.d/rcS.swupdate \
-		${IMAGE_ROOTFS}${sysconfdir}/init.d/rcS
-}
-	 
 # remove not needed ipkg informations
 ROOTFS_POSTPROCESS_COMMAND += "remove_locale_data_files ; "
-ROOTFS_POSTPROCESS_COMMAND += "fix_inittab_swupdate ; "
-#ROOTFS_POSTPROCESS_COMMAND += "exchange_rcs ; "
+ROOTFS_POSTPROCESS_COMMAND += "${@bb.utils.contains('SWUPDATE_INIT', 'tiny', '', 'fix_inittab_swupdate', d)}"
