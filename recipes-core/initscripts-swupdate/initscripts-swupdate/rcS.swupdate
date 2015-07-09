@@ -1,7 +1,7 @@
 #!/bin/sh
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
-USB=/mnt/card
+USB=/mnt
 
 umask 022
 mount -t proc proc /proc
@@ -9,9 +9,9 @@ mount sysfs /sys -t sysfs
 if [ -e /proc/cpu/alignment ]; then
    echo "3" > /proc/cpu/alignment
 fi
-mount tmpfs -t tmpfs $TMPDIR -o,size=40k
 
 echo 0 > /proc/sys/kernel/printk
+echo 100 > /sys/class/backlight/pwm-backlight/brightness
 
 mount_usb() {
 found=0
@@ -41,7 +41,7 @@ fi
 
 
 # wait until the device node is created
-reset
+
 echo "Checking for application software"
 echo "---------------------------------"
 echo "  "
@@ -58,42 +58,20 @@ while [ 1 ];do
 	fi
 done
 
-if [ -f ${USB}/software*.img ];then
-	found=1
-	break
+echo " "
+echo "Starting Software Update"
+echo "------------------------"
+swupdate -i "${USB}/*.swu" -v
+if [ $? == 0 ];then
+	echo "SUCCESS !"
+else
+	echo "FAILURE !"
 fi
 
-if [ $found == 0 ];then
-	echo "No Software Image found....exiting !"
-fi
-
-
-for file in ${USB}/software*.img;do
-	echo " "
-	echo "Starting Software Update"
-	echo "------------------------"
-	echo Image found : $file
-	echo " "
-	swupdate -i $file -v	
-	if [ $? == 0 ];then
-		echo "SUCCESS !"
-	else
-		echo "FAILURE !"
-	fi
-	sleep 5
-	break
+while [ 1 ]; do
+	echo "Please reboot the system !"
+	sleep 90
+	reboot
 done
 
-console=`cat /sys/class/tty/console/active`
-
-echo "console is $console"
-
-if [ x$console != "xttyO0" ];then
-	while [ 1 ]; do
-		echo "Please reboot the system !"
-		sleep 90
-		reboot
-	done
-fi
-/bin/sh
 exit 0
