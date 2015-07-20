@@ -7,10 +7,27 @@ mechanism of Yocto's images based on swupdate project.
 Layer dependencies
 ------------------
 
-meta and meta-yocto must be added to the layer definitions.
-Tested with the meta-eldk layer, but not strictly required.
+This layer depends on:
+
+URI: git://github.com/openembedded/meta-openembedded.git
+subdirectory: meta-oe
 
 Maintainer
 ----------
 
 Stefano Babic <sbabic@denx.de>
+
+Submitting patches
+------------------
+
+You can submit your patches (or post questions reagarding
+this layer to the swupdate Mailing List:
+
+	swupdate@googlegroups.com
+
+When creating patches, please use something like:
+
+    git format-patch -s --subject-prefix='meta-swupdate][PATCH' <revision range>
+
+Please use 'git send- email' to send the generated patches to the ML
+to bypass changes from your mailer.
