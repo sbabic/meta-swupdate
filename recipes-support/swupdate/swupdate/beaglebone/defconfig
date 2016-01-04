@@ -1,0 +1,76 @@
+#
+# Automatically generated file; DO NOT EDIT.
+# Swupdate Configuration
+#
+CONFIG_HAVE_DOT_CONFIG=y
+
+#
+# Swupdate Settings
+#
+
+#
+# General Configuration
+#
+CONFIG_SCRIPTS=y
+# CONFIG_HW_COMPATIBILITY is not set
+CONFIG_MTD=y
+CONFIG_LUA=y
+# CONFIG_FEATURE_SYSLOG is not set
+
+#
+# Build Options
+#
+# CONFIG_STATIC is not set
+CONFIG_CROSS_COMPILE=""
+CONFIG_SYSROOT=""
+CONFIG_EXTRA_CFLAGS=""
+CONFIG_EXTRA_LDFLAGS=""
+CONFIG_EXTRA_LDLIBS=""
+
+#
+# Debugging Options
+#
+# CONFIG_DEBUG is not set
+# CONFIG_WERROR is not set
+# CONFIG_NOCLEANUP is not set
+# CONFIG_DOWNLOAD is not set
+CONFIG_WEBSERVER=y
+
+#
+# Webserver Features
+#
+CONFIG_MONGOOSE=y
+
+#
+# Mongoose Feature
+#
+CONFIG_MONGOOSELUA=y
+# CONFIG_MONGOOSEIPV6 is not set
+CONFIG_MONGOOSESSL=y
+
+#
+# Archival Features
+#
+CONFIG_CPIO=y
+CONFIG_GUNZIP=y
+
+#
+# Parser Features
+#
+CONFIG_LIBCONFIG=y
+CONFIG_LIBCONFIGROOT=""
+# CONFIG_JSON is not set
+# CONFIG_LUAEXTERNAL is not set
+# CONFIG_SETSWDESCRIPTION is not set
+
+#
+# Image Handlers
+#
+# CONFIG_UBIVOL is not set
+CONFIG_CFI=y
+CONFIG_RAW=y
+CONFIG_LUASCRIPTHANDLER=y
+CONFIG_SHELLSCRIPTHANDLER=y
+CONFIG_HANDLER_IN_LUA=y
+CONFIG_UBOOT=y
+CONFIG_UBOOT_FWENV="/etc/fw_env.config"
