@@ -1,0 +1,15 @@
+software =
+{
+	version = "0.1.0";
+
+	hardware-compatibility: [ "revC"];
+
+	images: (
+		{
+			filename = "core-image-full-cmdline-beaglebone.ext3";
+			device = "/dev/mmcblk1p2";
+			type = "raw";
+		}
+	);
+}
+
