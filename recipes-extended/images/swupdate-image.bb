@@ -26,7 +26,7 @@ export SYSVINIT = "no"
 LICENSE = "MIT"
 
 IMAGE_CLASSES += " image_types_uboot"
-IMAGE_FSTYPES = "ext3.gz.u-boot"
+IMAGE_FSTYPES = "ext4.gz.u-boot"
 
 IMAGE_ROOTFS_SIZE = "8192"
 
@@ -49,4 +49,4 @@ fix_inittab_swupdate () {
 
 # remove not needed ipkg informations
 ROOTFS_POSTPROCESS_COMMAND += "remove_locale_data_files ; "
-ROOTFS_POSTPROCESS_COMMAND += "${@bb.utils.contains('SWUPDATE_INIT', 'tiny', '', 'fix_inittab_swupdate', d)}"
+#ROOTFS_POSTPROCESS_COMMAND += "${@bb.utils.contains('SWUPDATE_INIT', 'tiny', '', 'fix_inittab_swupdate', d)}"
