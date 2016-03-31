@@ -29,7 +29,7 @@ def swupdate_getdepends(d):
 
     depstr = ""
     for dep in deps:
-        depstr += " " + dep + ":do_rootfs"
+        depstr += " " + dep + ":do_populate_sysroot"
     return depstr
 
 do_swuimage[dirs] = "${TOPDIR}"
@@ -79,11 +79,15 @@ python do_swuimage () {
     deploydir = d.getVar('DEPLOY_DIR_IMAGE', True)
 
     for image in images:
-        imagename = image + '-' + d.getVar('MACHINE', True) + d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image, True)
-        src = os.path.join(deploydir, "%s" % imagename)
-        dst = os.path.join(s, "%s" % imagename)
-        shutil.copyfile(src, dst)
-        list_for_cpio += " " + imagename
+        imagename = image + '-' + d.getVar('MACHINE', True)
+        fstypes = (d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image, True) or "").split()
+        for fstype in fstypes:
+            imagebase = image + '-' + d.getVar('MACHINE', True)
+            imagename = imagebase + fstype
+            src = os.path.join(deploydir, "%s" % imagename)
+            dst = os.path.join(s, "%s" % imagename)
+            shutil.copyfile(src, dst)
+            list_for_cpio += " " + imagename
 
     line = 'for i in ' + list_for_cpio + '; do echo $i;done | cpio -ov -H crc >' + os.path.join(deploydir,d.getVar('IMAGE_NAME', True) + '.swu')
     os.system("cd " + s + ";" + line)
