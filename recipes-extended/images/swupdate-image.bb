@@ -10,7 +10,7 @@ IMAGE_INSTALL = "base-files \
 		libconfig \
 		swupdate \
 		swupdate-www \
-                ${@bb.utils.contains('SWUPDATE_INIT', 'tiny', 'initscripts-swupdate u-boot-fw-utils', 'initscripts sysvinit', d)} \
+                ${@bb.utils.contains('SWUPDATE_INIT', 'tiny', 'initscripts-swupdate', 'initscripts sysvinit', d)} \
 		util-linux-sfdisk \
 		 "
 
