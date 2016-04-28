@@ -18,6 +18,19 @@ Image hashing
 During creation of the update file, occurrences of @IMAGE (where IMAGE is an
 image filename) are replaced with the sha256 hash of the image.
 
+SWU image signing
+------------
+
+To enable signing:
+    Set SWUPDATE_SIGNING = "1"
+    Set SWUPDATE_PRIVATE_KEY to the full path of private key file
+
+sw-description is signed with the private key and the signature is writen to
+sw-description.sig which is included in the SWU file.
+
+Encrypted private keys are not currently supported since a secure 
+mechanism must exist to provide the passphrase.
+
 Maintainer
 ----------
 

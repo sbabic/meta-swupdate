@@ -14,6 +14,7 @@
 
 S = "${WORKDIR}/${PN}"
 
+DEPENDS += "${@ 'openssl-native' if d.getVar('SWUPDATE_SIGNING', True) == '1' else ''}"
 IMAGE_DEPENDS ?= ""
 
 def swupdate_is_hash_needed(s, filename):
@@ -109,6 +110,9 @@ python do_swuimage () {
 
     deploydir = d.getVar('DEPLOY_DIR_IMAGE', True)
 
+    if d.getVar('SWUPDATE_SIGNING', True) == '1':
+        list_for_cpio.append('sw-description.sig')
+
     for image in images:
         imagename = image + '-' + d.getVar('MACHINE', True)
         fstypes = (d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image, True) or "").split()
@@ -124,6 +128,19 @@ python do_swuimage () {
         if file != 'sw-description' and swupdate_is_hash_needed(s, file):
             hash = swupdate_get_sha256(s, file)
             swupdate_write_sha256(s, file, hash)
+
+    if d.getVar('SWUPDATE_SIGNING', True) == '1':
+        privkey = d.getVar('SWUPDATE_PRIVATE_KEY', True)
+        if not privkey:
+            bb.fatal("SWUPDATE_PRIVATE_KEY isn't set")
+        if not os.path.exists(privkey):
+            bb.fatal("SWUPDATE_PRIVATE_KEY %s doesn't exist" % (privkey))
+        signcmd = "openssl dgst -sha256 -sign '%s' -out '%s' '%s'" % (
+            privkey,
+            os.path.join(s, 'sw-description.sig'),
+            os.path.join(s, 'sw-description'))
+        if os.system(signcmd) != 0:
+            bb.fatal("Failed to sign sw-description with %s" % (privkey))
 
     line = 'for i in ' + ' '.join(list_for_cpio) + '; do echo $i;done | cpio -ov -H crc >' + os.path.join(deploydir,d.getVar('IMAGE_NAME', True) + '.swu')
     os.system("cd " + s + ";" + line)
