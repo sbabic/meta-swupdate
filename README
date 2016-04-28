@@ -12,6 +12,12 @@ This layer depends on:
 URI: git://github.com/openembedded/meta-openembedded.git
 subdirectory: meta-oe
 
+Image hashing
+-------------
+
+During creation of the update file, occurrences of @IMAGE (where IMAGE is an
+image filename) are replaced with the sha256 hash of the image.
+
 Maintainer
 ----------
 

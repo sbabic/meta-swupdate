@@ -16,6 +16,37 @@ S = "${WORKDIR}/${PN}"
 
 IMAGE_DEPENDS ?= ""
 
+def swupdate_is_hash_needed(s, filename):
+    with open(os.path.join(s, "sw-description"), 'r') as f:
+        for line in f:
+            if line.find("@%s" % (filename)) != -1:
+                return True
+    return False
+
+def swupdate_get_sha256(s, filename):
+    import hashlib
+
+    m = hashlib.sha256()
+
+    with open(os.path.join(s, filename), 'rb') as f:
+        while True:
+            data = f.read(1024)
+            if not data:
+                break
+            m.update(data)
+    return m.hexdigest()
+
+def swupdate_write_sha256(s, filename, hash):
+    write_lines = []
+
+    with open(os.path.join(s, "sw-description"), 'r') as f:
+        for line in f:
+            write_lines.append(line.replace("@%s" % (filename), hash))
+
+    with open(os.path.join(s, "sw-description"), 'w+') as f:
+        for line in write_lines:
+            f.write(line)
+
 def swupdate_getdepends(d):
     def adddep(depstr, deps):
         for i in (depstr or "").split():
@@ -67,14 +98,14 @@ python do_swuimage () {
     s = d.getVar('S', True)
     shutil.copyfile(os.path.join(workdir, "sw-description"), os.path.join(s, "sw-description"))
     fetch = bb.fetch2.Fetch([], d)
-    list_for_cpio = "sw-description"
+    list_for_cpio = ["sw-description"]
 
     for url in fetch.urls:
         local = fetch.localpath(url)
         filename = os.path.basename(local)
         shutil.copyfile(local, os.path.join(s, "%s" % filename ))
         if (filename != 'sw-description'):
-            list_for_cpio += " " + filename
+            list_for_cpio.append(filename)
 
     deploydir = d.getVar('DEPLOY_DIR_IMAGE', True)
 
@@ -87,9 +118,14 @@ python do_swuimage () {
             src = os.path.join(deploydir, "%s" % imagename)
             dst = os.path.join(s, "%s" % imagename)
             shutil.copyfile(src, dst)
-            list_for_cpio += " " + imagename
+            list_for_cpio.append(imagename)
 
-    line = 'for i in ' + list_for_cpio + '; do echo $i;done | cpio -ov -H crc >' + os.path.join(deploydir,d.getVar('IMAGE_NAME', True) + '.swu')
+    for file in list_for_cpio:
+        if file != 'sw-description' and swupdate_is_hash_needed(s, file):
+            hash = swupdate_get_sha256(s, file)
+            swupdate_write_sha256(s, file, hash)
+
+    line = 'for i in ' + ' '.join(list_for_cpio) + '; do echo $i;done | cpio -ov -H crc >' + os.path.join(deploydir,d.getVar('IMAGE_NAME', True) + '.swu')
     os.system("cd " + s + ";" + line)
 }
 
