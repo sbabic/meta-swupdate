@@ -101,6 +101,9 @@ python do_swuimage () {
     fetch = bb.fetch2.Fetch([], d)
     list_for_cpio = ["sw-description"]
 
+    if d.getVar('SWUPDATE_SIGNING', True) == '1':
+        list_for_cpio.append('sw-description.sig')
+
     for url in fetch.urls:
         local = fetch.localpath(url)
         filename = os.path.basename(local)
@@ -109,9 +112,6 @@ python do_swuimage () {
             list_for_cpio.append(filename)
 
     deploydir = d.getVar('DEPLOY_DIR_IMAGE', True)
-
-    if d.getVar('SWUPDATE_SIGNING', True) == '1':
-        list_for_cpio.append('sw-description.sig')
 
     for image in images:
         imagename = image + '-' + d.getVar('MACHINE', True)
@@ -135,8 +135,12 @@ python do_swuimage () {
             bb.fatal("SWUPDATE_PRIVATE_KEY isn't set")
         if not os.path.exists(privkey):
             bb.fatal("SWUPDATE_PRIVATE_KEY %s doesn't exist" % (privkey))
-        signcmd = "openssl dgst -sha256 -sign '%s' -out '%s' '%s'" % (
+        passout = d.getVar('SWUPDATE_PASSWORD_FILE', True)
+        if passout:
+            passout = "-passin file:'%s' " % (passout)
+        signcmd = "openssl dgst -sha256 -sign '%s' %s -out '%s' '%s'" % (
             privkey,
+            passout,
             os.path.join(s, 'sw-description.sig'),
             os.path.join(s, 'sw-description'))
         if os.system(signcmd) != 0:
