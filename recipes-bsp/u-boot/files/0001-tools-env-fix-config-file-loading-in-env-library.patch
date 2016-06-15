@@ -1,0 +1,34 @@
+From 925c97c248527391de32c2926f7e1911850fd4b0 Mon Sep 17 00:00:00 2001
+From: Anatolij Gustschin <agust@denx.de>
+Date: Fri, 29 Apr 2016 22:00:11 +0200
+Subject: [PATCH] tools: env: fix config file loading in env library
+
+env library is broken as the config file pointer is only initialized
+in main(). When running in the env library parse_config() fails:
+
+  Cannot parse config file '(null)': Bad address
+
+Ensure that config file pointer is always initialized.
+
+Signed-off-by: Anatolij Gustschin <agust@denx.de>
+Cc: Stefano Babic <sbabic@denx.de>
+---
+ tools/env/fw_env.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/tools/env/fw_env.c b/tools/env/fw_env.c
+index 1420ac5..06cf63d 100644
+--- a/tools/env/fw_env.c
++++ b/tools/env/fw_env.c
+@@ -1325,6 +1325,9 @@ static int parse_config ()
+	struct stat st;
+
+ #if defined(CONFIG_FILE)
++	if (!common_args.config_file)
++		common_args.config_file = CONFIG_FILE;
++
+	/* Fills in DEVNAME(), ENVSIZE(), DEVESIZE(). Or don't. */
+	if (get_config(common_args.config_file)) {
+		fprintf(stderr, "Cannot parse config file '%s': %m\n",
+--
+2.5.5
