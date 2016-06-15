@@ -5,11 +5,12 @@ DEPENDS = "mtd-utils libconfig libarchive openssl lua curl json-c u-boot-fw-util
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=0636e73ff0215e8d672dc4c32c317bb3"
 
-inherit cml1 update-rc.d
+inherit cml1 update-rc.d systemd
 
 SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=git \
      file://defconfig \
      file://swupdate \
+     file://swupdate.service \
      "
 
 PACKAGES =+ "${PN}-www"
@@ -17,7 +18,7 @@ PACKAGES =+ "${PN}-www"
 FILES_${PN}-www = "/www/*"
 FILES_${PN}-dev = "${includedir}"
 FILES_${PN}-staticdev = "${libdir}"
-FILES_${PN} = "${bindir}/* /etc/init.d"
+FILES_${PN} = "${bindir}/* /etc"
 CONFFILES_${PN} += "${sysconfdir}/init.d/recovery"
 
 S = "${WORKDIR}/git/"
@@ -27,6 +28,12 @@ EXTRA_OEMAKE += "V=1 ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET_PREFIX} SKIP_STR
 do_configure () {
   cp ${WORKDIR}/defconfig ${S}/.config
   cml1_do_configure
+}
+
+do_compile() {
+  unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
+  oe_runmake swupdate_unstripped
+  cp swupdate_unstripped swupdate
 }
 
 do_install () {
@@ -40,18 +47,15 @@ do_install () {
   install -d ${D}${includedir}/
   install -m 0644 ${S}include/network_ipc.h ${D}${includedir}
   install -m 0755 ${S}ipc/lib.a ${D}${libdir}/libswupdate.a
-}
 
-do_compile() {
-  unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
-  oe_runmake swupdate_unstripped
-  cp swupdate_unstripped swupdate
-}
-
-do_install_append() {
   install -d ${D}${sysconfdir}/init.d
   install -m 755 ${WORKDIR}/swupdate ${D}${sysconfdir}/init.d
+
+  install -d ${D}${systemd_unitdir}/system
+  install -m 644 ${WORKDIR}/swupdate.service ${D}${systemd_unitdir}/system
 }
 
 INITSCRIPT_NAME = "swupdate"
 INITSCRIPT_PARAMS = "defaults 70"
+
+SYSTEMD_SERVICE_${PN} = "swupdate.service"
