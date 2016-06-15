@@ -111,13 +111,21 @@ python do_swuimage () {
         if (filename != 'sw-description'):
             list_for_cpio.append(filename)
 
+# SWUPDATE_IMAGES refers to images in the DEPLOY directory
+# If they are not there, additional file can be added
+# by fetching from URLs
     deploydir = d.getVar('DEPLOY_DIR_IMAGE', True)
 
     for image in images:
-        imagename = image + '-' + d.getVar('MACHINE', True)
         fstypes = (d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image, True) or "").split()
         for fstype in fstypes:
-            imagebase = image + '-' + d.getVar('MACHINE', True)
+
+            appendmachine = d.getVarFlag("SWUPDATE_IMAGES_NOAPPEND_MACHINE", image, True)
+            if appendmachine == None:
+                imagebase = image + '-' + d.getVar('MACHINE', True)
+            else:
+                imagebase = image
+
             imagename = imagebase + fstype
             src = os.path.join(deploydir, "%s" % imagename)
             dst = os.path.join(s, "%s" % imagename)
