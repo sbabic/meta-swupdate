@@ -5,10 +5,11 @@ DEPENDS = "mtd-utils libconfig libarchive openssl lua curl json-c u-boot-fw-util
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=0636e73ff0215e8d672dc4c32c317bb3"
 
-inherit cml1
+inherit cml1 update-rc.d
 
 SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=git \
      file://defconfig \
+     file://swupdate \
      "
 
 PACKAGES =+ "${PN}-www"
@@ -46,3 +47,11 @@ do_compile() {
   oe_runmake swupdate_unstripped
   cp swupdate_unstripped swupdate
 }
+
+do_install_append() {
+  install -d ${D}${sysconfdir}/init.d
+  install -m 755 ${WORKDIR}/swupdate ${D}${sysconfdir}/init.d
+}
+
+INITSCRIPT_NAME = "swupdate"
+INITSCRIPT_PARAMS = "defaults 70"
