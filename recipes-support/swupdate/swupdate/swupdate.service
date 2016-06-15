@@ -1,0 +1,10 @@
+[Unit]
+Description=swupdate
+
+[Service]
+ExecStartPre=-/usr/bin/swupdate-env
+EnvironmentFile=-/tmp/swupdate.env
+ExecStart=/usr/bin/swupdate -v -w "-document_root /www" $SWUPDATE_EXTRA_ARGS
+
+[Install]
+WantedBy=multi-user.target
