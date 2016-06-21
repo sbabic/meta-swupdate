@@ -31,8 +31,9 @@ do_configure () {
 
 do_compile() {
   unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
-  oe_runmake swupdate_unstripped
+  oe_runmake swupdate_unstripped progress_unstripped
   cp swupdate_unstripped swupdate
+  cp progress_unstripped progress
 }
 
 do_install () {
