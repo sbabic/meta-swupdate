@@ -146,6 +146,8 @@ python do_swuimage () {
         passout = d.getVar('SWUPDATE_PASSWORD_FILE', True)
         if passout:
             passout = "-passin file:'%s' " % (passout)
+        else:
+            passout = ""
         signcmd = "openssl dgst -sha256 -sign '%s' %s -out '%s' '%s'" % (
             privkey,
             passout,
