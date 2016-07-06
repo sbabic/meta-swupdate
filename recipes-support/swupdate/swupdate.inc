@@ -19,7 +19,6 @@ FILES_${PN}-www = "/www/*"
 FILES_${PN}-dev = "${includedir}"
 FILES_${PN}-staticdev = "${libdir}"
 FILES_${PN} = "${bindir}/* /etc"
-CONFFILES_${PN} += "${sysconfdir}/init.d/recovery"
 
 S = "${WORKDIR}/git/"
 
