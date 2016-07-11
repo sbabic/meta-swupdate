@@ -118,6 +118,9 @@ python do_swuimage () {
 
     for image in images:
         fstypes = (d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image, True) or "").split()
+        if not fstypes:
+            fstypes = [""]
+
         for fstype in fstypes:
 
             appendmachine = d.getVarFlag("SWUPDATE_IMAGES_NOAPPEND_MACHINE", image, True)
