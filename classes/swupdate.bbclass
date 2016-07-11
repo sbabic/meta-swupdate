@@ -107,8 +107,8 @@ python do_swuimage () {
     for url in fetch.urls:
         local = fetch.localpath(url)
         filename = os.path.basename(local)
-        shutil.copyfile(local, os.path.join(s, "%s" % filename ))
         if (filename != 'sw-description'):
+            shutil.copyfile(local, os.path.join(s, "%s" % filename ))
             list_for_cpio.append(filename)
 
 # SWUPDATE_IMAGES refers to images in the DEPLOY directory
