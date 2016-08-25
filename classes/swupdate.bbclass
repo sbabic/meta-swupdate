@@ -61,7 +61,7 @@ def swupdate_getdepends(d):
 
     depstr = ""
     for dep in deps:
-        depstr += " " + dep + ":do_populate_sysroot"
+        depstr += " " + dep + ":do_build"
     return depstr
 
 do_swuimage[dirs] = "${TOPDIR}"
