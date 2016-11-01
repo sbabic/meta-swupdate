@@ -1,4 +1,3 @@
 require swupdate.inc
 
-SRCREV = "${AUTOREV}"
-
+DEFAULT_PREFERENCE = "-1"

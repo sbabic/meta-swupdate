@@ -13,6 +13,8 @@ SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=git \
      file://swupdate.service \
      "
 
+SRCREV = "${AUTOREV}"
+
 PACKAGES =+ "${PN}-www"
 
 FILES_${PN}-www = "/www/*"
