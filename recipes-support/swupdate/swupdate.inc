@@ -31,9 +31,13 @@ do_configure () {
 
 do_compile() {
   unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
-  oe_runmake swupdate_unstripped progress_unstripped
+  oe_runmake swupdate_unstripped
   cp swupdate_unstripped swupdate
-  cp progress_unstripped progress
+
+  if [ "${@bb.utils.vercmp_string('${PV}', '2016.07')}" = "1"  ]; then
+    oe_runmake progress_unstripped
+    cp progress_unstripped progress
+  fi
 }
 
 do_install () {
