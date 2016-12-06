@@ -1,7 +1,7 @@
 SUMMARY="Image updater for Yocto projects"
 DESCRIPTION = "Application for automatic software update from USB Pen"
 SECTION="swupdate"
-DEPENDS = "mtd-utils libconfig libarchive openssl lua curl json-c u-boot-fw-utils gnutls zeromq"
+DEPENDS = "libconfig openssl gnutls"
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=0636e73ff0215e8d672dc4c32c317bb3"
 
@@ -25,6 +25,50 @@ FILES_${PN} = "${bindir}/* /etc"
 S = "${WORKDIR}/git/"
 
 EXTRA_OEMAKE += "V=1 ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET_PREFIX} SKIP_STRIP=y"
+
+python () {
+    try:
+        defconfig = bb.fetch2.localpath('file://defconfig', d)
+    except bb.fetch2.FetchError:
+        return
+
+    try:
+        configfile = open(defconfig)
+    except IOError:
+        return
+
+    features = configfile.readlines()
+    configfile.close()
+
+    if 'CONFIG_REMOTE_HANDLER=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' zeromq')
+
+    if 'CONFIG_JSON=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' json-c')
+
+    if 'CONFIG_ARCHIVE=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' libarchive')
+
+    if 'CONFIG_LUA=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' lua')
+
+    if 'CONFIG_UBOOT=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' u-boot-fw-utils')
+
+    if 'CONFIG_DOWNLOAD=y\n' in features or 'CONFIG_SURICATTA=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' curl')
+
+    if 'CONFIG_MTD=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' mtd-utils')
+
+}
 
 do_configure () {
   cp ${WORKDIR}/defconfig ${S}/.config
