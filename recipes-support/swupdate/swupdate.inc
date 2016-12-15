@@ -1,31 +1,89 @@
 SUMMARY="Image updater for Yocto projects"
 DESCRIPTION = "Application for automatic software update from USB Pen"
 SECTION="swupdate"
-DEPENDS = "mtd-utils libconfig libarchive openssl lua curl json-c u-boot-fw-utils gnutls"
+DEPENDS = "libconfig openssl gnutls"
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=0636e73ff0215e8d672dc4c32c317bb3"
 
-inherit cml1
+inherit cml1 update-rc.d systemd
 
 SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=git \
      file://defconfig \
+     file://swupdate \
+     file://swupdate.service \
      "
+
+SRCREV = "${AUTOREV}"
 
 PACKAGES =+ "${PN}-www"
 
 FILES_${PN}-www = "/www/*"
 FILES_${PN}-dev = "${includedir}"
 FILES_${PN}-staticdev = "${libdir}"
-FILES_${PN} = "${bindir}/* /etc/init.d"
-CONFFILES_${PN} += "${sysconfdir}/init.d/recovery"
+FILES_${PN} = "${bindir}/* /etc"
 
 S = "${WORKDIR}/git/"
 
 EXTRA_OEMAKE += "V=1 ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET_PREFIX} SKIP_STRIP=y"
 
+python () {
+    try:
+        defconfig = bb.fetch2.localpath('file://defconfig', d)
+    except bb.fetch2.FetchError:
+        return
+
+    try:
+        configfile = open(defconfig)
+    except IOError:
+        return
+
+    features = configfile.readlines()
+    configfile.close()
+
+    if 'CONFIG_REMOTE_HANDLER=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' zeromq')
+
+    if 'CONFIG_JSON=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' json-c')
+
+    if 'CONFIG_ARCHIVE=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' libarchive')
+
+    if 'CONFIG_LUA=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' lua')
+
+    if 'CONFIG_UBOOT=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' u-boot-fw-utils')
+
+    if 'CONFIG_DOWNLOAD=y\n' in features or 'CONFIG_SURICATTA=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' curl')
+
+    if 'CONFIG_MTD=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' mtd-utils')
+
+}
+
 do_configure () {
   cp ${WORKDIR}/defconfig ${S}/.config
   cml1_do_configure
+}
+
+do_compile() {
+  unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
+  oe_runmake swupdate_unstripped
+  cp swupdate_unstripped swupdate
+
+  if [ "${@bb.utils.vercmp_string('${PV}', '2016.07')}" = "1"  ]; then
+    oe_runmake progress_unstripped
+    cp progress_unstripped progress
+  fi
 }
 
 do_install () {
@@ -39,10 +97,15 @@ do_install () {
   install -d ${D}${includedir}/
   install -m 0644 ${S}include/network_ipc.h ${D}${includedir}
   install -m 0755 ${S}ipc/lib.a ${D}${libdir}/libswupdate.a
+
+  install -d ${D}${sysconfdir}/init.d
+  install -m 755 ${WORKDIR}/swupdate ${D}${sysconfdir}/init.d
+
+  install -d ${D}${systemd_unitdir}/system
+  install -m 644 ${WORKDIR}/swupdate.service ${D}${systemd_unitdir}/system
 }
 
-do_compile() {
-  unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
-  oe_runmake swupdate_unstripped
-  cp swupdate_unstripped swupdate
-}
+INITSCRIPT_NAME = "swupdate"
+INITSCRIPT_PARAMS = "defaults 70"
+
+SYSTEMD_SERVICE_${PN} = "swupdate.service"

@@ -5,7 +5,7 @@ DESCRIPTION = "Example Compound image for beaglebone "
 SECTION = ""
 
 # Note: sw-description is mandatory
-SRC_URI = "file://sw-description \
+SRC_URI_beaglebone = "file://sw-description \
            "
 inherit swupdate
 

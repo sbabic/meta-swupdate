@@ -80,7 +80,7 @@ do_package_write_rpm[noexec] = "1"
 
 python () {
     deps = " " + swupdate_getdepends(d)
-    d.appendVarFlag('do_build', 'depends', deps)
+    d.appendVarFlag('do_swuimage', 'depends', deps)
 }
 
 do_install () {
