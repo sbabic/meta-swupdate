@@ -96,6 +96,8 @@ do_install () {
   install -d ${D}${libdir}/
   install -d ${D}${includedir}/
   install -m 0644 ${S}include/network_ipc.h ${D}${includedir}
+  install -m 0644 ${S}include/swupdate_status.h ${D}${includedir}
+  install -m 0644 ${S}include/progress.h ${D}${includedir}
   install -m 0755 ${S}ipc/lib.a ${D}${libdir}/libswupdate.a
 
   install -d ${D}${sysconfdir}/init.d
