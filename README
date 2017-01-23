@@ -31,6 +31,33 @@ sw-description.sig which is included in the SWU file.
 Encrypted private keys are not currently supported since a secure 
 mechanism must exist to provide the passphrase.
 
+SWU image hardware signing
+--------------------------
+
+One may prefer to sign the SWU image with a hardware token or hardware security
+module (HSM) which doesn't expose the private key.
+
+To enable, SWUPDATE_SIGNING_ENGINE must be set to an available openssl engine.
+
+Example:
+    SWUPDATE_SIGNING_ENGINE = "pkcs11"
+
+SWUPDATE_SIGNING_ENGINE_PATH may need to be set so that openssl can locate the
+engine.
+
+Example:
+    SWUPDATE_SIGNING_ENGINE_PATH = "/usr/lib"
+
+Instead of setting SWUPDATE_PRIVATE_KEY to the full path of a file, set it to
+a key string recognized by the engine used.
+
+Example:
+    SWUPDATE_PRIVATE_KEY = "pkcs11:model=SoftHSM%20v2;" \
+                           "manufacturer=SoftHSM%20project;" \
+                           "serial=1234567890;" \
+                           "token=test-token;pin-value=123456;" \
+                           "object=swupdate-test"
+
 Maintainer
 ----------
 
