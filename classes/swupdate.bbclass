@@ -144,34 +144,16 @@ python do_swuimage () {
         privkey = d.getVar('SWUPDATE_PRIVATE_KEY', True)
         if not privkey:
             bb.fatal("SWUPDATE_PRIVATE_KEY isn't set")
-
-        engine = d.getVar('SWUPDATE_SIGNING_ENGINE', True)
-        if engine:
-            engine = "-engine '%s' -keyform engine " % (engine)
-        elif not os.path.exists(privkey):
+        if not os.path.exists(privkey):
             bb.fatal("SWUPDATE_PRIVATE_KEY %s doesn't exist" % (privkey))
-        else:
-            engine = ""
-
-        engine_path = d.getVar('SWUPDATE_SIGNING_ENGINE_PATH', True)
-        if engine and engine_path:
-            engine_path = 'OPENSSL_ENGINES="%s" ' % (engine_path)
-        else:
-            engine_path = ""
-
         passout = d.getVar('SWUPDATE_PASSWORD_FILE', True)
         if passout:
             passout = "-passin file:'%s' " % (passout)
         else:
             passout = ""
-
-        # Sign with openssl.real, provided by openssl-native so OPENSSL_ENGINES
-        # can be overridden
-        signcmd = "%sopenssl.real dgst -sha256 -sign '%s' %s%s -out '%s' '%s'" % (
-            engine_path,
+        signcmd = "openssl dgst -sha256 -sign '%s' %s -out '%s' '%s'" % (
             privkey,
             passout,
-            engine,
             os.path.join(s, 'sw-description.sig'),
             os.path.join(s, 'sw-description'))
         if os.system(signcmd) != 0:
