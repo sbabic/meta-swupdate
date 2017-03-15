@@ -31,6 +31,9 @@ sw-description.sig which is included in the SWU file.
 Encrypted private keys are not currently supported since a secure 
 mechanism must exist to provide the passphrase.
 
+If SWUPDATE_SIGN_TOOL is set, SWUPDATE_PRIVATE_KEY is ignored and the string
+contained in SWUPDATE_SIGN_TOOL is executed to perform the signing.
+
 Maintainer
 ----------
 
