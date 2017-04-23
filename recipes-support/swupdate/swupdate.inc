@@ -27,6 +27,12 @@ S = "${WORKDIR}/git/"
 
 EXTRA_OEMAKE += "V=1 ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET_PREFIX} SKIP_STRIP=y"
 
+DEPENDS += "kern-tools-native"
+
+# returns all the elements from the src uri that are .cfg files
+def find_cfgs(d):
+    return [s for s in src_patches(d, True) if s.endswith('.cfg')]
+
 python () {
     try:
         defconfig = bb.fetch2.localpath('file://defconfig', d)
@@ -73,6 +79,7 @@ python () {
 
 do_configure () {
   cp ${WORKDIR}/defconfig ${S}/.config
+  merge_config.sh -m .config ${@" ".join(find_cfgs(d))}
   cml1_do_configure
 }
 
