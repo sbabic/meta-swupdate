@@ -28,10 +28,7 @@ IMAGE_ROOTFS_SIZE = "8192"
 
 inherit image
 
-remove_locale_data_files() {
-	printf "Post processing local %s\n" ${IMAGE_ROOTFS}${libdir}/locale
-	rm -rf ${IMAGE_ROOTFS}${libdir}/locale
-}
+IMAGE_LINGUAS = " "
 
 fix_inittab_swupdate () {
 	sed -e 's/1\:2345.*/1\:2345:respawn:\/bin\/sh/' \
@@ -43,6 +40,4 @@ fix_inittab_swupdate () {
 	mv ${IMAGE_ROOTFS}${sysconfdir}/inittab.swupdate ${IMAGE_ROOTFS}${sysconfdir}/inittab
 }
 
-# remove not needed ipkg informations
-ROOTFS_POSTPROCESS_COMMAND += "remove_locale_data_files ; "
 ROOTFS_POSTPROCESS_COMMAND += "${@bb.utils.contains('SWUPDATE_INIT', 'tiny', 'fix_inittab_swupdate', '',  d)}"
