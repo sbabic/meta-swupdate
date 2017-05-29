@@ -1,0 +1,52 @@
+From fd8d8242b0ca277c29ffb901e526ed5b40d4e4d3 Mon Sep 17 00:00:00 2001
+From: Stefano Babic <sbabic@denx.de>
+Date: Sun, 19 Mar 2017 13:00:47 +0100
+Subject: [PATCH v1 3/4] env: add a version number to check API
+
+Changes in the environment library are difficult to tracked by programs
+using the library. Add simply an API version number that must be
+increased each time when the API is changed.
+
+This can be detected and a program can work with different versions of
+the library.
+
+Signed-off-by: Stefano Babic <sbabic@denx.de>
+---
+
+ tools/env/fw_env.h | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/tools/env/fw_env.h b/tools/env/fw_env.h
+index 3e5539d..cf346b3 100644
+--- a/tools/env/fw_env.h
++++ b/tools/env/fw_env.h
+@@ -8,6 +8,13 @@
+ #include <stdint.h>
+ #include <uboot_aes.h>
+ 
++/*
++ * Programs using the library must check which API is available,
++ * that varies depending on the U-Boot version.
++ * This can be changed in future
++ */
++#define FW_ENV_API_VERSION	1
++
+ struct env_opts {
+ #ifdef CONFIG_FILE
+ 	char *config_file;
+@@ -140,4 +147,12 @@ int fw_env_write(char *name, char *value);
+  */
+ int fw_env_close(struct env_opts *opts);
+ 
++/**
++ * fw_env_version - return the current version of the library
++ *
++ * Return:
++ *  version string of the library
++ */
++char *fw_env_version(void);
++
+ unsigned long crc32(unsigned long, const unsigned char *, unsigned);
+-- 
+2.7.4
+
