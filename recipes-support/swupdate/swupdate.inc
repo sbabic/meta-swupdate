@@ -1,7 +1,7 @@
 SUMMARY="Image updater for Yocto projects"
 DESCRIPTION = "Application for automatic software update from USB Pen"
 SECTION="swupdate"
-DEPENDS = "libconfig openssl gnutls"
+DEPENDS = "libconfig"
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=0636e73ff0215e8d672dc4c32c317bb3"
 
@@ -50,6 +50,10 @@ python () {
     if 'CONFIG_REMOTE_HANDLER=y\n' in features:
         depends = d.getVar('DEPENDS', False)
         d.setVar('DEPENDS', depends + ' zeromq')
+
+    if 'CONFIG_ENCRYPTED_IMAGES=y\n' in features or 'CONFIG_MONGOOSESSL=y\n' in features or 'CONFIG_HASH_VERIFY=y\n' in features or 'CONFIG_SURICATTA_SSL=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' openssl')
 
     if 'CONFIG_JSON=y\n' in features:
         depends = d.getVar('DEPENDS', False)
