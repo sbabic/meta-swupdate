@@ -89,9 +89,13 @@ do_configure () {
 
 do_compile() {
   unset LDFLAGS
-  oe_runmake swupdate_unstripped progress_unstripped
-  cp swupdate_unstripped swupdate
-  cp progress_unstripped progress
+  if [ "${@bb.utils.vercmp_string('${PV}', 'git')}" = "1"  ]; then
+    oe_runmake
+  else
+    oe_runmake swupdate_unstripped progress_unstripped
+    cp swupdate_unstripped swupdate
+    cp progress_unstripped progress
+  fi
 
 }
 
