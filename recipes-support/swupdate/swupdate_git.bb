@@ -2,6 +2,12 @@ require swupdate.inc
 
 DEFAULT_PREFERENCE = "-1"
 
+PACKAGES =+ "${PN}-tools"
+
+INSANE_SKIP_${PN}-tools = "ldflags"
+
+FILES_${PN}-tools = "${bindir}/swupdate-*"
+
 do_compile() {
   unset LDFLAGS
 
