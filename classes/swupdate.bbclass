@@ -199,5 +199,5 @@ python do_swuimage () {
 COMPRESSIONTYPES = ""
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-addtask do_swuimage after do_unpack before do_install
+addtask do_swuimage after do_unpack after do_prepare_recipe_sysroot before do_install
 addtask do_createlink after do_swuimage before do_install
