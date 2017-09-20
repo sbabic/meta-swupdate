@@ -64,15 +64,23 @@ def swupdate_getdepends(d):
         depstr += " " + dep + ":do_build"
     return depstr
 
+IMGDEPLOYDIR = "${WORKDIR}/deploy-${PN}-swuimage"
+
 do_swuimage[dirs] = "${TOPDIR}"
-do_swuimage[cleandirs] += "${S}"
+do_swuimage[cleandirs] += "${S} ${IMGDEPLOYDIR}"
 do_swuimage[umask] = "022"
+SSTATETASKS += "do_swuimage"
+SSTATE_SKIP_CREATION_task-swuimage = '1'
+do_swuimage[sstate-inputdirs] = "${IMGDEPLOYDIR}"
+do_swuimage[sstate-outputdirs] = "${DEPLOY_DIR_IMAGE}"
+do_swuimage[stamp-extra-info] = "${MACHINE}"
 
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"
 do_install[noexec] = "1"
+deltask do_populate_sysroot
 do_package[noexec] = "1"
-do_package_qa[noexec] = "1"
+deltask do_package_qa
 do_packagedata[noexec] = "1"
 do_package_write_ipk[noexec] = "1"
 do_package_write_deb[noexec] = "1"
@@ -81,14 +89,6 @@ do_package_write_rpm[noexec] = "1"
 python () {
     deps = " " + swupdate_getdepends(d)
     d.appendVarFlag('do_swuimage', 'depends', deps)
-}
-
-do_install () {
-}
-
-do_createlink () {
-    cd ${DEPLOY_DIR_IMAGE}
-    ln -sf ${IMAGE_NAME}.swu ${IMAGE_LINK_NAME}.swu
 }
 
 python do_swuimage () {
@@ -115,6 +115,7 @@ python do_swuimage () {
 # If they are not there, additional file can be added
 # by fetching from URLs
     deploydir = d.getVar('DEPLOY_DIR_IMAGE', True)
+    imgdeploydir = d.getVar('IMGDEPLOYDIR', True)
 
     for image in images:
         fstypes = (d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image, True) or "").split()
@@ -192,12 +193,17 @@ python do_swuimage () {
         else:
             bb.fatal("Unrecognized SWUPDATE_SIGNING mechanism.");
 
-    line = 'for i in ' + ' '.join(list_for_cpio) + '; do echo $i;done | cpio -ov -H crc >' + os.path.join(deploydir,d.getVar('IMAGE_NAME', True) + '.swu')
+    line = 'for i in ' + ' '.join(list_for_cpio) + '; do echo $i;done | cpio -ov -H crc >' + os.path.join(imgdeploydir,d.getVar('IMAGE_NAME', True) + '.swu')
     os.system("cd " + s + ";" + line)
+
+    line = 'ln -sf ' + d.getVar('IMAGE_NAME', True) + '.swu ' + d.getVar('IMAGE_LINK_NAME', True) + '.swu'
+    os.system("cd " + imgdeploydir + "; " + line)
 }
 
 COMPRESSIONTYPES = ""
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-addtask do_swuimage after do_unpack after do_prepare_recipe_sysroot before do_install
-addtask do_createlink after do_swuimage before do_install
+INHIBIT_DEFAULT_DEPS = "1"
+EXCLUDE_FROM_WORLD = "1"
+
+addtask do_swuimage after do_unpack after do_prepare_recipe_sysroot before do_build
