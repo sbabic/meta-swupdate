@@ -11,6 +11,9 @@ SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=https \
      file://defconfig \
      file://swupdate \
      file://swupdate.service \
+     file://swupdate-usb.rules \
+     file://swupdate-usb@.service \
+     file://swupdate-progress.service \
      "
 
 SRCREV = "${AUTOREV}"
@@ -118,9 +121,18 @@ do_install () {
 
   install -d ${D}${systemd_unitdir}/system
   install -m 644 ${WORKDIR}/swupdate.service ${D}${systemd_unitdir}/system
+  install -m 644 ${WORKDIR}/swupdate-usb@.service ${D}${systemd_unitdir}/system
+  install -m 644 ${WORKDIR}/swupdate-progress.service ${D}${systemd_unitdir}/system
+
+
+  if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
+    install -d ${D}${sysconfdir}/udev/rules.d
+    install -m 0644 ${WORKDIR}/swupdate-usb.rules ${D}${sysconfdir}/udev/rules.d/
+  fi
 }
 
 INITSCRIPT_NAME = "swupdate"
 INITSCRIPT_PARAMS = "defaults 70"
 
 SYSTEMD_SERVICE_${PN} = "swupdate.service"
+SYSTEMD_SERVICE_${PN} += swupdate-usb@.service swupdate-progress.service"
