@@ -59,6 +59,10 @@ python () {
         depends = d.getVar('DEPENDS', False)
         d.setVar('DEPENDS', depends + ' json-c')
 
+    if 'CONFIG_SYSTEMD=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' systemd')
+
     if 'CONFIG_ARCHIVE=y\n' in features:
         depends = d.getVar('DEPENDS', False)
         d.setVar('DEPENDS', depends + ' libarchive')
