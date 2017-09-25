@@ -1,4 +1,4 @@
-SUMMARY = "Root filesystem for swuupdate as rescue system"
+SUMMARY = "Root filesystem for swupdate as rescue system"
 DESCRIPTION = "Root FS to start swupdate in rescue mode	\
 		"
 
