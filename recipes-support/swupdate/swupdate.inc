@@ -135,4 +135,4 @@ INITSCRIPT_NAME = "swupdate"
 INITSCRIPT_PARAMS = "defaults 70"
 
 SYSTEMD_SERVICE_${PN} = "swupdate.service"
-SYSTEMD_SERVICE_${PN} += swupdate-usb@.service swupdate-progress.service"
+SYSTEMD_SERVICE_${PN} += "swupdate-usb@.service swupdate-progress.service"
