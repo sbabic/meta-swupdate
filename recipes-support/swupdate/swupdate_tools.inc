@@ -2,7 +2,10 @@ PACKAGES =+ "${PN}-tools"
 
 INSANE_SKIP_${PN}-tools = "ldflags"
 
-FILES_${PN}-tools = "${bindir}/swupdate-*"
+FILES_${PN}-tools = "${bindir}/swupdate-client \
+                    ${bindir}/swupdate-progress \
+                    ${bindir}/swupdate-hawkbitcfg \
+                    ${bindir}/swupdate-sendtohawkbit"
 
 do_compile() {
   unset LDFLAGS
