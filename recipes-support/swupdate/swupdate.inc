@@ -75,6 +75,13 @@ python () {
         depends = d.getVar('DEPENDS', False)
         d.setVar('DEPENDS', depends + ' mtd-utils')
 
+    if 'CONFIG_CFI=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' mtd-utils')
+
+    if 'CONFIG_UBIVOL=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' mtd-utils')
 }
 
 do_configure () {
