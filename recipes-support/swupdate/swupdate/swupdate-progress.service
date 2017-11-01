@@ -3,5 +3,4 @@ Description=swupdate progress service
 Requires=swupdate.service
 
 [Service]
-Type=forking
 ExecStart=/usr/bin/swupdate-progress -r -w
