@@ -21,7 +21,7 @@ image filename) are replaced with the sha256 hash of the image.
 SWU image signing
 ------------
 
-There are 3 signing mechanism supported by meta-swupdate at the moment:
+There are 3 signing mechanisms supported by meta-swupdate at the moment:
 
 1. RSA signing:
 
@@ -67,5 +67,5 @@ When creating patches, please use something like:
 
     git format-patch -s --subject-prefix='meta-swupdate][PATCH' <revision range>
 
-Please use 'git send- email' to send the generated patches to the ML
+Please use 'git send-email' to send the generated patches to the ML
 to bypass changes from your mailer.
