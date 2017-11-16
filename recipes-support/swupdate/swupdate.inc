@@ -80,10 +80,6 @@ do_compile() {
   oe_runmake swupdate_unstripped
   cp swupdate_unstripped swupdate
 
-  if [ "${@bb.utils.vercmp_string('${PV}', '2016.07')}" = "1"  ]; then
-    oe_runmake progress_unstripped
-    cp progress_unstripped progress
-  fi
 }
 
 do_install () {
