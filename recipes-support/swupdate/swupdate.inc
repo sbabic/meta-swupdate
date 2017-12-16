@@ -16,8 +16,6 @@ SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=https \
      file://swupdate-progress.service \
      "
 
-SRCREV = "${AUTOREV}"
-
 INSANE_SKIP_${PN} = "ldflags"
 PACKAGES =+ "${PN}-www"
 
