@@ -11,9 +11,9 @@ DEFAULT_PREFERENCE = "-1"
 # In casethe _git version is chosen, sets the revision
 # to TOT to test with last commit-id.
 def version_git(d):
-    version = d.getVar("PREFERRED_VERSION_%s" % d.getVar('PN'))
+    version = d.getVar("PREFERRED_VERSION_%s" % d.getVar('PN', False), False)
     if version is not None and "git" in version:
-        return d.getVar("AUTOREV")
+        return d.getVar('AUTOREV', False)
     else:
         return "c0fec16b3fc82b0db12d8ac58be7055ed1b8d439"
 
