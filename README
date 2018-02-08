@@ -21,18 +21,34 @@ image filename) are replaced with the sha256 hash of the image.
 SWU image signing
 ------------
 
-To enable signing:
-    Set SWUPDATE_SIGNING = "1"
-    Set SWUPDATE_PRIVATE_KEY to the full path of private key file
+There are 3 signing mechanisms supported by meta-swupdate at the moment:
 
-sw-description is signed with the private key and the signature is writen to
-sw-description.sig which is included in the SWU file.
+1. RSA signing:
 
-Encrypted private keys are not currently supported since a secure 
+  * Set variable: `SWUPDATE_SIGNING = "RSA"`
+
+  * Set `SWUPDATE_PRIVATE_KEY` to the full path of private key file
+
+2. CMS signing:
+
+  * Set variable: `SWUPDATE_SIGNING = "CMS"`
+
+  * Set `SWUPDATE_CMS_CERT` to the full path of certificate file
+
+  * Set `SWUPDATE_CMS_KEY ` to the full path of private key file
+
+3. Custom signing tool:
+
+  * Set variable: `SWUPDATE_SIGNING = "CUSTOM"`
+
+  * Set variable `SWUPDATE_SIGN_TOOL' to custom string that needs to be
+    executed in order to perform the signing
+
+sw-description is signed and the signature is written to sw-description.sig
+which is included in the SWU file.
+
+Encrypted private keys are not currently supported since a secure
 mechanism must exist to provide the passphrase.
-
-If SWUPDATE_SIGN_TOOL is set, SWUPDATE_PRIVATE_KEY is ignored and the string
-contained in SWUPDATE_SIGN_TOOL is executed to perform the signing.
 
 Maintainer
 ----------
@@ -51,5 +67,5 @@ When creating patches, please use something like:
 
     git format-patch -s --subject-prefix='meta-swupdate][PATCH' <revision range>
 
-Please use 'git send- email' to send the generated patches to the ML
+Please use 'git send-email' to send the generated patches to the ML
 to bypass changes from your mailer.
