@@ -91,6 +91,8 @@ python () {
     if 'CONFIG_UBIVOL=y\n' in features:
         depends = d.getVar('DEPENDS', False)
         d.setVar('DEPENDS', depends + ' mtd-utils')
+    if 'CONFIG_MONGOOSE_WEB_API_V2=y\n' in features:
+        d.setVar('SWUPDATE_WWW', 'webapp')
 }
 
 do_configure () {
@@ -112,7 +114,11 @@ do_install () {
   install -m 0755 swupdate ${D}${bindir}/
 
   install -m 0755 -d ${D}/www
-  install -m 0755 ${S}www/* ${D}/www
+  if [ x${SWUPDATE_WWW} == "xwebapp" ];then
+	cp -R --no-dereference --preserve=mode,links -v ${S}examples/www/V2/* ${D}/www
+  else
+	install -m 0755 ${S}www/* ${D}/www
+  fi
 
   install -d ${D}${libdir}/
   install -d ${D}${includedir}/
