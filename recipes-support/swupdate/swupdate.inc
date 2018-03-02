@@ -115,7 +115,7 @@ do_install () {
 
   install -m 0755 -d ${D}/www
   if [ x${SWUPDATE_WWW} == "xwebapp" ];then
-	cp -R --no-dereference --preserve=mode,links -v ${S}examples/www/V2/* ${D}/www
+	cp -R --no-dereference --preserve=mode,links -v ${S}examples/www/v2/* ${D}/www
   else
 	install -m 0755 ${S}www/* ${D}/www
   fi
