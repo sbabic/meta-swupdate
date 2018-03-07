@@ -6,7 +6,7 @@ Documentation=https://sbabic.github.io/swupdate
 [Service]
 ExecStartPre=-/usr/bin/swupdate-env
 EnvironmentFile=-/tmp/swupdate.env
-ExecStart=/usr/bin/swupdate -v -w "-document_root /www" $SWUPDATE_EXTRA_ARGS
+ExecStart=/usr/bin/swupdate -v -w "-r /www" $SWUPDATE_EXTRA_ARGS
 
 [Install]
 WantedBy=multi-user.target
