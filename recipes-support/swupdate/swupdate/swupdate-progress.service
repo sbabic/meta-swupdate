@@ -1,0 +1,6 @@
+[Unit]
+Description=swupdate progress service
+Requires=swupdate.service
+
+[Service]
+ExecStart=/usr/bin/swupdate-progress -r -w
