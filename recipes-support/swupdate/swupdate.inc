@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=0636e73ff0215e8d672dc4c32c317bb3"
 
 inherit cml1 update-rc.d systemd
 
-SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=git \
+SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=https \
      file://defconfig \
      file://swupdate \
      file://swupdate.service \
@@ -55,6 +55,10 @@ python () {
         depends = d.getVar('DEPENDS', False)
         d.setVar('DEPENDS', depends + ' json-c')
 
+    if 'CONFIG_SYSTEMD=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' systemd')
+
     if 'CONFIG_ARCHIVE=y\n' in features:
         depends = d.getVar('DEPENDS', False)
         d.setVar('DEPENDS', depends + ' libarchive')
@@ -93,20 +97,19 @@ do_configure () {
 do_compile() {
   unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
   oe_runmake swupdate_unstripped
-  cp swupdate_unstripped swupdate
 
-  if [ "${@bb.utils.vercmp_string('${PV}', '2016.07')}" = "1"  ]; then
-    oe_runmake progress_unstripped
-    cp progress_unstripped progress
-  fi
 }
 
 do_install () {
   install -d ${D}${bindir}/
-  install -m 0755 swupdate ${D}${bindir}/
+  install -m 0755 swupdate_unstripped ${D}${bindir}/
 
   install -m 0755 -d ${D}/www
-  install -m 0755 ${S}www/* ${D}/www
+  if [ -d ${S}/web-app ];then
+	cp -R --no-dereference --preserve=mode,links -v ${S}examples/www/v2/* ${D}/www
+  else
+	install -m 0755 ${S}www/* ${D}/www
+  fi
 
   install -d ${D}${libdir}/
   install -d ${D}${includedir}/
@@ -120,6 +123,12 @@ do_install () {
 
   install -d ${D}${systemd_unitdir}/system
   install -m 644 ${WORKDIR}/swupdate.service ${D}${systemd_unitdir}/system
+  install -m 644 ${WORKDIR}/swupdate-usb@.service ${D}${systemd_unitdir}/system
+  install -m 644 ${WORKDIR}/swupdate-progress.service ${D}${systemd_unitdir}/system
+  if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
+    install -d ${D}${sysconfdir}/udev/rules.d
+    install -m 0644 ${WORKDIR}/swupdate-usb.rules ${D}${sysconfdir}/udev/rules.d/
+  fi
 }
 
 INITSCRIPT_NAME = "swupdate"
