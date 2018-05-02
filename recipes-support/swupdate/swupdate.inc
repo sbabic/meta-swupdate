@@ -91,6 +91,7 @@ python () {
     if 'CONFIG_UBIVOL=y\n' in features:
         depends = d.getVar('DEPENDS', False)
         d.setVar('DEPENDS', depends + ' mtd-utils')
+
     if 'CONFIG_MONGOOSE_WEB_API_V2=y\n' in features:
         d.setVar('SWUPDATE_WWW', 'webapp')
 }
@@ -115,17 +116,17 @@ do_install () {
 
   install -m 0755 -d ${D}/www
   if [ -d ${S}/web-app ];then
-	cp -R --no-dereference --preserve=mode,links -v ${S}examples/www/v2/* ${D}/www
+	cp -R --no-dereference --preserve=mode,links -v ${S}/examples/www/v2/* ${D}/www
   else
-	install -m 0755 ${S}www/* ${D}/www
+	install -m 0755 ${S}/www/* ${D}/www
   fi
 
   install -d ${D}${libdir}/
   install -d ${D}${includedir}/
-  install -m 0644 ${S}include/network_ipc.h ${D}${includedir}
-  install -m 0644 ${S}include/swupdate_status.h ${D}${includedir}
-  install -m 0644 ${S}include/progress.h ${D}${includedir}
-  install -m 0755 ${S}ipc/lib.a ${D}${libdir}/libswupdate.a
+  install -m 0644 ${S}/include/network_ipc.h ${D}${includedir}
+  install -m 0644 ${S}/include/swupdate_status.h ${D}${includedir}
+  install -m 0644 ${S}/include/progress.h ${D}${includedir}
+  install -m 0755 ${S}/ipc/lib.a ${D}${libdir}/libswupdate.a
 
   install -d ${D}${sysconfdir}/init.d
   install -m 755 ${WORKDIR}/swupdate ${D}${sysconfdir}/init.d
