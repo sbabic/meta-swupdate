@@ -97,12 +97,12 @@ do_configure () {
 do_compile() {
   unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
   oe_runmake swupdate_unstripped
-
+  cp swupdate_unstripped swupdate
 }
 
 do_install () {
   install -d ${D}${bindir}/
-  install -m 0755 swupdate_unstripped ${D}${bindir}/
+  install -m 0755 swupdate ${D}${bindir}/
 
   install -m 0755 -d ${D}/www
   if [ -d ${S}/web-app ];then
