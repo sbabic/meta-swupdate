@@ -1,0 +1,29 @@
+From 2e6cbd39bb99c890bcbc513dcd643c239d34f7c6 Mon Sep 17 00:00:00 2001
+From: Kas User <kas@example.com>
+Date: Tue, 22 May 2018 19:20:04 +0200
+Subject: [PATCH] fix for OE
+
+Signed-off-by: Kas User <kas@example.com>
+---
+ makefile | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/makefile b/makefile
+index cc15b4e..632fb73 100644
+--- a/makefile
++++ b/makefile
+@@ -14,8 +14,10 @@ PLATS= macosx linux win32 mingw freebsd solaris
+ 
+ all: $(PLAT)
+ 
++LUAV = `pkg-config --modversion lua | cut -d'.' -f1,2`
++
+ $(PLATS) none install install-unix local clean:
+-	$(MAKE) -C src $@
++	$(MAKE) -C src $@ LUAV=${LUAV}
+ 
+ print:
+ 	$(MAKE) -C src $@
+-- 
+2.7.4
+
