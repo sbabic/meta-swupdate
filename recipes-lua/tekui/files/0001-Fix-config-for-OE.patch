@@ -1,0 +1,101 @@
+From 54b0fc6c15cd4b9dcc9a5a9a39e6be2398128eb8 Mon Sep 17 00:00:00 2001
+From: Kas User <kas@example.com>
+Date: Mon, 7 May 2018 10:51:03 +0200
+Subject: [PATCH] Fix config for OE
+
+Signed-off-by: Kas User <kas@example.com>
+---
+ config | 31 +++++++++++++++++--------------
+ 1 file changed, 17 insertions(+), 14 deletions(-)
+
+diff --git a/config b/config
+index 8664568..31e65a2 100644
+--- a/config
++++ b/config
+@@ -27,7 +27,7 @@ DISPLAY_DRIVER ?= x11
+ # Uncomment TSYS_POSIX if your platform is not listed in include/tek/config.h
+ # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ 
+-CC = $(CROSS_COMPILE)gcc -fpic # -DTSYS_POSIX
++CC ?= $(CROSS_COMPILE)gcc -fpic # -DTSYS_POSIX
+ 
+ # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ # For Windows using MinGW:
+@@ -117,8 +117,8 @@ TEKUI_LIBS =
+ PNG_DIR = $(PREFIX)
+ PNG_INCDIR = $(PNG_DIR)/include
+ PNG_LIBDIR = $(PNG_DIR)/lib
+-# TEKUI_DEFS += -DENABLE_PNG -I$(PNG_INCDIR)
+-# TEKUI_LIBS += -L$(PNG_LIBDIR) -lpng # $(CC_LD_RT)$(PNG_LIBDIR)
++TEKUI_DEFS += -DENABLE_PNG -I$(PNG_INCDIR)
++TEKUI_LIBS += -L$(PNG_LIBDIR) -lpng # $(CC_LD_RT)$(PNG_LIBDIR)
+ 
+ TEKLIB_DEFS = -DENABLE_LAZY_SINGLETON
+ 
+@@ -129,13 +129,14 @@ TEKLIB_DEFS = -DENABLE_LAZY_SINGLETON
+ #------------------------------------------------------------------------------
+ 
+ PREFIX ?= /usr/local
+-LUAVER ?= 5.1
++LUAVER ?= `pkg-config --modversion lua | cut -d'.' -f1,2`
+ 
+ LUA_DIR = $(PREFIX)
+ LUA_INCDIR = $(LUA_DIR)/include
+-LUA_DEFS = -I$(LUA_INCDIR) -I/usr/include/lua$(LUAVER)
++#LUA_DEFS = -I$(LUA_INCDIR) -I/usr/include/lua$(LUAVER)
++LUA_DEFS = `pkg-config --cflags lua` #$(LUA_DIR)/include
+ # some known paths in distributions and toolchains:
+-LUA_DEFS += -I/usr/local/include/lua51 -I/usr/include/lua5.1
++#LUA_DEFS += -I/usr/local/include/lua51 -I/usr/include/lua5.1
+ 
+ LUA_LIB = $(PREFIX)/lib/lua/$(LUAVER)
+ LUA_SHARE = $(PREFIX)/share/lua/$(LUAVER)
+@@ -146,11 +147,13 @@ SYS_LUA_SHARE = $(PREFIX)/share/lua/$(LUAVER)
+ # Libraries:
+ #------------------------------------------------------------------------------
+ 
+-FREETYPE_DIR = $(PREFIX)
+-FREETYPE_INCDIR = $(FREETYPE_DIR)/include
+-FREETYPE_LIBDIR = $(FREETYPE_DIR)/lib
+-FREETYPE_LIBS = -L$(FREETYPE_LIBDIR) -lfreetype # $(CC_LD_RT)$(FREETYPE_LIBDIR)
+-FREETYPE_DEFS = -I$(FREETYPE_INCDIR)/freetype2 `freetype-config --cflags`
++#FREETYPE_DIR = $(PREFIX)
++#FREETYPE_INCDIR = $(FREETYPE_DIR)/include
++#FREETYPE_LIBDIR = $(FREETYPE_DIR)/lib
++FREETYPE_INCDIR = `pkg-config --cflags freetype2`
++#FREETYPE_LIBS = -L$(FREETYPE_LIBDIR) -lfreetype # $(CC_LD_RT)$(FREETYPE_LIBDIR)
++FREETYPE_LIBS = `pkg-config --libs freetype2`
++FREETYPE_DEFS = $(FREETYPE_INCDIR)
+ 
+ # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ # X11 defines and libraries:
+@@ -170,7 +173,7 @@ XFT_DIR = $(X11_DIR)
+ XFT_INCDIR = $(XFT_DIR)/include
+ XFT_LIBDIR = $(XFT_DIR)/lib
+ XFT_LIBS = -L$(XFT_LIBDIR) -lXft # $(CC_LD_RT)$(XFT_LIBDIR)
+-XFT_DEFS = -I$(XFT_INCDIR) -DENABLE_XFT
++XFT_DEFS = -I$(XFT_INCDIR) # -DENABLE_XFT
+ 
+ FONTCONFIG_DIR = $(PREFIX)
+ FONTCONFIG_INCDIR = $(FONTCONFIG_DIR)/include
+@@ -254,7 +257,7 @@ LUAARCH = -m64 # -m32 for 32bit, -m64 for 64bit architecture
+ # Build tools:
+ #------------------------------------------------------------------------------
+ 
+-AR = $(CROSS_COMPILE)ar rcu
++AR = ar rcu
+ RM = rm -f
+ RMDIR = rm -rf
+ MKDIR = mkdir -p
+@@ -262,7 +265,7 @@ ECHO = echo
+ INSTALL_B = install
+ INSTALL_F = install
+ INSTALL_D = install -d
+-INSTALL_S = install -s
++INSTALL_S = install 
+ 
+ #------------------------------------------------------------------------------
+ # Predefined targets:
+-- 
+2.7.4
+
