@@ -20,9 +20,6 @@ INSANE_SKIP_${PN} = "ldflags"
 PACKAGES =+ "${PN}-www"
 
 FILES_${PN}-www = "/www/*"
-FILES_${PN}-dev = "${includedir}"
-FILES_${PN}-staticdev = "${libdir}"
-FILES_${PN} = "${bindir}/* ${sysconfdir}"
 
 S = "${WORKDIR}/git/"
 
