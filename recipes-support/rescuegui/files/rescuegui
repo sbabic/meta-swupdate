@@ -57,6 +57,7 @@ do_start() {
 	*)
 		echo "Starting $DESC ..."
 		cd /opt/rescueGUI
+		echo 0 > /sys/class/graphics/fbcon/cursor_blink
 		export FONTDIR=/usr/share/fonts/truetype
 		exec $DAEMON &
 		exit 0
