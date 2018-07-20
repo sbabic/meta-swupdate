@@ -11,7 +11,6 @@ IMAGE_INSTALL += " \
 	init-ifupdown \
 	lua \
 	luafilesystem \
-	lua-swupdate \
 	rescuegui \
 	swupdate-tools \
 	tekui \

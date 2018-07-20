@@ -7,8 +7,8 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425
 
 inherit update-rc.d
 
-DEPENDS += "swupdate lua lua-swupdate luafilesystem"
-RDEPENDS_${PN} += "swupdate-tools"
+DEPENDS += "swupdate lua luafilesystem"
+RDEPENDS_${PN} += "swupdate-tools swupdate-lua"
 
 SRC_URI = "git://github.com/sbabic/SWUpdateGUI.git;protocol=https \
      	   file://rescuegui \
