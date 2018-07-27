@@ -17,8 +17,7 @@ SRC_URI = "git://github.com/sbabic/SWUpdateGUI.git;protocol=https \
 
 # Modify these as desired
 PV = "1.0+git${SRCPV}"
-#SRCREV = "e286a994e7ed4fc660d644634abc4837c1f78beb"
-SRCREV = "${AUTOREV}"
+SRCREV = "2d7b04b89efbec1f0670e979bc428da3121e16b3"
 
 S = "${WORKDIR}/git"
 
