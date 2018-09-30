@@ -12,6 +12,13 @@ This layer depends on:
 URI: git://github.com/openembedded/meta-openembedded.git
 subdirectory: meta-oe
 
+BitBake variable expansion
+--------------------------
+
+To insert the values of BitBake variables into the update file, pre- and postfix
+the names with "@@". For example, to automatically set the version tag, use the
+line `version = "@@DISTRO_VERSION@@";` in your sw-description file.
+
 Image hashing
 -------------
 

@@ -29,7 +29,29 @@ def swupdate_write_sha256(s, filename, hash):
         for line in write_lines:
             f.write(line)
 
+def swupdate_expand_bitbake_variables(d, s):
+    write_lines = []
+
+    with open(os.path.join(s, "sw-description"), 'r') as f:
+        import re
+        for line in f:
+            m = re.match(r"^(?P<before_placeholder>.+)@@(?P<bitbake_variable_name>\w+)@@(?P<after_placeholder>.+)$", line)
+            if m:
+                bitbake_variable_value = d.getVar(m.group('bitbake_variable_name'), True)
+                if bitbake_variable_value:
+                    write_lines.append(m.group('before_placeholder') + bitbake_variable_value + m.group('after_placeholder') + "\n");
+                else:
+                    bb.fatal("BitBake variable %s not set" % (m.group('bitbake_variable_name')))
+            else:
+                write_lines.append(line)
+
+    with open(os.path.join(s, "sw-description"), 'w+') as f:
+        for line in write_lines:
+            f.write(line)
+
 def prepare_sw_description(d, s, list_for_cpio):
+
+    swupdate_expand_bitbake_variables(d, s)
 
     for file in list_for_cpio:
         if file != 'sw-description' and swupdate_is_hash_needed(s, file):
