@@ -38,10 +38,10 @@ def swupdate_expand_bitbake_variables(d, s):
             m = re.match(r"^(?P<before_placeholder>.+)@@(?P<bitbake_variable_name>\w+)@@(?P<after_placeholder>.+)$", line)
             if m:
                 bitbake_variable_value = d.getVar(m.group('bitbake_variable_name'), True)
-                if bitbake_variable_value:
-                    write_lines.append(m.group('before_placeholder') + bitbake_variable_value + m.group('after_placeholder') + "\n");
-                else:
-                    bb.fatal("BitBake variable %s not set" % (m.group('bitbake_variable_name')))
+                if bitbake_variable_value is None:
+                   bitbake_variable_value = ""
+                   bb.warn("BitBake variable %s not set" % (m.group('bitbake_variable_name')))
+                write_lines.append(m.group('before_placeholder') + bitbake_variable_value + m.group('after_placeholder') + "\n");
             else:
                 write_lines.append(line)
 
