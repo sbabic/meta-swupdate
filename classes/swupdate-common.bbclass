@@ -35,15 +35,31 @@ def swupdate_expand_bitbake_variables(d, s):
     with open(os.path.join(s, "sw-description"), 'r') as f:
         import re
         for line in f:
-            m = re.match(r"^(?P<before_placeholder>.+)@@(?P<bitbake_variable_name>\w+)@@(?P<after_placeholder>.+)$", line)
-            if m:
-                bitbake_variable_value = d.getVar(m.group('bitbake_variable_name'), True)
-                if bitbake_variable_value is None:
-                   bitbake_variable_value = ""
-                   bb.warn("BitBake variable %s not set" % (m.group('bitbake_variable_name')))
-                write_lines.append(m.group('before_placeholder') + bitbake_variable_value + m.group('after_placeholder') + "\n");
-            else:
-                write_lines.append(line)
+            found = False
+            while True:
+                m = re.match(r"^(?P<before_placeholder>.+)@@(?P<bitbake_variable_name>\w+)@@(?P<after_placeholder>.+)$", line)
+                if m:
+                    bitbake_variable_value = d.getVar(m.group('bitbake_variable_name'), True)
+                    if bitbake_variable_value is None:
+                       bitbake_variable_value = ""
+                       bb.warn("BitBake variable %s not set" % (m.group('bitbake_variable_name')))
+                    line = m.group('before_placeholder') + bitbake_variable_value + m.group('after_placeholder')
+                    found = True
+                    continue
+                else:
+                    m = re.match(r"^(?P<before_placeholder>.+)@@(?P<bitbake_variable_name>.+)\[(?P<flag_var_name>.+)\]@@(?P<after_placeholder>.+)$", line)
+                    if m:
+                       bitbake_variable_value = (d.getVarFlag(m.group('bitbake_variable_name'), m.group('flag_var_name'), True) or "")
+                       if bitbake_variable_value is None:
+                          bitbake_variable_value = ""
+                       line = m.group('before_placeholder') + bitbake_variable_value + m.group('after_placeholder')
+                       continue
+
+                    if found:
+                       line = line + "\n"
+                    break
+
+            write_lines.append(line)
 
     with open(os.path.join(s, "sw-description"), 'w+') as f:
         for line in write_lines:
