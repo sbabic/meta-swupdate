@@ -14,6 +14,7 @@ SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=https \
      file://swupdate-usb.rules \
      file://swupdate-usb@.service \
      file://swupdate-progress.service \
+     file://systemd-tmpfiles-swupdate.conf \
      "
 
 INSANE_SKIP_${PN} = "ldflags"
@@ -21,6 +22,7 @@ PACKAGES =+ "${PN}-www ${PN}-lua"
 
 FILES_${PN}-lua += "${libdir}/lua/"
 FILES_${PN}-www = "/www/*"
+FILES_${PN} += "${libdir}/tmpfiles.d"
 
 S = "${WORKDIR}/git/"
 
@@ -137,6 +139,8 @@ do_install () {
 
 
   if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
+    install -d ${D}${libdir}/tmpfiles.d
+    install -m 0644 ${WORKDIR}/systemd-tmpfiles-swupdate.conf ${D}${libdir}/tmpfiles.d/swupdate.conf
     install -d ${D}${sysconfdir}/udev/rules.d
     install -m 0644 ${WORKDIR}/swupdate-usb.rules ${D}${sysconfdir}/udev/rules.d/
   fi
