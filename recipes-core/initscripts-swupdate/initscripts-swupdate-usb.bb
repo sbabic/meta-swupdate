@@ -20,6 +20,6 @@ do_install () {
 PACKAGES = "${PN}"
 FILES_${PN} = "/"
 
-PACKAGE_ARCH = "all"
+inherit allarch
 
 CONFFILES_${PN} = ""
