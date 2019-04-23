@@ -10,7 +10,8 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/LGPL-2.1;md5=1a6d268fd218675ffe
 SECTION = "libs"
 
 SRC_URI = "git://github.com/sbabic/libubootenv;protocol=https"
-SRCREV = "c1d89d574d830e1a366d6db0898c5cd2c47eb3d3"
+SRCREV = "8a7d4030bcb106de11632e85b6a0e7b7d4cb47af"
+PV_append = "+git${SRCPV}"
 
 S = "${WORKDIR}/git"
 
