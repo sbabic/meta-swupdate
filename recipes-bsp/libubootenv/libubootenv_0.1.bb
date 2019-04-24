@@ -17,6 +17,8 @@ S = "${WORKDIR}/git"
 
 inherit cmake
 
+EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release"
+
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 PROVIDES += "u-boot-fw-utils"
