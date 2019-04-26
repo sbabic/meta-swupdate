@@ -57,7 +57,7 @@ do_start() {
 	*)
 		echo "Starting $DESC ..."
 		cd /home/root
-		exec $DAEMON -v -w "-r /www" $SWUPDATE_EXTRA_ARGS &
+		exec $DAEMON -v -w "-r /www $SWUPDATE_MONGOOSE_EXTRA_ARGS" $SWUPDATE_EXTRA_ARGS &
 		exit 0
 		;;
 	esac
