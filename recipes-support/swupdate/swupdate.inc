@@ -105,6 +105,10 @@ python () {
 
     if 'CONFIG_MONGOOSE_WEB_API_V2=y\n' in features:
         d.setVar('SWUPDATE_WWW', 'webapp')
+
+    if 'CONFIG_BOOTLOADER_EBG=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' efibootguard')
 }
 
 do_configure () {
