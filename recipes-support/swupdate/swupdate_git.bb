@@ -3,4 +3,4 @@ require swupdate_tools.inc
 
 DEFAULT_PREFERENCE = "-1"
 
-SRCREV ?= "d39f4b8e00ef1929545b66158e45b82ea922bf81"
+SRCREV ?= "887e6e49394b0bde7635cb1ef254c7428370cec3"
