@@ -99,6 +99,10 @@ python () {
         depends = d.getVar('DEPENDS', False)
         d.setVar('DEPENDS', depends + ' libgpiod')
 
+    if 'CONFIG_SWUFORWARDER_HANDLER=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' curl libwebsockets uriparser')
+
     if 'CONFIG_RDIFFHANDLER=y\n' in features:
         depends = d.getVar('DEPENDS', False)
         d.setVar('DEPENDS', depends + ' librsync')
