@@ -116,11 +116,17 @@ def prepare_sw_description(d, s, list_for_cpio):
                 bb.fatal("SWUPDATE_CMS_KEY isn't set")
             if not os.path.exists(cms_key):
                 bb.fatal("SWUPDATE_CMS_KEY %s doesn't exist" % (cms_key))
-            signcmd = "openssl cms -sign -in '%s' -out '%s' -signer '%s' -inkey '%s' -outform DER -nosmimecap -binary" % (
+            passout = d.getVar('SWUPDATE_PASSWORD_FILE', True)
+            if passout:
+                passout = "-passin file:'%s' " % (passout)
+            else:
+                passout = ""
+            signcmd = "openssl cms -sign -in '%s' -out '%s' -signer '%s' -inkey '%s' %s -outform DER -nosmimecap -binary" % (
                 os.path.join(s, 'sw-description'),
                 os.path.join(s, 'sw-description.sig'),
                 cms_cert,
-                cms_key)
+                cms_key,
+                passout)
             if os.system(signcmd) != 0:
                 bb.fatal("Failed to sign sw-description with %s" % (privkey))
         else:
