@@ -1,5 +1,5 @@
 require libubootenv.inc
-SRCREV = "88de5d2b0be791f5e91889e8aed5dc985769b74d"
+SRCREV = "9e121d41113dc0313452b2c00627097c46802c10"
 PV_append = "+git${SRCPV}"
 
 DEFAULT_PREFERENCE = "-1"
