@@ -10,8 +10,8 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d8045f3b8f929c1cb29a1e3fd737b499 \
 
 SRC_URI = "git://github.com/librsync/librsync.git;protocol=https"
 
-PV = "2.0.2+git${SRCPV}"
-SRCREV = "dfba8988ef12d6a2f96dc16e608923a9a5d6371d"
+PV = "2.1.0+git${SRCPV}"
+SRCREV = "ac2274f562e74578b533ee734c8dada1aa5d93dc"
 
 S = "${WORKDIR}/git"
 
