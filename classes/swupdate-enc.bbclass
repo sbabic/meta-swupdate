@@ -13,7 +13,7 @@ swu_encrypt_file() {
 	key=`cat ${SWUPDATE_AES_FILE} | grep ^key | cut -d '=' -f 2`
 	iv=`cat ${SWUPDATE_AES_FILE} | grep ^iv | cut -d '=' -f 2`
 	salt=`cat ${SWUPDATE_AES_FILE} | grep ^salt | cut -d '=' -f 2`
-	if [ -z ${salt} ] || [ -z ${key} ] || [ -z {iv} ];then
+	if [ -z ${salt} ] || [ -z ${key} ] || [ -z ${iv} ];then
 		bbfatal "SWUPDATE_AES_FILE=$SWUPDATE_AES_FILE does not contain valid keys"
 	fi
 	openssl enc -aes-256-cbc -in ${input} -out ${output} -K ${key} -iv ${iv} -S ${salt}
