@@ -7,10 +7,30 @@
 # in field.
 # See also http://sbabic.github.io/swupdate/
 #
+# To use this class, add swupdate to the inherit clause of the update image bb file.
+# The generated output file is an swu archive ready to be uploaded to a device running
+# swupdate.
 #
-# To use, add swupdate to the inherit clause and set
-# set the images (all of them must be found in deploy directory)
-# that are part of the compound image.
+# Files listed in the SRC_URI variable are added the the swu archive.
+#
+# For each entry in the SWUPDATE_IMAGES variable an image file is searched for in the
+# ${DEPLOY_DIR_IMAGE} folder and added to the swu archive. Different types of entries
+# are supported:
+# * image name(s) and fstype(s):
+#   Example:
+#     SWUPDATE_IMAGES = "core-image-full-cmdline"
+#     SWUPDATE_IMAGES_FSTYPES[core-image-full-cmdline] = ".ext4.gz"
+#   For this example either a file core-image-full-cmdline-${MACHINE}.ext4.gz or a file
+#   core-image-full-cmdline.ext4.gz gets added the swu archive. Optionally the variable
+#   SWUPDATE_IMAGES_NOAPPEND_MACHINE allows to explicitley define if the MACHINE name
+#   must be part of the image file name or not.
+# * image file name(s)
+#   Example:
+#     SWUPDATE_IMAGES = "core-image-full-cmdline.ext4.gz"
+#   If SWUPDATE_IMAGES_FSTYPES is not defined for an entry in SWUPDATE_IMAGES or the
+#   corresponding image files cannot be found in the ${DEPLOY_DIR_IMAGE} folder, an
+#   image file with exactly the name as specified in SWUPDATE_IMAGES is searched for.
+
 inherit swupdate-common.bbclass
 
 S = "${WORKDIR}/${PN}"
@@ -74,6 +94,7 @@ python do_swuimage () {
     if d.getVar('SWUPDATE_SIGNING', True):
         list_for_cpio.append('sw-description.sig')
 
+    # Add files listed in SRC_URI to the swu file
     for url in fetch.urls:
         local = fetch.localpath(url)
         filename = os.path.basename(local)
@@ -81,30 +102,40 @@ python do_swuimage () {
             shutil.copyfile(local, os.path.join(s, "%s" % filename ))
             list_for_cpio.append(filename)
 
-# SWUPDATE_IMAGES refers to images in the DEPLOY directory
-# If they are not there, additional file can be added
-# by fetching from URLs
+    def add_image_to_swu(deploydir, imagename, s):
+        src = os.path.join(deploydir, imagename)
+        if not os.path.isfile(src):
+            return False
+        target_imagename = os.path.basename(imagename)  # allow images in subfolders of DEPLOY_DIR_IMAGE
+        dst = os.path.join(s, target_imagename)
+        shutil.copyfile(src, dst)
+        list_for_cpio.append(target_imagename)
+        return True
+
+    # Search for images listed in SWUPDATE_IMAGES in the DEPLOY directory.
     deploydir = d.getVar('DEPLOY_DIR_IMAGE', True)
     imgdeploydir = d.getVar('IMGDEPLOYDIR', True)
-
     for image in images:
         fstypes = (d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image, True) or "").split()
-        if not fstypes:
-            fstypes = [""]
-
-        for fstype in fstypes:
-
-            appendmachine = d.getVarFlag("SWUPDATE_IMAGES_NOAPPEND_MACHINE", image, True)
-            if appendmachine == None:
-                imagebase = image + '-' + d.getVar('MACHINE', True)
-            else:
-                imagebase = image
-
-            imagename = imagebase + fstype
-            src = os.path.join(deploydir, "%s" % imagename)
-            dst = os.path.join(s, "%s" % imagename)
-            shutil.copyfile(src, dst)
-            list_for_cpio.append(imagename)
+        if fstypes:
+            noappend_machine = d.getVarFlag("SWUPDATE_IMAGES_NOAPPEND_MACHINE", image, True)
+            if noappend_machine == False:  # Search for a file explicitely with MACHINE
+                imagebases = [ image + '-' + d.getVar('MACHINE', True) ]
+            elif noappend_machine == True:  # Search for a file explicitely without MACHINE
+                imagebases = [ image ]
+            else:  # None, means auto mode. Just try to find an image file with MACHINE or without MACHINE
+                imagebases = [ image + '-' + d.getVar('MACHINE', True), image ]
+            for fstype in fstypes:
+                image_found = False
+                for imagebase in imagebases:
+                    image_found = add_image_to_swu(deploydir, imagebase + fstype, s)
+                    if image_found:
+                        break
+                if not image_found:
+                    bb.fatal("swupdate cannot find image file: %s" % os.path.join(deploydir, imagebase + fstype))
+        else:  # Allow also complete entries like "image.ext4.gz" in SWUPDATE_IMAGES
+            if not add_image_to_swu(deploydir, image, s):
+                bb.fatal("swupdate cannot find %s image file" % image)
 
     prepare_sw_description(d, s, list_for_cpio)
 
