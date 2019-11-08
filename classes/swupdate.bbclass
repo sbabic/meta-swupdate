@@ -152,4 +152,4 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_DEFAULT_DEPS = "1"
 EXCLUDE_FROM_WORLD = "1"
 
-addtask do_swuimage after do_unpack after do_prepare_recipe_sysroot before do_build
+addtask do_swuimage after do_unpack do_prepare_recipe_sysroot before do_build
