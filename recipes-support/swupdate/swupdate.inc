@@ -16,27 +16,25 @@ PACKAGES =+ " \
     ${PN}-client \
     ${PN}-lua \
     ${PN}-progress \
-    ${PN}-progress-sd \
-    ${PN}-sd \
-    ${PN}-sv \
     ${PN}-tools \
     ${PN}-tools-hawkbit \
     ${PN}-usb \
-    ${PN}-usb-sd \
     ${PN}-www \
 "
 
+# tools is now an empty meta package for backward compatibility
+ALLOW_EMPTY_${PN}-tools = "1"
+
 FILES_${PN}-client = "${bindir}/swupdate-client"
 FILES_${PN}-lua += "${libdir}/lua/"
-FILES_${PN}-progress = "${bindir}/swupdate-progress"
-FILES_${PN}-progress-sd = "${systemd_system_unitdir}/swupdate-progress.service"
-FILES_${PN}-sd = " \
-    ${systemd_system_unitdir}/swupdate.socket \
-    ${systemd_system_unitdir}/swupdate.service \
+FILES_${PN}-progress = " \
+    ${bindir}/swupdate-progress \
+    ${systemd_system_unitdir}/swupdate-progress.service \
 "
-FILES_${PN}-sv = "${sysconfdir}/init.d/*"
-FILES_${PN}-usb = "${sysconfdir}/udev/rules.d/swupdate-usb.rules"
-FILES_${PN}-usb-sd = "${systemd_system_unitdir}/swupdate-usb@.service"
+FILES_${PN}-usb = " \
+    ${sysconfdir}/udev/rules.d/swupdate-usb.rules \
+    ${systemd_system_unitdir}/swupdate-usb@.service \
+"
 FILES_${PN}-tools-hawkbit = " \
     ${bindir}/swupdate-hawkbitcfg \
     ${bindir}/swupdate-sendtohawkbit \
@@ -44,15 +42,16 @@ FILES_${PN}-tools-hawkbit = " \
 FILES_${PN} += " \
     ${libdir}/tmpfiles.d \
     ${libdir}/swupdate/* \
+    ${systemd_system_unitdir}/swupdate.socket \
+    ${systemd_system_unitdir}/swupdate.service \
+    ${sysconfdir}/init.d/* \
 "
 FILES_${PN}-www = " \
     ${libdir}/swupdate/conf.d/*mongoose* \
     /www/* \
 "
 
-RDEPENDS_${PN}-progress += "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'swupdate-progress-sd', '', d)}"
-RDEPENDS_${PN}-usb += "${PN}-client ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'swupdate-usb-sd', '', d)}"
-RDEPENDS_${PN} += "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'swupdate-sd', 'swupdate-sv', d)}"
+RDEPENDS_${PN}-usb += "${PN}-client"
 
 # The tools package is deprecated, it is an empty meta package for backward compatibility
 RDEPENDS_${PN}-tools += "${PN}-client ${PN}-progress ${PN}-tools-hawkbit ${PN}-usb"
@@ -150,13 +149,6 @@ python () {
 }
 
 do_configure () {
-    # Always install systemd support and the swupdate.sh shell wrapper.
-    # This allows to build swupdate packages init manager agnostic and splitt the file to separate packages.
-    #grep -v 'CONFIG_SYSTEMD' ${WORKDIR}/defconfig > ${S}/.config
-    #echo "# Global settings from swupdate recipe" >> ${S}/.config
-    #echo "CONFIG_SYSTEMD=y" >> ${S}/.config
-    #echo "CONFIG_SYSTEMD_SYSTEM_UNITDIR=\"${systemd_system_unitdir}\"" >> ${S}/.config
-
     cp ${WORKDIR}/defconfig ${S}/.config
     merge_config.sh -m .config ${@" ".join(find_cfgs(d))}
     cml1_do_configure
@@ -185,15 +177,7 @@ do_install () {
 INITSCRIPT_NAME = "swupdate"
 INITSCRIPT_PARAMS = "defaults 70"
 
-SYSTEMD_PACKAGES_append = " ${PN}-sd ${PN}-progress-sd ${PN}-usb-sd"
-SYSTEMD_SERVICE_${PN}-sd = "swupdate.service"
-SYSTEMD_SERVICE_${PN}-progress-sd = "swupdate-progress.service"
-SYSTEMD_SERVICE_${PN}-usb-sd = "swupdate-usb@.service"
-
-# Prevents the systemd.bbclass from deleting scripts or service files.
-rm_systemd_unitdir () {
-    return 0
-}
-rm_sysvinit_initddir () {
-    return 0
-}
+SYSTEMD_PACKAGES = "${PN} ${PN}-progress ${PN}-usb"
+SYSTEMD_SERVICE_${PN} = "swupdate.service"
+SYSTEMD_SERVICE_${PN}-progress = "swupdate-progress.service"
+SYSTEMD_SERVICE_${PN}-usb = "swupdate-usb@.service"
