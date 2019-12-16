@@ -98,7 +98,7 @@ python do_swuimage () {
     for url in fetch.urls:
         local = fetch.localpath(url)
         filename = os.path.basename(local)
-        if (filename != 'sw-description') and (os.path.isfile(filename)):
+        if (filename != 'sw-description') and (os.path.isfile(local)):
             shutil.copyfile(local, os.path.join(s, "%s" % filename ))
             list_for_cpio.append(filename)
 
