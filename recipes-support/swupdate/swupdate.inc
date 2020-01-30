@@ -163,6 +163,10 @@ python () {
         depends = d.getVar('DEPENDS', False)
         d.setVar('DEPENDS', depends + ' efibootguard')
 
+    if 'CONFIG_ZSTD=y\n' in features:
+        depends = d.getVar('DEPENDS', False)
+        d.setVar('DEPENDS', depends + ' zstd')
+
     # Values not used here might be used in a bbappend
     d.setVar('SWUPDATE_SOCKET_CTRL_PATH', '/tmp/sockinstctrl')
     d.setVar('SWUPDATE_SOCKET_PROGRESS_PATH', '/tmp/swupdateprog')
