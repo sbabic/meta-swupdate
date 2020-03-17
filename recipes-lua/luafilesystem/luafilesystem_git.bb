@@ -15,7 +15,7 @@ inherit pkgconfig
 
 S = "${WORKDIR}/git"
 
-EXTRA_OEMAKE = 'PREFIX=${D}/usr CROSS_COMPILE=${TARGET_PREFIX} CC="${CC} -fpic" LDFLAGS="${LDFLAGS}"'
+EXTRA_OEMAKE = 'PREFIX=${D}/usr BASELIB=${base_libdir} CROSS_COMPILE=${TARGET_PREFIX} CC="${CC} -fpic" LDFLAGS="${LDFLAGS}"'
 
 # NOTE: this is a Makefile-only piece of software, so we cannot generate much of the
 # recipe automatically - you will need to examine the Makefile yourself and ensure
