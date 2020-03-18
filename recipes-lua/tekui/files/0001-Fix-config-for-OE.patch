@@ -8,8 +8,6 @@ Signed-off-by: Kas User <kas@example.com>
  config | 31 +++++++++++++++++--------------
  1 file changed, 17 insertions(+), 14 deletions(-)
 
-diff --git a/config b/config
-index 8664568..31e65a2 100644
 --- a/config
 +++ b/config
 @@ -27,7 +27,7 @@ DISPLAY_DRIVER ?= x11
@@ -32,11 +30,12 @@ index 8664568..31e65a2 100644
  
  TEKLIB_DEFS = -DENABLE_LAZY_SINGLETON
  
-@@ -129,13 +129,14 @@ TEKLIB_DEFS = -DENABLE_LAZY_SINGLETON
+@@ -129,15 +129,17 @@ TEKLIB_DEFS = -DENABLE_LAZY_SINGLETON
  #------------------------------------------------------------------------------
  
  PREFIX ?= /usr/local
 -LUAVER ?= 5.1
++BASELIB ?= /lib
 +LUAVER ?= `pkg-config --modversion lua | cut -d'.' -f1,2`
  
  LUA_DIR = $(PREFIX)
@@ -48,9 +47,12 @@ index 8664568..31e65a2 100644
 -LUA_DEFS += -I/usr/local/include/lua51 -I/usr/include/lua5.1
 +#LUA_DEFS += -I/usr/local/include/lua51 -I/usr/include/lua5.1
  
- LUA_LIB = $(PREFIX)/lib/lua/$(LUAVER)
+-LUA_LIB = $(PREFIX)/lib/lua/$(LUAVER)
++LUA_LIB = $(PREFIX)$(BASELIB)/lua/$(LUAVER)
  LUA_SHARE = $(PREFIX)/share/lua/$(LUAVER)
-@@ -146,11 +147,13 @@ SYS_LUA_SHARE = $(PREFIX)/share/lua/$(LUAVER)
+ SYS_LUA_LIB = $(PREFIX)/lib/lua/$(LUAVER)
+ SYS_LUA_SHARE = $(PREFIX)/share/lua/$(LUAVER)
+@@ -146,11 +148,13 @@ SYS_LUA_SHARE = $(PREFIX)/share/lua/$(LU
  # Libraries:
  #------------------------------------------------------------------------------
  
@@ -69,7 +71,7 @@ index 8664568..31e65a2 100644
  
  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  # X11 defines and libraries:
-@@ -170,7 +173,7 @@ XFT_DIR = $(X11_DIR)
+@@ -170,7 +174,7 @@ XFT_DIR = $(X11_DIR)
  XFT_INCDIR = $(XFT_DIR)/include
  XFT_LIBDIR = $(XFT_DIR)/lib
  XFT_LIBS = -L$(XFT_LIBDIR) -lXft # $(CC_LD_RT)$(XFT_LIBDIR)
@@ -78,7 +80,7 @@ index 8664568..31e65a2 100644
  
  FONTCONFIG_DIR = $(PREFIX)
  FONTCONFIG_INCDIR = $(FONTCONFIG_DIR)/include
-@@ -254,7 +257,7 @@ LUAARCH = -m64 # -m32 for 32bit, -m64 for 64bit architecture
+@@ -254,7 +258,7 @@ LUAARCH = -m64 # -m32 for 32bit, -m64 fo
  # Build tools:
  #------------------------------------------------------------------------------
  
@@ -87,15 +89,12 @@ index 8664568..31e65a2 100644
  RM = rm -f
  RMDIR = rm -rf
  MKDIR = mkdir -p
-@@ -262,7 +265,7 @@ ECHO = echo
+@@ -262,7 +266,7 @@ ECHO = echo
  INSTALL_B = install
  INSTALL_F = install
  INSTALL_D = install -d
 -INSTALL_S = install -s
-+INSTALL_S = install 
++INSTALL_S = install
  
  #------------------------------------------------------------------------------
  # Predefined targets:
--- 
-2.7.4
-

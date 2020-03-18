@@ -39,7 +39,7 @@ DEPENDS = "libx11 readline lua freetype libpng fontconfig"
 DEPENDS = "lua freetype libpng fontconfig"
 RDEPENDS_${PN} += "lua"
 
-EXTRA_OEMAKE = 'PREFIX=${D}/usr DISPLAY_DRIVER=rawfb CROSS_COMPILE=${TARGET_PREFIX} CC="${CC} -fpic"'
+EXTRA_OEMAKE = 'PREFIX=${D}/usr BASELIB=${base_libdir} DISPLAY_DRIVER=rawfb CROSS_COMPILE=${TARGET_PREFIX} CC="${CC} -fpic"'
 
 do_compile () {
 	oe_runmake all
