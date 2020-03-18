@@ -25,7 +25,7 @@ SRC_URI[sha256sum] = "d3130a9403e05b8322e47b5e8c0716f5ccf2956ecae6e1268b05085a77
 
 PR = "r1"
 
-S = "${WORKDIR}/${PN}-${PV}-${PR}"
+S = "${WORKDIR}/${BP}-${PR}"
 
 PACKAGES += "${PN}-examples"
 FILES_${PN} = "${libdir} ${datadir}/lua" 
