@@ -11,15 +11,20 @@ RPROVIDES_${PN} += "virtual/initscripts-swupdate"
 
 S = "${WORKDIR}"
 
+inherit allarch update-alternatives
+
 do_install () {
 	install -d ${D}/${sysconfdir}/init.d
 	install -d ${D}${base_sbindir}
 	install -m 755 ${S}/rcS.swupdate ${D}${base_sbindir}/init
 }
 
+ALTERNATIVE_PRIORITY = "300"
+ALTERNATIVE_${PN} = "init"
+ALTERNATIVE_LINK_NAME[init] = "${base_sbindir}/init"
+ALTERNATIVE_PRIORITY[init] = "60"
+
 PACKAGES = "${PN}"
 FILES_${PN} = "/"
-
-inherit allarch
 
 CONFFILES_${PN} = ""
