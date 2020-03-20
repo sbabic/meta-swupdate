@@ -118,10 +118,7 @@ python () {
 
     if 'CONFIG_UBOOT=y\n' in features:
         depends = d.getVar('DEPENDS', False)
-        if 'CONFIG_UBOOT_NEWAPI=y\n' in features:
-            d.setVar('DEPENDS', depends + ' libubootenv')
-        else:
-            d.setVar('DEPENDS', depends + ' u-boot-fw-utils')
+        d.setVar('DEPENDS', depends + ' libubootenv')
 
     if 'CONFIG_DOWNLOAD=y\n' in features or 'CONFIG_SURICATTA=y\n' in features:
         depends = d.getVar('DEPENDS', False)
