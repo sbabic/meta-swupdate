@@ -99,6 +99,8 @@ python () {
 
     if 'CONFIG_SSL_IMPL_OPENSSL=y\n' in features:
         depends += ' openssl'
+    elif 'CONFIG_SSL_IMPL_MBEDTLS=y\n' in features:
+        depends += ' mbedtls'
 
     if 'CONFIG_JSON=y\n' in features:
         depends += ' json-c'
