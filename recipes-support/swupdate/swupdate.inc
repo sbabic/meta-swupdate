@@ -92,61 +92,51 @@ python () {
     features = configfile.readlines()
     configfile.close()
 
-    if 'CONFIG_REMOTE_HANDLER=y\n' in features:
-        depends = d.getVar('DEPENDS', False)
-        d.setVar('DEPENDS', depends + ' zeromq')
+    depends = d.getVar('DEPENDS', False)
 
-    if 'CONFIG_ENCRYPTED_IMAGES=y\n' in features or 'CONFIG_MONGOOSESSL=y\n' in features or 'CONFIG_HASH_VERIFY=y\n' in features or 'CONFIG_SURICATTA_SSL=y\n' in features:
-        depends = d.getVar('DEPENDS', False)
-        d.setVar('DEPENDS', depends + ' openssl')
+    if 'CONFIG_REMOTE_HANDLER=y\n' in features:
+        depends += ' zeromq'
+
+    if 'CONFIG_SSL_IMPL_OPENSSL=y\n' in features:
+        depends += ' openssl'
 
     if 'CONFIG_JSON=y\n' in features:
-        depends = d.getVar('DEPENDS', False)
-        d.setVar('DEPENDS', depends + ' json-c')
+        depends += ' json-c'
 
     if 'CONFIG_SYSTEMD=y\n' in features:
-        depends = d.getVar('DEPENDS', False)
-        d.setVar('DEPENDS', depends + ' systemd')
+        depends += ' systemd'
 
     if 'CONFIG_ARCHIVE=y\n' in features:
-        depends = d.getVar('DEPENDS', False)
-        d.setVar('DEPENDS', depends + ' libarchive')
+        depends += ' libarchive'
 
     if 'CONFIG_LUA=y\n' in features:
-        depends = d.getVar('DEPENDS', False)
-        d.setVar('DEPENDS', depends + ' lua')
+        depends += ' lua'
 
     if 'CONFIG_UBOOT=y\n' in features:
-        depends = d.getVar('DEPENDS', False)
-        d.setVar('DEPENDS', depends + ' libubootenv')
+        depends += ' libubootenv'
 
     if 'CONFIG_DOWNLOAD=y\n' in features or 'CONFIG_SURICATTA=y\n' in features:
-        depends = d.getVar('DEPENDS', False)
-        d.setVar('DEPENDS', depends + ' curl')
+        depends += ' curl'
 
-    if 'CONFIG_MTD=y\n' in features:
-        depends = d.getVar('DEPENDS', False)
-        d.setVar('DEPENDS', depends + ' mtd-utils')
-
-    if 'CONFIG_CFI=y\n' in features:
-        depends = d.getVar('DEPENDS', False)
-        d.setVar('DEPENDS', depends + ' mtd-utils')
-
-    if 'CONFIG_UBIVOL=y\n' in features:
-        depends = d.getVar('DEPENDS', False)
-        d.setVar('DEPENDS', depends + ' mtd-utils')
+    if 'CONFIG_MTD=y\n' in features or 'CONFIG_CFI=y\n' in features or 'CONFIG_UBIVOL=y\n' in features:
+        depends += ' mtd-utils'
 
     if 'CONFIG_UCFWHANDLER=y\n' in features:
-        depends = d.getVar('DEPENDS', False)
-        d.setVar('DEPENDS', depends + ' libgpiod')
+        depends += ' libgpiod'
 
     if 'CONFIG_SWUFORWARDER_HANDLER=y\n' in features:
-        depends = d.getVar('DEPENDS', False)
-        d.setVar('DEPENDS', depends + ' curl libwebsockets uriparser')
+        depends += ' curl libwebsockets uriparser'
 
     if 'CONFIG_RDIFFHANDLER=y\n' in features:
-        depends = d.getVar('DEPENDS', False)
-        d.setVar('DEPENDS', depends + ' librsync')
+        depends += ' librsync'
+
+    if 'CONFIG_BOOTLOADER_EBG=y\n' in features:
+        depends += ' efibootguard'
+
+    if 'CONFIG_ZSTD=y\n' in features:
+        depends += ' zstd'
+
+    d.setVar('DEPENDS', depends)
 
     if 'CONFIG_MONGOOSE=y\n' in features:
         d.setVar('SWUPDATE_MONGOOSE', 'true')
@@ -155,14 +145,6 @@ python () {
 
     if 'CONFIG_MONGOOSE_WEB_API_V2=y\n' in features:
         d.setVar('SWUPDATE_WWW', 'webapp')
-
-    if 'CONFIG_BOOTLOADER_EBG=y\n' in features:
-        depends = d.getVar('DEPENDS', False)
-        d.setVar('DEPENDS', depends + ' efibootguard')
-
-    if 'CONFIG_ZSTD=y\n' in features:
-        depends = d.getVar('DEPENDS', False)
-        d.setVar('DEPENDS', depends + ' zstd')
 
     # Values not used here might be used in a bbappend
     d.setVar('SWUPDATE_SOCKET_CTRL_PATH', '/tmp/sockinstctrl')
