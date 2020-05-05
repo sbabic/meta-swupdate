@@ -79,6 +79,8 @@ def find_cfgs(d):
     return [s for s in src_patches(d, True) if s.endswith('.cfg')]
 
 python () {
+    import re
+
     try:
         defconfig = bb.fetch2.localpath('file://defconfig', d)
     except bb.fetch2.FetchError:
@@ -89,8 +91,27 @@ python () {
     except IOError:
         return
 
-    features = configfile.readlines()
+    features = configfile.read()
     configfile.close()
+
+    for current_fragment in find_cfgs(d):
+        try:
+            fragment_fd = open(current_fragment)
+        except IOError:
+            continue
+
+        fragment = fragment_fd.read()
+        fragment_fd.close()
+
+        fragment_search = re.findall('^(?:# )?(CONFIG_[a-zA-Z0-9_]*)[= ].*\n?', fragment, re.MULTILINE)
+
+        for feature in fragment_search:
+            features = re.sub("^(?:# )?" + feature + "[= ].*\n?", "", features, flags=re.MULTILINE)
+
+        features = features + fragment
+
+    features = features.splitlines(True)
+
 
     depends = d.getVar('DEPENDS', False)
 
