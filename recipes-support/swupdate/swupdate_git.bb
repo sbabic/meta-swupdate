@@ -2,5 +2,5 @@ require swupdate.inc
 
 DEFAULT_PREFERENCE = "-1"
 
-SRCREV ?= "1a6dfbb5a0be978ac1a159758e278ab4d44167e2"
+SRCREV ?= "4ad398cbe137d01180a7094cfdea974a943e1f1e"
 PV = "2020.04+git${SRCPV}"
