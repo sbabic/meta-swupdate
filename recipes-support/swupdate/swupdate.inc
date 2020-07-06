@@ -216,11 +216,13 @@ do_install () {
     # shell based configuration loader allows to place code snippets into this folder
     install -d ${D}${libdir}/swupdate/conf.d
     install -m 755 ${WORKDIR}/swupdate.sh ${D}${libdir}/swupdate
+    sed -i 's#@LIBDIR@#${libdir}#g' ${D}${libdir}/swupdate/swupdate.sh
     if ${SWUPDATE_MONGOOSE}; then
         install -m 644 ${WORKDIR}/10-mongoose-args ${D}${libdir}/swupdate/conf.d/
     fi
     install -d ${D}${systemd_unitdir}/system
     install -m 644 ${WORKDIR}/swupdate.service ${D}${systemd_system_unitdir}
+    sed -i 's#@LIBDIR@#${libdir}#' ${D}${systemd_system_unitdir}/swupdate.service
     install -m 644 ${WORKDIR}/swupdate.socket.tmpl ${D}${systemd_system_unitdir}/swupdate.socket
     sed -e "s,@@SWUPDATE_SOCKET_CTRL_PATH@@,${SWUPDATE_SOCKET_CTRL_PATH},g" \
         -e "s,@@SWUPDATE_SOCKET_PROGRESS_PATH@@,${SWUPDATE_SOCKET_PROGRESS_PATH},g" \

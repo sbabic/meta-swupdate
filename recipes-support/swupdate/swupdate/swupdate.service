@@ -4,7 +4,7 @@ Documentation=https://github.com/sbabic/swupdate
 Documentation=https://sbabic.github.io/swupdate
 
 [Service]
-ExecStart=/usr/lib/swupdate/swupdate.sh
+ExecStart=@LIBDIR@/swupdate/swupdate.sh
 KillMode=mixed
 
 [Install]
