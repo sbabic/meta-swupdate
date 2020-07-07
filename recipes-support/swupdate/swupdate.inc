@@ -69,8 +69,9 @@ RDEPENDS_${PN}-tools += "${PN}-client ${PN}-progress ${PN}-tools-hawkbit \
 "
 
 S = "${WORKDIR}/git/"
+B = "${WORKDIR}/build/"
 
-EXTRA_OEMAKE += " HOSTCC="${BUILD_CC}" HOSTCXX="${BUILD_CXX}" LD="${CC}" DESTDIR="${D}" LIBDIR="${libdir}" V=1 ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET_PREFIX} SKIP_STRIP=y"
+EXTRA_OEMAKE += " O=${B} HOSTCC="${BUILD_CC}" HOSTCXX="${BUILD_CXX}" LD="${CC}" DESTDIR="${D}" LIBDIR="${libdir}" V=1 ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET_PREFIX} SKIP_STRIP=y"
 
 DEPENDS += "kern-tools-native"
 
@@ -190,18 +191,18 @@ python () {
 }
 
 do_configure () {
-    cp ${WORKDIR}/defconfig ${S}/.config
-    merge_config.sh -m .config ${@" ".join(find_cfgs(d))}
-    cml1_do_configure
+    cp ${WORKDIR}/defconfig ${WORKDIR}/.config
+    merge_config.sh -O ${B} -m ${WORKDIR}/.config ${@" ".join(find_cfgs(d))}
+    (cd ${S} && cml1_do_configure)
 }
 
 do_compile() {
     unset LDFLAGS
-    oe_runmake
+    (cd ${S} && oe_runmake)
 }
 
 do_install () {
-    oe_runmake install
+    (cd ${S} && oe_runmake install)
 
     install -m 0755 -d ${D}/www
     if [ -d ${S}/web-app ];then
