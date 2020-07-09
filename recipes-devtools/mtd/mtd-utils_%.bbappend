@@ -2,6 +2,9 @@ FILES_${PN}-staticdev += "ubi-utils/libubi.a ${libdir}/*.a"
 
 SRCREV = "639b871fe3d2cb3e73d21363e8c13ede2bbd9f99"
 
+# remove patch from meta layer that has already been applied with this SRCREV
+SRC_URI_remove = "file://0001-mtd-utils-Fix-return-value-of-ubiformat.patch"
+
 do_install_append () {
 	install -d ${D}${includedir}/mtd/
 	install -d ${D}${libdir}/
