@@ -1,0 +1,58 @@
+From 42e051acd32c28c2f93c946d0c4bf6f9eada2aa4 Mon Sep 17 00:00:00 2001
+From: Bastian Germann <bastiangermann@fishpost.de>
+Date: Wed, 29 Jan 2020 19:50:13 +0100
+Subject: [PATCH 2/2] libubi: remove private kernel header from includes
+
+libubi.h includes ubi-media.h which was made private in the kernel a
+long time ago. There are users of libubi.h, e.g. swupdate, which have to
+have ubi-media.h available at build time with this inclusion.
+
+However, libubi.h uses only one symbol from ubi-media.h. Define that symbol
+in the header to enable using libubi.h without installing ubi-media.h.
+
+Make up for the transitive symbol use in ubiformat.c by including ubi-media.h.
+
+Signed-off-by: Bastian Germann <bastiangermann@fishpost.de>
+Signed-off-by: David Oberhollenzer <david.oberhollenzer@sigma-star.at>
+---
+ include/libubi.h      | 4 +++-
+ ubi-utils/ubiformat.c | 1 +
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/include/libubi.h b/include/libubi.h
+index 46596a3..46c732a 100644
+--- a/include/libubi.h
++++ b/include/libubi.h
+@@ -26,7 +26,6 @@
+ #include <ctype.h>
+ #include <stdint.h>
+ #include <mtd/ubi-user.h>
+-#include <mtd/ubi-media.h>
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -38,6 +37,9 @@ extern "C" {
+ /* Maximum physical eraseblock size in bytes */
+ #define UBI_MAX_PEB_SZ (2*1024*1024)
+ 
++/* The maximum volume name length (from Linux's ubi-media.h) */
++#define UBI_VOL_NAME_MAX 127
++
+ /* UBI library descriptor */
+ typedef void * libubi_t;
+ 
+diff --git a/ubi-utils/ubiformat.c b/ubi-utils/ubiformat.c
+index be40e52..d1b12e4 100644
+--- a/ubi-utils/ubiformat.c
++++ b/ubi-utils/ubiformat.c
+@@ -38,6 +38,7 @@
+ #include <getopt.h>
+ #include <fcntl.h>
+ 
++#include <mtd/ubi-media.h>
+ #include <libubi.h>
+ #include <libmtd.h>
+ #include <libscan.h>
+-- 
+2.25.1
+

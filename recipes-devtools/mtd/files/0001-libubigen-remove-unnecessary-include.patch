@@ -1,0 +1,29 @@
+From 87809c4804d3355ecd2fd0bd3362526fa27bf953 Mon Sep 17 00:00:00 2001
+From: Bastian Germann <bastiangermann@fishpost.de>
+Date: Wed, 29 Jan 2020 19:50:12 +0100
+Subject: [PATCH 1/2] libubigen: remove unnecessary include
+
+libubigen.h does not use any symbol from mtd/ubi-media.h,
+so remove it from includes.
+
+Signed-off-by: Bastian Germann <bastiangermann@fishpost.de>
+Signed-off-by: David Oberhollenzer <david.oberhollenzer@sigma-star.at>
+---
+ include/libubigen.h | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/include/libubigen.h b/include/libubigen.h
+index c25ac20..48d2fad 100644
+--- a/include/libubigen.h
++++ b/include/libubigen.h
+@@ -26,7 +26,6 @@
+ #define __LIBUBIGEN_H__
+ 
+ #include <stdint.h>
+-#include <mtd/ubi-media.h>
+ 
+ #ifdef __cplusplus
+ extern "C" {
+-- 
+2.25.1
+
