@@ -2,11 +2,6 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 FILES_${PN}-staticdev += "ubi-utils/libubi.a ${libdir}/*.a"
 
-SRC_URI += " \
-	file://0001-libubigen-remove-unnecessary-include.patch \
-	file://0002-libubi-remove-private-kernel-header-from-includes.patch \
-"
-
 do_install_append () {
 	install -d ${D}${includedir}/mtd/
 	install -d ${D}${libdir}/
