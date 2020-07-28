@@ -191,7 +191,12 @@ python () {
 }
 
 do_configure () {
-    cp ${WORKDIR}/defconfig ${WORKDIR}/.config
+    cat > ${WORKDIR}/.config <<HEREDOC
+CONFIG_EXTRA_CFLAGS="${CFLAGS}"
+CONFIG_EXTRA_LDFLAGS="${LDFLAGS}"
+HEREDOC
+    cat ${WORKDIR}/defconfig >> ${WORKDIR}/.config
+
     merge_config.sh -O ${B} -m ${WORKDIR}/.config ${@" ".join(find_cfgs(d))}
     (cd ${S} && cml1_do_configure)
 }
