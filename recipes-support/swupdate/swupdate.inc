@@ -123,6 +123,8 @@ python () {
         depends += ' openssl'
     elif 'CONFIG_SSL_IMPL_MBEDTLS=y\n' in features:
         depends += ' mbedtls'
+    elif 'CONFIG_SSL_IMPL_WOLFSSL=y\n' in features:
+        depends += ' wolfssl'
 
     if 'CONFIG_JSON=y\n' in features:
         depends += ' json-c'
