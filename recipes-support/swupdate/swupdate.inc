@@ -75,10 +75,6 @@ EXTRA_OEMAKE += " O=${B} HOSTCC="${BUILD_CC}" HOSTCXX="${BUILD_CXX}" LD="${CC}" 
 
 DEPENDS += "kern-tools-native"
 
-# returns all the elements from the src uri that are .cfg files
-def find_cfgs(d):
-    return [s for s in src_patches(d, True) if s.endswith('.cfg')]
-
 python () {
     import re
 
