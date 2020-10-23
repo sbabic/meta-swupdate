@@ -2,8 +2,17 @@ SUMMARY="Image updater for Yocto projects"
 DESCRIPTION = "Application for automatic software update from USB Pen"
 SECTION="swupdate"
 DEPENDS = "libconfig"
-LICENSE = "GPLv2+"
-LIC_FILES_CHKSUM = "file://COPYING;md5=0636e73ff0215e8d672dc4c32c317bb3"
+
+# SWUpdate licensing is described in the following pages:
+# https://sbabic.github.io/swupdate/licensing.html
+# rst form: file://doc/source/licensing.rst
+LICENSE = "GPLv2+ & LGPLv2+ & MIT"
+LICENSE_${PN}-lua = "LGPLv2+"
+LICENSE_${PN}-www = "MIT"
+LIC_FILES_CHKSUM = "file://COPYING;md5=0636e73ff0215e8d672dc4c32c317bb3 \
+                    file://Licenses/lgpl-2.1.txt;md5=4fbd65380cdd255951079008b364516c \
+                    file://Licenses/mit.txt;md5=838c366f69b72c5df05c96dff79b35f2 \
+                    file://Licenses/Exceptions;md5=5f205fe7a7f2b056b4fa42603fe2d63a"
 
 inherit cml1 update-rc.d systemd pkgconfig
 
