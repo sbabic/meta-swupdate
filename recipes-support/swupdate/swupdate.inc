@@ -1,7 +1,7 @@
 SUMMARY="Image updater for Yocto projects"
 DESCRIPTION = "Application for automatic software update from USB Pen"
 SECTION="swupdate"
-DEPENDS = "libconfig"
+DEPENDS += "libconfig"
 
 # SWUpdate licensing is described in the following pages:
 # https://sbabic.github.io/swupdate/licensing.html
@@ -29,6 +29,8 @@ SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=https \
     file://10-mongoose-args \
     file://90-start-progress \
 "
+
+LTOEXTRA += "-flto-partition=none"
 
 PACKAGES =+ " \
     ${PN}-client \
