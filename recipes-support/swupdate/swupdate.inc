@@ -167,6 +167,9 @@ python () {
     if 'CONFIG_ZSTD=y\n' in features:
         depends += ' zstd'
 
+    if 'CONFIG_DISKPART=y\n' in features:
+        depends += ' util-linux'
+
     d.setVar('DEPENDS', depends)
 
     if 'CONFIG_MONGOOSE=y\n' in features:
