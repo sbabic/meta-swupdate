@@ -100,16 +100,28 @@ python do_swuimage () {
         local = fetch.localpath(url)
         filename = os.path.basename(local)
         if (filename != 'sw-description') and (os.path.isfile(local)):
-            shutil.copyfile(local, os.path.join(s, "%s" % filename ))
+            encrypted = (d.getVarFlag("SWUPDATE_IMAGES_ENCRYPTED", filename, True) or "")
+            key,iv,salt = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE', True))
+            dst = os.path.join(s, "%s" % filename )
+            if encrypted == '1':
+                bb.note("Encryption requested for %s" %(filename))
+                swupdate_encrypt_file(local, dst, key, iv, salt)
+            else:
+                shutil.copyfile(local, dst)
             list_for_cpio.append(filename)
 
-    def add_image_to_swu(deploydir, imagename, s):
+    def add_image_to_swu(deploydir, imagename, s, encrypt):
         src = os.path.join(deploydir, imagename)
         if not os.path.isfile(src):
             return False
         target_imagename = os.path.basename(imagename)  # allow images in subfolders of DEPLOY_DIR_IMAGE
         dst = os.path.join(s, target_imagename)
-        shutil.copyfile(src, dst)
+        if encrypt == '1':
+            key,iv,salt = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE', True))
+            bb.note("Encryption requested for %s" %(imagename))
+            swupdate_encrypt_file(src, dst, key, iv, salt)
+        else:
+            shutil.copyfile(src, dst)
         list_for_cpio.append(target_imagename)
         return True
 
@@ -118,6 +130,7 @@ python do_swuimage () {
     imgdeploydir = d.getVar('IMGDEPLOYDIR', True)
     for image in images:
         fstypes = (d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image, True) or "").split()
+        encrypted = (d.getVarFlag("SWUPDATE_IMAGES_ENCRYPTED", image, True) or "")
         if fstypes:
             noappend_machine = d.getVarFlag("SWUPDATE_IMAGES_NOAPPEND_MACHINE", image, True)
             if noappend_machine == False:  # Search for a file explicitely with MACHINE
@@ -129,7 +142,7 @@ python do_swuimage () {
             for fstype in fstypes:
                 image_found = False
                 for imagebase in imagebases:
-                    image_found = add_image_to_swu(deploydir, imagebase + fstype, s)
+                    image_found = add_image_to_swu(deploydir, imagebase + fstype, s, encrypted)
                     if image_found:
                         break
                 if not image_found:
