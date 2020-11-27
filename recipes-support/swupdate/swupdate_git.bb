@@ -1,6 +1,6 @@
 require swupdate.inc
-require swupdate_tools.inc
 
 DEFAULT_PREFERENCE = "-1"
 
-SRCREV ?= "f8a0f105d11e1278b35b3a7230656e7af76ac04b"
+SRCREV ?= "bd2685eab2bb91107928d653cae55f2430d5a52b"
+PV = "2020.04+git${SRCPV}"

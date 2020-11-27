@@ -8,11 +8,9 @@ Signed-off-by: Kas User <kas@example.com>
  makefile | 4 +++-
  1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/makefile b/makefile
-index cc15b4e..632fb73 100644
 --- a/makefile
 +++ b/makefile
-@@ -14,8 +14,10 @@ PLATS= macosx linux win32 mingw freebsd solaris
+@@ -14,8 +14,10 @@ PLATS= macosx linux win32 mingw freebsd
  
  all: $(PLAT)
  
@@ -24,6 +22,14 @@ index cc15b4e..632fb73 100644
  
  print:
  	$(MAKE) -C src $@
--- 
-2.7.4
-
+--- a/src/makefile
++++ b/src/makefile
+@@ -50,7 +50,7 @@ LDIR_macosx?=share/lua/$(LUAV)
+ LUAINC_linux_base?=/usr/include
+ LUAINC_linux?=$(LUAINC_linux_base)/lua/$(LUAV)
+ LUAPREFIX_linux?=/usr/local
+-CDIR_linux?=lib/lua/$(LUAV)
++CDIR_linux?=$(BASELIB)/lua/$(LUAV)
+ LDIR_linux?=share/lua/$(LUAV)
+ 
+ # LUAINC_freebsd:

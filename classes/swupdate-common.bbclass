@@ -18,6 +18,36 @@ def swupdate_get_sha256(s, filename):
             m.update(data)
     return m.hexdigest()
 
+def swupdate_extract_keys(keyfile):
+    try:
+        keys = open(keyfile)
+    except IOError:
+        bb.fatal("Failed to open file with keys %s" % (keyfile))
+    lines = keys.read()
+    keys.close()
+    lines = lines.splitlines(True)
+    for line in lines:
+        line = line.replace('\n', '')
+        kv = line.split('=')
+        if kv[0] == 'salt':
+            salt = kv[1]
+        if kv[0] == 'key':
+            key = kv[1]
+        if kv[0] == 'iv' or kv[0] == 'iv ':
+            iv = kv[1]
+    return key,iv,salt
+
+def swupdate_encrypt_file(f, out, key, ivt, salt):
+    cmd = "openssl enc -aes-256-cbc -in '%s' -out '%s' -K '%s' -iv '%s' -S '%s'" % (
+                f,
+                out,
+                key,
+                ivt,
+                salt)
+    if os.system(cmd) != 0:
+        bb.fatal("Failed to encrypt %s" % (f))
+
+
 def swupdate_write_sha256(s, filename, hash):
     write_lines = []
 
@@ -66,6 +96,7 @@ def swupdate_expand_bitbake_variables(d, s):
             f.write(line)
 
 def prepare_sw_description(d, s, list_for_cpio):
+    import shutil
 
     swupdate_expand_bitbake_variables(d, s)
 
@@ -73,6 +104,13 @@ def prepare_sw_description(d, s, list_for_cpio):
         if file != 'sw-description' and swupdate_is_hash_needed(s, file):
             hash = swupdate_get_sha256(s, file)
             swupdate_write_sha256(s, file, hash)
+
+    encrypt = d.getVar('SWUPDATE_ENCRYPT_SWDESC', True)
+    if encrypt:
+        bb.note("Encryption of sw-description")
+        shutil.copyfile(os.path.join(s, 'sw-description'), os.path.join(s, 'sw-description.plain'))
+        key,iv,salt = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE', True))
+        swupdate_encrypt_file(os.path.join(s, 'sw-description.plain'), os.path.join(s, 'sw-description'), key, iv, salt)
 
     signing = d.getVar('SWUPDATE_SIGNING', True)
     if signing == "1":
@@ -116,11 +154,17 @@ def prepare_sw_description(d, s, list_for_cpio):
                 bb.fatal("SWUPDATE_CMS_KEY isn't set")
             if not os.path.exists(cms_key):
                 bb.fatal("SWUPDATE_CMS_KEY %s doesn't exist" % (cms_key))
-            signcmd = "openssl cms -sign -in '%s' -out '%s' -signer '%s' -inkey '%s' -outform DER -nosmimecap -binary" % (
+            passout = d.getVar('SWUPDATE_PASSWORD_FILE', True)
+            if passout:
+                passout = "-passin file:'%s' " % (passout)
+            else:
+                passout = ""
+            signcmd = "openssl cms -sign -in '%s' -out '%s' -signer '%s' -inkey '%s' %s -outform DER -nosmimecap -binary" % (
                 os.path.join(s, 'sw-description'),
                 os.path.join(s, 'sw-description.sig'),
                 cms_cert,
-                cms_key)
+                cms_key,
+                passout)
             if os.system(signcmd) != 0:
                 bb.fatal("Failed to sign sw-description with %s" % (privkey))
         else:

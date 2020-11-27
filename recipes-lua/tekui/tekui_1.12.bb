@@ -12,20 +12,18 @@
 #   doc/copyright.html
 #   src/display_rawfb/vnc/COPYING
 LICENSE = "MIT"
-LIC_FILES_CHKSUM = "file://COPYRIGHT;md5=f8640872a50cd4ee663b8fb2f603b854 \
-                    file://tek/ui/font/COPYRIGHT.TXT;md5=27d7484b1e18d0ee4ce538644a3f04be \
-                    file://doc/copyright.html;md5=e0ef847c1e1b62ee80317a79b7cd99de \
-                    file://src/display_rawfb/vnc/COPYING;md5=361b6b837cad26c6900a926b62aada5f"
+LIC_FILES_CHKSUM = "file://COPYRIGHT;md5=a12f233f3497ee1f8a18dddfde5a7fc3"
 
-SRC_URI = "http://tekui.neoscientists.org/releases/tekui-1.12-r1.tgz \
-           file://0001-Fix-config-for-OE.patch \
+SRC_URI = " \
+	git://github.com/sbabic/tekUI.git;protocol=https;branch=tekui-devel \
+        file://0001-Fix-config-for-OE.patch \
 	"
-SRC_URI[md5sum] = "cf67e1aa5583ee22e5f63ad2b297e2c9"
-SRC_URI[sha256sum] = "d3130a9403e05b8322e47b5e8c0716f5ccf2956ecae6e1268b05085a774b0894"
+
+SRCREV = "b0a20f57e47548099e443d54fc6fb33666543b72"
 
 PR = "r1"
 
-S = "${WORKDIR}/${PN}-${PV}-${PR}"
+S = "${WORKDIR}/git"
 
 PACKAGES += "${PN}-examples"
 FILES_${PN} = "${libdir} ${datadir}/lua" 
@@ -39,7 +37,7 @@ DEPENDS = "libx11 readline lua freetype libpng fontconfig"
 DEPENDS = "lua freetype libpng fontconfig"
 RDEPENDS_${PN} += "lua"
 
-EXTRA_OEMAKE = 'PREFIX=${D}/usr DISPLAY_DRIVER=rawfb CROSS_COMPILE=${TARGET_PREFIX} CC="${CC} -fpic"'
+EXTRA_OEMAKE = 'PREFIX=${D}/usr BASELIB=${base_libdir} DISPLAY_DRIVER=rawfb CROSS_COMPILE=${TARGET_PREFIX} CC="${CC} -fpic"'
 
 do_compile () {
 	oe_runmake all

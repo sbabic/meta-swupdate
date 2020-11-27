@@ -17,7 +17,7 @@ S = "${WORKDIR}/git"
 
 FILES_${PN} = "${libdir} ${datadir}/lua" 
 
-EXTRA_OEMAKE = 'DESTDIR=${D} PREFIX=/usr CC="${CC}" LD="${CC}" MYLDFLAGS="${LDFLAGS}"'
+EXTRA_OEMAKE = 'DESTDIR=${D} BASELIB=${base_libdir} PREFIX=/usr CC="${CC}" LD="${CC}" MYLDFLAGS="${LDFLAGS}"'
 
 inherit pkgconfig
 

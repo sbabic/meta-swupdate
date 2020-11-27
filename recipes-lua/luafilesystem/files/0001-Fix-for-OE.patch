@@ -9,8 +9,6 @@ Signed-off-by: Kas User <kas@example.com>
  config   | 14 +++++++-------
  2 files changed, 8 insertions(+), 8 deletions(-)
 
-diff --git a/Makefile b/Makefile
-index dfc1a8a..a521db7 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -12,7 +12,7 @@ OBJS= src/$T.o
@@ -22,8 +20,6 @@ index dfc1a8a..a521db7 100644
  
  test: lib
  	LUA_CPATH=./src/?.so lua tests/test.lua
-diff --git a/config b/config
-index 2fc9a78..fd73f4a 100644
 --- a/config
 +++ b/config
 @@ -1,25 +1,25 @@
@@ -31,12 +27,13 @@ index 2fc9a78..fd73f4a 100644
  
  # Default installation prefix
 -PREFIX=/usr/local
+-
 +PREFIX ?= /usr/local
- 
++BASELIB ?= /lib
  # System's libraries directory (where binary libraries are installed)
 -LUA_LIBDIR= $(PREFIX)/lib/lua/5.1
 +LUAVER ?= `pkg-config --modversion lua | cut -d'.' -f1,2`
-+LUA_LIBDIR = $(PREFIX)/lib/lua/$(LUAVER)
++LUA_LIBDIR = $(PREFIX)$(BASELIB)/lua/$(LUAVER)
  
  # Lua includes directory
  LUA_INC += -I$(PREFIX)/include
@@ -59,6 +56,3 @@ index 2fc9a78..fd73f4a 100644
 +CFLAGS += $(WARN) $(INCS) ${LUA_INC}
  
  # $Id: config,v 1.21 2007/10/27 22:42:32 carregal Exp $
--- 
-2.7.4
-
