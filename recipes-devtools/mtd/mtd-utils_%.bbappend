@@ -2,6 +2,12 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 FILES_${PN}-staticdev += "ubi-utils/libubi.a ${libdir}/*.a"
 
+SRCREV = "7b986779342021bda87c04da3bf729718736d8ab"
+PV = "2.1.2"
+
+PACKAGECONFIG[zstd] = "--with-zstd,--without-zstd,zstd"
+PACKAGECONFIG_remove = "zstd"
+
 do_install_append () {
 	install -d ${D}${includedir}/mtd/
 	install -d ${D}${libdir}/
