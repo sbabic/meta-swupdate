@@ -32,7 +32,6 @@
 #   image file with exactly the name as specified in SWUPDATE_IMAGES is searched for.
 
 inherit swupdate-common.bbclass
-inherit image-artifact-names
 
 S = "${WORKDIR}/${PN}"
 
