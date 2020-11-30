@@ -1,9 +1,18 @@
 SUMMARY="Image updater for Yocto projects"
 DESCRIPTION = "Application for automatic software update from USB Pen"
 SECTION="swupdate"
-DEPENDS = "libconfig"
-LICENSE = "GPLv2+"
-LIC_FILES_CHKSUM = "file://COPYING;md5=0636e73ff0215e8d672dc4c32c317bb3"
+DEPENDS += "libconfig"
+
+# SWUpdate licensing is described in the following pages:
+# https://sbabic.github.io/swupdate/licensing.html
+# rst form: file://doc/source/licensing.rst
+LICENSE = "GPLv2+ & LGPLv2+ & MIT"
+LICENSE_${PN}-lua = "LGPLv2+"
+LICENSE_${PN}-www = "MIT"
+LIC_FILES_CHKSUM = "file://COPYING;md5=0636e73ff0215e8d672dc4c32c317bb3 \
+                    file://Licenses/lgpl-2.1.txt;md5=4fbd65380cdd255951079008b364516c \
+                    file://Licenses/mit.txt;md5=838c366f69b72c5df05c96dff79b35f2 \
+                    file://Licenses/Exceptions;md5=5f205fe7a7f2b056b4fa42603fe2d63a"
 
 inherit cml1 update-rc.d systemd pkgconfig
 
@@ -20,6 +29,8 @@ SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=https \
     file://10-mongoose-args \
     file://90-start-progress \
 "
+
+LTOEXTRA += "-flto-partition=none"
 
 PACKAGES =+ " \
     ${PN}-client \
@@ -68,16 +79,12 @@ RDEPENDS_${PN}-tools += "${PN}-client ${PN}-progress ${PN}-tools-hawkbit \
     ${@bb.utils.contains('DISTRO_FEATURES','systemd','${PN}-usb','',d)} \
 "
 
-S = "${WORKDIR}/git/"
-B = "${WORKDIR}/build/"
+S = "${WORKDIR}/git"
+B = "${WORKDIR}/build"
 
 EXTRA_OEMAKE += " O=${B} HOSTCC="${BUILD_CC}" HOSTCXX="${BUILD_CXX}" LD="${CC}" DESTDIR="${D}" LIBDIR="${libdir}" V=1 ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET_PREFIX} SKIP_STRIP=y"
 
 DEPENDS += "kern-tools-native"
-
-# returns all the elements from the src uri that are .cfg files
-def find_cfgs(d):
-    return [s for s in src_patches(d, True) if s.endswith('.cfg')]
 
 python () {
     import re
@@ -123,6 +130,8 @@ python () {
         depends += ' openssl'
     elif 'CONFIG_SSL_IMPL_MBEDTLS=y\n' in features:
         depends += ' mbedtls'
+    elif 'CONFIG_SSL_IMPL_WOLFSSL=y\n' in features:
+        depends += ' wolfssl'
 
     if 'CONFIG_JSON=y\n' in features:
         depends += ' json-c'
@@ -159,6 +168,9 @@ python () {
 
     if 'CONFIG_ZSTD=y\n' in features:
         depends += ' zstd'
+
+    if 'CONFIG_DISKPART=y\n' in features:
+        depends += ' util-linux'
 
     d.setVar('DEPENDS', depends)
 
