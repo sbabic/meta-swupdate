@@ -99,12 +99,16 @@ python do_swuimage () {
     for url in fetch.urls:
         local = fetch.localpath(url)
         filename = os.path.basename(local)
+        aes_file = d.getVar('SWUPDATE_AES_FILE', True)
+        if aes_file:
+            key,iv,salt = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE', True))
         if (filename != 'sw-description') and (os.path.isfile(local)):
             encrypted = (d.getVarFlag("SWUPDATE_IMAGES_ENCRYPTED", filename, True) or "")
-            key,iv,salt = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE', True))
             dst = os.path.join(s, "%s" % filename )
             if encrypted == '1':
                 bb.note("Encryption requested for %s" %(filename))
+                if not key or not iv or not salt:
+                    bb.fatal("Encryption required, but no key found")
                 swupdate_encrypt_file(local, dst, key, iv, salt)
             else:
                 shutil.copyfile(local, dst)
@@ -148,7 +152,7 @@ python do_swuimage () {
                 if not image_found:
                     bb.fatal("swupdate cannot find image file: %s" % os.path.join(deploydir, imagebase + fstype))
         else:  # Allow also complete entries like "image.ext4.gz" in SWUPDATE_IMAGES
-            if not add_image_to_swu(deploydir, image, s):
+            if not add_image_to_swu(deploydir, image, s, encrypted):
                 bb.fatal("swupdate cannot find %s image file" % image)
 
     prepare_sw_description(d, s, list_for_cpio)

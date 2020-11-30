@@ -18,35 +18,35 @@ def swupdate_get_sha256(s, filename):
             m.update(data)
     return m.hexdigest()
 
-def swupdate_extract_keys(keyfile):
+def swupdate_extract_keys(keyfile_path):
     try:
-        keys = open(keyfile)
+        with open(keyfile_path, 'r') as f:
+            lines = f.readlines()
     except IOError:
         bb.fatal("Failed to open file with keys %s" % (keyfile))
-    lines = keys.read()
-    keys.close()
-    lines = lines.splitlines(True)
-    for line in lines:
-        line = line.replace('\n', '')
-        kv = line.split('=')
-        if kv[0] == 'salt':
-            salt = kv[1]
-        if kv[0] == 'key':
-            key = kv[1]
-        if kv[0] == 'iv' or kv[0] == 'iv ':
-            iv = kv[1]
+
+    data = {}
+    for _ in lines:
+        k,v = _.split('=',maxsplit=1)
+        data[k.rstrip()] = v
+
+    key = data['key']
+    iv = data['iv']
+    salt = data['salt']
+
     return key,iv,salt
 
 def swupdate_encrypt_file(f, out, key, ivt, salt):
+    import subprocess
+    encargs = ["openssl", "enc", "-aes-256-cbc", "-in", f, "-out", out]
+    encargs += ["-K", key, "-iv", ivt, "-S", salt]
     cmd = "openssl enc -aes-256-cbc -in '%s' -out '%s' -K '%s' -iv '%s' -S '%s'" % (
                 f,
                 out,
                 key,
                 ivt,
                 salt)
-    if os.system(cmd) != 0:
-        bb.fatal("Failed to encrypt %s" % (f))
-
+    subprocess.run(encargs, check=True)
 
 def swupdate_write_sha256(s, filename, hash):
     write_lines = []
