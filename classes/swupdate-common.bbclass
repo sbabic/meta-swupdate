@@ -140,7 +140,7 @@ def prepare_sw_description(d, s, list_for_cpio):
                 privkey,
                 passout,
                 os.path.join(s, 'sw-description.sig'),
-                os.path.join(s, 'sw-description'))
+                os.path.join(s, 'sw-description.plain' if encrypt else 'sw-description'))
             if os.system(signcmd) != 0:
                 bb.fatal("Failed to sign sw-description with %s" % (privkey))
         elif signing == "CMS":
@@ -160,7 +160,7 @@ def prepare_sw_description(d, s, list_for_cpio):
             else:
                 passout = ""
             signcmd = "openssl cms -sign -in '%s' -out '%s' -signer '%s' -inkey '%s' %s -outform DER -nosmimecap -binary" % (
-                os.path.join(s, 'sw-description'),
+                os.path.join(s, 'sw-description.plain' if encrypt else 'sw-description'),
                 os.path.join(s, 'sw-description.sig'),
                 cms_cert,
                 cms_key,
