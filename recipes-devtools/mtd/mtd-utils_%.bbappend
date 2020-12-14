@@ -3,6 +3,9 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 FILES_${PN}-staticdev += "ubi-utils/libubi.a ${libdir}/*.a"
 
 SRCREV = "7b986779342021bda87c04da3bf729718736d8ab"
+
+SRC_URI_remove = "file://0001-Revert-Return-correct-error-number-in-ubi_get_vol_in.patch"
+
 PV = "2.1.2"
 
 PACKAGECONFIG[zstd] = "--with-zstd,--without-zstd,zstd"
