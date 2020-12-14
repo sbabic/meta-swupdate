@@ -30,9 +30,9 @@ def swupdate_extract_keys(keyfile_path):
         k,v = _.split('=',maxsplit=1)
         data[k.rstrip()] = v
 
-    key = data['key']
-    iv = data['iv']
-    salt = data['salt']
+    key = data['key'].rstrip('\n')
+    iv = data['iv'].rstrip('\n')
+    salt = data['salt'].rstrip('\n')
 
     return key,iv,salt
 
