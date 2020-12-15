@@ -32,20 +32,13 @@ def swupdate_extract_keys(keyfile_path):
 
     key = data['key'].rstrip('\n')
     iv = data['iv'].rstrip('\n')
-    salt = data['salt'].rstrip('\n')
 
-    return key,iv,salt
+    return key,iv
 
-def swupdate_encrypt_file(f, out, key, ivt, salt):
+def swupdate_encrypt_file(f, out, key, ivt):
     import subprocess
     encargs = ["openssl", "enc", "-aes-256-cbc", "-in", f, "-out", out]
-    encargs += ["-K", key, "-iv", ivt, "-S", salt]
-    cmd = "openssl enc -aes-256-cbc -in '%s' -out '%s' -K '%s' -iv '%s' -S '%s'" % (
-                f,
-                out,
-                key,
-                ivt,
-                salt)
+    encargs += ["-K", key, "-iv", ivt, "-nosalt"]
     subprocess.run(encargs, check=True)
 
 def swupdate_write_sha256(s, filename, hash):
@@ -109,8 +102,8 @@ def prepare_sw_description(d, s, list_for_cpio):
     if encrypt:
         bb.note("Encryption of sw-description")
         shutil.copyfile(os.path.join(s, 'sw-description'), os.path.join(s, 'sw-description.plain'))
-        key,iv,salt = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE', True))
-        swupdate_encrypt_file(os.path.join(s, 'sw-description.plain'), os.path.join(s, 'sw-description'), key, iv, salt)
+        key,iv = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE', True))
+        swupdate_encrypt_file(os.path.join(s, 'sw-description.plain'), os.path.join(s, 'sw-description'), key, iv)
 
     signing = d.getVar('SWUPDATE_SIGNING', True)
     if signing == "1":
