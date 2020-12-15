@@ -100,15 +100,15 @@ python do_swuimage () {
         filename = os.path.basename(local)
         aes_file = d.getVar('SWUPDATE_AES_FILE', True)
         if aes_file:
-            key,iv,salt = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE', True))
+            key,iv = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE', True))
         if (filename != 'sw-description') and (os.path.isfile(local)):
             encrypted = (d.getVarFlag("SWUPDATE_IMAGES_ENCRYPTED", filename, True) or "")
             dst = os.path.join(s, "%s" % filename )
             if encrypted == '1':
                 bb.note("Encryption requested for %s" %(filename))
-                if not key or not iv or not salt:
+                if not key or not iv:
                     bb.fatal("Encryption required, but no key found")
-                swupdate_encrypt_file(local, dst, key, iv, salt)
+                swupdate_encrypt_file(local, dst, key, iv)
             else:
                 shutil.copyfile(local, dst)
             list_for_cpio.append(filename)
@@ -120,9 +120,9 @@ python do_swuimage () {
         target_imagename = os.path.basename(imagename)  # allow images in subfolders of DEPLOY_DIR_IMAGE
         dst = os.path.join(s, target_imagename)
         if encrypt == '1':
-            key,iv,salt = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE', True))
+            key,iv = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE', True))
             bb.note("Encryption requested for %s" %(imagename))
-            swupdate_encrypt_file(src, dst, key, iv, salt)
+            swupdate_encrypt_file(src, dst, key, iv)
         else:
             shutil.copyfile(src, dst)
         list_for_cpio.append(target_imagename)
