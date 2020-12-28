@@ -1,3 +1,3 @@
 require swupdate.inc
 
-SRCREV = "e0684ea4f491e4b87d5c0ce1c1418005b4158cb2"
+SRCREV = "9763342203e32d58cbfed36550b3986b5cf0e52e"
