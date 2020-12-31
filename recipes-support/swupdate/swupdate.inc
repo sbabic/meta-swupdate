@@ -41,6 +41,7 @@ PACKAGES =+ " \
     ${PN}-usb \
     ${PN}-www \
 "
+INSANE_SKIP_${PN}-lua = "dev-so"
 
 # tools is now an empty meta package for backward compatibility
 ALLOW_EMPTY_${PN}-tools = "1"
