@@ -1,15 +1,15 @@
-From fdb15577a039f059871af318361c5d53de0e22e9 Mon Sep 17 00:00:00 2001
+From c49dd772f915336b2c1b469a3c173f0a3ee434e4 Mon Sep 17 00:00:00 2001
 From: Stefano Babic <sbabic@denx.de>
 Date: Fri, 12 Oct 2018 12:00:50 +0200
 Subject: [PATCH] Fix config for OE
 
 Signed-off-by: Stefano Babic <sbabic@denx.de>
 ---
- config | 54 +++++++++++++++++++++---------------------------------
- 1 file changed, 21 insertions(+), 33 deletions(-)
+ config | 60 +++++++++++++++++++++++-----------------------------------
+ 1 file changed, 24 insertions(+), 36 deletions(-)
 
 diff --git a/config b/config
-index 63c980a..b7e0b8f 100644
+index 63c980a..bf07e73 100644
 --- a/config
 +++ b/config
 @@ -27,7 +27,7 @@ DISPLAY_DRIVER ?= x11
@@ -21,7 +21,7 @@ index 63c980a..b7e0b8f 100644
  
  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  # For Windows using MinGW:
-@@ -127,14 +127,15 @@ TEKLIB_DEFS = -DENABLE_LAZY_SINGLETON
+@@ -127,29 +127,34 @@ TEKLIB_DEFS = -DENABLE_LAZY_SINGLETON
  #------------------------------------------------------------------------------
  
  PREFIX ?= /usr/local
@@ -39,9 +39,15 @@ index 63c980a..b7e0b8f 100644
 +#LUA_DEFS += -I/usr/local/include/lua51
 +LUA_DEFS = `pkg-config --cflags lua` #$(LUA_DIR)/include
  
- LUA_LIB = $(PREFIX)/lib/lua/$(LUAVER)
+-LUA_LIB = $(PREFIX)/lib/lua/$(LUAVER)
++LUA_LIB ?= $(PREFIX)$(BASELIB)/lua/$(LUAVER)
  LUA_SHARE = $(PREFIX)/share/lua/$(LUAVER)
-@@ -145,11 +146,15 @@ SYS_LUA_SHARE = $(PREFIX)/share/lua/$(LUAVER)
+-SYS_LUA_LIB = $(PREFIX)/lib/lua/$(LUAVER)
+-SYS_LUA_SHARE = $(PREFIX)/share/lua/$(LUAVER)
++SYS_LUA_LIB = $(SYS_LUA_LIB)
++SYS_LUA_SHARE = $(LUA_SHARE)
+ 
+ #------------------------------------------------------------------------------
  # Libraries:
  #------------------------------------------------------------------------------
  
@@ -121,5 +127,5 @@ index 63c980a..b7e0b8f 100644
  #------------------------------------------------------------------------------
  # Predefined targets:
 -- 
-2.17.1
+2.25.1
 
