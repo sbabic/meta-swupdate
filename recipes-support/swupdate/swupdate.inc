@@ -235,6 +235,7 @@ do_install () {
 
     install -d ${D}${sysconfdir}/init.d
     install -m 755 ${WORKDIR}/swupdate ${D}${sysconfdir}/init.d
+    sed -i -e "s|/usr/lib/|${libdir}/|" ${D}${sysconfdir}/init.d/swupdate
 
     # shell based configuration loader allows to place code snippets into this folder
     install -d ${D}${libdir}/swupdate/conf.d
