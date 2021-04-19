@@ -273,5 +273,5 @@ INITSCRIPT_PARAMS = "defaults 70"
 
 SYSTEMD_PACKAGES = "${PN} ${PN}-progress ${PN}-usb"
 SYSTEMD_SERVICE_${PN} = "swupdate.service swupdate.socket"
-SYSTEMD_SERVICE_${PN}-progress = "swupdate-progress.service"
+SYSTEMD_SERVICE_${PN}-progress-systemd = "swupdate-progress.service"
 SYSTEMD_SERVICE_${PN}-usb = "swupdate-usb@.service"
