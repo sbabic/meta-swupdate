@@ -42,6 +42,7 @@ PACKAGES =+ " \
     ${PN}-www \
 "
 INSANE_SKIP_${PN}-lua = "dev-so"
+wwwdir ?= "/www"
 
 # tools is now an empty meta package for backward compatibility
 ALLOW_EMPTY_${PN}-tools = "1"
@@ -70,7 +71,7 @@ FILES_${PN} += " \
 "
 FILES_${PN}-www = " \
     ${libdir}/swupdate/conf.d/*mongoose* \
-    /www/* \
+    ${wwwdir}/* \
 "
 
 RDEPENDS_${PN}-usb += "${PN}-client"
@@ -222,11 +223,11 @@ do_compile() {
 do_install () {
     (cd ${S} && oe_runmake install)
 
-    install -m 0755 -d ${D}/www
+    install -m 0755 -d ${D}${wwwdir}
     if [ -d ${S}/web-app ];then
-        cp -R --no-dereference --preserve=mode,links -v ${S}/examples/www/v2/* ${D}/www
+        cp -R --no-dereference --preserve=mode,links -v ${S}/examples/www/v2/* ${D}${wwwdir}
     else
-        install -m 0755 ${S}/www/* ${D}/www
+        install -m 0755 ${S}/www/* ${D}${wwwdir}
     fi
 
     install -d ${D}${sysconfdir}/init.d
