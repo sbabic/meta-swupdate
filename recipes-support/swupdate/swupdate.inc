@@ -36,9 +36,6 @@ PACKAGES =+ " \
     ${PN}-client \
     ${PN}-lua \
     ${PN}-progress \
-    ${PN}-progress-bin \
-    ${PN}-progress-systemd \
-    ${PN}-progress-sysvinit \
     ${PN}-tools \
     ${PN}-tools-hawkbit \
     ${PN}-usb \
@@ -51,12 +48,11 @@ ALLOW_EMPTY_${PN}-tools = "1"
 
 FILES_${PN}-client = "${bindir}/swupdate-client"
 FILES_${PN}-lua += "${libdir}/lua/"
-
-ALLOW_EMPTY_${PN}-progress = "1"
-FILES_${PN}-progress-bin = "${bindir}/swupdate-progress"
-FILES_${PN}-progress-systemd = "${systemd_system_unitdir}/swupdate-progress.service"
-FILES_${PN}-progress-sysvinit = "${libdir}/swupdate/conf.d/90-start-progress"
-
+FILES_${PN}-progress = " \
+    ${bindir}/swupdate-progress \
+    ${systemd_system_unitdir}/swupdate-progress.service \
+    ${libdir}/swupdate/conf.d/90-start-progress \
+"
 FILES_${PN}-usb = " \
     ${sysconfdir}/udev/rules.d/swupdate-usb.rules \
     ${systemd_system_unitdir}/swupdate-usb@.service \
@@ -78,9 +74,6 @@ FILES_${PN}-www = " \
 "
 
 RDEPENDS_${PN}-usb += "${PN}-client"
-RDEPENDS_${PN}-progress += "${@bb.utils.contains('DISTRO_FEATURES','systemd','${PN}-progress-systemd','${PN}-progress-sysvinit',d)}"
-RDEPENDS_${PN}-progress-systemd += "${PN}-progress-bin"
-RDEPENDS_${PN}-progress-sysvinit += "${PN}-progress-bin"
 
 # The tools package is deprecated, it is an empty meta package for backward compatibility
 RDEPENDS_${PN}-tools += "${PN}-client ${PN}-progress ${PN}-tools-hawkbit \
@@ -262,10 +255,10 @@ do_install () {
         install -m 0644 ${WORKDIR}/tmpfiles-swupdate.conf ${D}${libdir}/tmpfiles.d/swupdate.conf
         install -d ${D}${sysconfdir}/udev/rules.d
         install -m 0644 ${WORKDIR}/swupdate-usb.rules ${D}${sysconfdir}/udev/rules.d/
+    else
+        # in case of systemd there is a service file, for sysv init we need to start it as well
+        install -m 0644 ${WORKDIR}/90-start-progress ${D}${libdir}/swupdate/conf.d/
     fi
-
-    # in case of systemd there is a service file, for sysv init we need to start it as well
-    install -m 0644 ${WORKDIR}/90-start-progress ${D}${libdir}/swupdate/conf.d/
 }
 
 INITSCRIPT_NAME = "swupdate"
