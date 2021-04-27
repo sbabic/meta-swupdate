@@ -176,7 +176,7 @@ python () {
         depends += ' zstd'
 
     if 'CONFIG_DISKPART=y\n' in features:
-        depends += ' util-linux'
+        depends += ' util-linux e2fsprogs'
 
     d.setVar('DEPENDS', depends)
 
