@@ -3,7 +3,7 @@ DESCRIPTION = "This is a simple GUI that allows to set network addresses \
 	and start an install from local media. It shows progress on the HMI"
 SECTION="swupdate"
 LICENSE = "GPLv2+"
-LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-or-later;md5=fed54355545ffd980b814dab4a3b312c"
 
 inherit update-rc.d
 
