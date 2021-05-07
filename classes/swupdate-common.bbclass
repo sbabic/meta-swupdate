@@ -88,10 +88,60 @@ def swupdate_expand_bitbake_variables(d, s):
         for line in write_lines:
             f.write(line)
 
+def swupdate_expand_auto_versions(d, s, list_for_cpio):
+    import re
+    import oe.packagedata
+    AUTO_VERSION_TAG = "SWU_AUTO_VERSION"
+
+    with open(os.path.join(s, "sw-description"), 'r') as f:
+        data = f.read()
+
+    def get_package_name(group, file_list):
+        m = re.search(r"%s:(?P<package>.+?(?=\"))" % (AUTO_VERSION_TAG), group)
+        if m:
+            package = m.group('package')
+            return (package, True)
+
+        for filename in file_list:
+            if filename in group:
+                package = filename
+
+        if not package:
+            bb.fatal("Failed to find %s in group with \"%s\"" % (filename, AUTO_VERSION_TAG))
+
+        return (package, False)
+
+    regexp = re.compile(r"\{[^\{]*%s.[^\}]*\}" % (AUTO_VERSION_TAG))
+    while True:
+        m = regexp.search(data)
+        if not m:
+            break
+
+        group = data[m.start():m.end()]
+
+        (package, pkg_name_defined) = get_package_name(group, list_for_cpio)
+
+        pkg_info = os.path.join(d.getVar('PKGDATA_DIR'), 'runtime-reverse', package)
+        pkgdata = oe.packagedata.read_pkgdatafile(pkg_info)
+
+        if not "PV" in pkgdata.keys():
+            bb.fatal("Failed to find version for package %s" % (package))
+
+        replace_str = AUTO_VERSION_TAG
+        if pkg_name_defined:
+            replace_str = replace_str + ":" + package
+
+        group = group.replace(replace_str, pkgdata['PV'].split('+')[0])
+        data = data[:m.start()] + group + data[m.end():]
+
+    with open(os.path.join(s, "sw-description"), 'w+') as f:
+        f.write(data)
+
 def prepare_sw_description(d, s, list_for_cpio):
     import shutil
 
     swupdate_expand_bitbake_variables(d, s)
+    swupdate_expand_auto_versions(d, s, list_for_cpio)
 
     for file in list_for_cpio:
         if file != 'sw-description' and swupdate_is_hash_needed(s, file):
