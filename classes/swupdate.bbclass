@@ -137,9 +137,9 @@ python do_swuimage () {
         encrypted = (d.getVarFlag("SWUPDATE_IMAGES_ENCRYPTED", image, True) or "")
         if fstypes:
             noappend_machine = d.getVarFlag("SWUPDATE_IMAGES_NOAPPEND_MACHINE", image, True)
-            if noappend_machine == False:  # Search for a file explicitely with MACHINE
+            if noappend_machine == "0":  # Search for a file explicitely with MACHINE
                 imagebases = [ image + '-' + d.getVar('MACHINE', True) ]
-            elif noappend_machine == True:  # Search for a file explicitely without MACHINE
+            elif noappend_machine == "1":  # Search for a file explicitely without MACHINE
                 imagebases = [ image ]
             else:  # None, means auto mode. Just try to find an image file with MACHINE or without MACHINE
                 imagebases = [ image + '-' + d.getVar('MACHINE', True), image ]
