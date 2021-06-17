@@ -100,7 +100,7 @@ def swupdate_expand_auto_versions(d, s, list_for_cpio):
     def get_package_name(group, file_list):
         package = None
 
-        m = re.search(r"%s:(?P<package>.+?(?=\"))" % (AUTOVERSION_REGEXP), group)
+        m = re.search(r"%s:(?P<package>.+?(?=[\"@]))" % (AUTOVERSION_REGEXP), group)
         if m:
             package = m.group('package')
             return (package, True)
@@ -113,6 +113,12 @@ def swupdate_expand_auto_versions(d, s, list_for_cpio):
             bb.fatal("Failed to find file in group %s" % (group))
 
         return (package, False)
+
+    def get_packagedata_key(group):
+        m = re.search(r"%s.+?(?<=@)(?P<key>.+?(?=\"))" % (AUTOVERSION_REGEXP), group)
+        if m:
+            return (m.group('key'), True)
+        return ("PV", False)
 
     regexp = re.compile(r"\{[^\{]*%s.[^\}]*\}" % (AUTOVERSION_REGEXP))
     while True:
@@ -127,15 +133,19 @@ def swupdate_expand_auto_versions(d, s, list_for_cpio):
         pkg_info = os.path.join(d.getVar('PKGDATA_DIR'), 'runtime-reverse', package)
         pkgdata = oe.packagedata.read_pkgdatafile(pkg_info)
 
-        if not "PV" in pkgdata.keys():
-            bb.warn("\"PV\" not set for package %s - using \"1.0\"" % (package))
+        (key, key_defined) = get_packagedata_key(group)
+
+        if not key in pkgdata.keys():
+            bb.warn("\"%s\" not set for package %s - using \"1.0\"" % (key, package))
             version = "1.0"
         else:
-            version = pkgdata['PV'].split('+')[0]
+            version = pkgdata[key].split('+')[0]
 
         replace_str = AUTO_VERSION_TAG
         if pkg_name_defined:
             replace_str = replace_str + ":" + package
+        if key_defined:
+            replace_str = replace_str + "@" + key
 
         group = group.replace(replace_str, version)
         data = data[:m.start()] + group + data[m.end():]
