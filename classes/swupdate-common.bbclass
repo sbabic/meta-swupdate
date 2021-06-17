@@ -98,6 +98,8 @@ def swupdate_expand_auto_versions(d, s, list_for_cpio):
         data = f.read()
 
     def get_package_name(group, file_list):
+        package = None
+
         m = re.search(r"%s:(?P<package>.+?(?=\"))" % (AUTOVERSION_REGEXP), group)
         if m:
             package = m.group('package')
@@ -108,7 +110,7 @@ def swupdate_expand_auto_versions(d, s, list_for_cpio):
                 package = filename
 
         if not package:
-            bb.fatal("Failed to find %s in group with \"%s\"" % (filename, AUTO_VERSION_TAG))
+            bb.fatal("Failed to find file in group %s" % (group))
 
         return (package, False)
 
