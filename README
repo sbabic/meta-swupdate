@@ -44,7 +44,7 @@ or
 `@SWU_AUTO_VERSION:<package-name>@<package-data-variable>`
 
 SWU image signing
-------------
+-----------------
 
 There are 3 signing mechanisms supported by meta-swupdate at the moment:
 
