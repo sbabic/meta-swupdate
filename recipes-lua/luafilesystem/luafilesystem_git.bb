@@ -21,7 +21,7 @@ EXTRA_OEMAKE = 'PREFIX=${D}/usr BASELIB=${base_libdir} CROSS_COMPILE=${TARGET_PR
 # recipe automatically - you will need to examine the Makefile yourself and ensure
 # that the appropriate arguments are passed in.
 
-FILES_${PN} = "${libdir} ${datadir}/lua" 
+FILES:${PN} = "${libdir} ${datadir}/lua"
 
 do_configure () {
 	# Specify any needed configure commands here

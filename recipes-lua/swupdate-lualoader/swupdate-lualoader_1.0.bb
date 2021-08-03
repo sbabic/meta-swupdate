@@ -16,5 +16,5 @@ do_install() {
 
 }
 
-RDEPENDS_${PN} = "luafilesystem"
-FILES_${PN} = "${libdir}/lua"
+RDEPENDS:${PN} = "luafilesystem"
+FILES:${PN} = "${libdir}/lua"

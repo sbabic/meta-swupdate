@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-or-later;md5=fed5435554
 inherit update-rc.d
 
 DEPENDS += "swupdate lua luafilesystem"
-RDEPENDS_${PN} += "swupdate-tools swupdate-lua"
+RDEPENDS:${PN} += "swupdate-tools swupdate-lua"
 
 SRC_URI = "git://github.com/sbabic/SWUpdateGUI.git;protocol=https \
      	   file://rescuegui \
@@ -21,7 +21,7 @@ SRCREV = "a52b3d3bc315eb1195fc6311c8170651a54d7893"
 
 S = "${WORKDIR}/git"
 
-FILES_${PN} = "/opt ${sysconfdir}"
+FILES:${PN} = "/opt ${sysconfdir}"
 
 do_configure () {
 	# Specify any needed configure commands here

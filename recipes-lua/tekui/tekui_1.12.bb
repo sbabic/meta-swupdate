@@ -26,7 +26,7 @@ PR = "r1"
 S = "${WORKDIR}/git"
 
 PACKAGES += "${PN}-examples"
-FILES_${PN} = "${libdir} ${datadir}/lua" 
+FILES:${PN} = "${libdir} ${datadir}/lua"
 
 inherit pkgconfig
 
@@ -35,7 +35,7 @@ inherit pkgconfig
 # NOTE: some of these dependencies may be optional, check the Makefile and/or upstream documentation
 DEPENDS = "libx11 readline lua freetype libpng fontconfig"
 DEPENDS = "lua freetype libpng fontconfig"
-RDEPENDS_${PN} += "lua"
+RDEPENDS:${PN} += "lua"
 
 EXTRA_OEMAKE = 'PREFIX=${D}/usr BASELIB=${base_libdir} DISPLAY_DRIVER=rawfb CROSS_COMPILE=${TARGET_PREFIX} CC="${CC} -fpic"'
 

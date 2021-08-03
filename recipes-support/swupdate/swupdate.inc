@@ -7,8 +7,8 @@ DEPENDS += "libconfig"
 # https://sbabic.github.io/swupdate/licensing.html
 # rst form: file://doc/source/licensing.rst
 LICENSE = "GPLv2+ & LGPLv2+ & MIT"
-LICENSE_${PN}-lua = "LGPLv2+"
-LICENSE_${PN}-www = "MIT"
+LICENSE:${PN}-lua = "LGPLv2+"
+LICENSE:${PN}-www = "MIT"
 LIC_FILES_CHKSUM = "file://COPYING;md5=0636e73ff0215e8d672dc4c32c317bb3 \
                     file://Licenses/lgpl-2.1.txt;md5=4fbd65380cdd255951079008b364516c \
                     file://Licenses/mit.txt;md5=838c366f69b72c5df05c96dff79b35f2 \
@@ -41,43 +41,43 @@ PACKAGES =+ " \
     ${PN}-usb \
     ${PN}-www \
 "
-INSANE_SKIP_${PN}-lua = "dev-so"
+INSANE_SKIP:${PN}-lua = "dev-so"
 wwwdir ?= "/www"
 
 # tools is now an empty meta package for backward compatibility
-ALLOW_EMPTY_${PN}-tools = "1"
+ALLOW_EMPTY:${PN}-tools = "1"
 
-FILES_${PN}-client = "${bindir}/swupdate-client"
-FILES_${PN}-lua += "${libdir}/lua/"
-FILES_${PN}-progress = " \
+FILES:${PN}-client = "${bindir}/swupdate-client"
+FILES:${PN}-lua += "${libdir}/lua/"
+FILES:${PN}-progress = " \
     ${bindir}/swupdate-progress \
     ${systemd_system_unitdir}/swupdate-progress.service \
     ${libdir}/swupdate/conf.d/90-start-progress \
 "
-FILES_${PN}-usb = " \
+FILES:${PN}-usb = " \
     ${sysconfdir}/udev/rules.d/swupdate-usb.rules \
     ${systemd_system_unitdir}/swupdate-usb@.service \
 "
-FILES_${PN}-tools-hawkbit = " \
+FILES:${PN}-tools-hawkbit = " \
     ${bindir}/swupdate-hawkbitcfg \
     ${bindir}/swupdate-sendtohawkbit \
 "
-FILES_${PN} += " \
+FILES:${PN} += " \
     ${libdir}/tmpfiles.d \
     ${libdir}/swupdate/* \
     ${systemd_system_unitdir}/swupdate.socket \
     ${systemd_system_unitdir}/swupdate.service \
     ${sysconfdir}/init.d/* \
 "
-FILES_${PN}-www = " \
+FILES:${PN}-www = " \
     ${libdir}/swupdate/conf.d/*mongoose* \
     ${wwwdir}/* \
 "
 
-RDEPENDS_${PN}-usb += "${PN}-client"
+RDEPENDS:${PN}-usb += "${PN}-client"
 
 # The tools package is deprecated, it is an empty meta package for backward compatibility
-RDEPENDS_${PN}-tools += "${PN}-client ${PN}-progress ${PN}-tools-hawkbit \
+RDEPENDS:${PN}-tools += "${PN}-client ${PN}-progress ${PN}-tools-hawkbit \
     ${@bb.utils.contains('DISTRO_FEATURES','systemd','${PN}-usb','',d)} \
 "
 
@@ -266,6 +266,6 @@ INITSCRIPT_NAME = "swupdate"
 INITSCRIPT_PARAMS = "defaults 70"
 
 SYSTEMD_PACKAGES = "${PN} ${PN}-progress ${PN}-usb"
-SYSTEMD_SERVICE_${PN} = "swupdate.service swupdate.socket"
-SYSTEMD_SERVICE_${PN}-progress = "swupdate-progress.service"
-SYSTEMD_SERVICE_${PN}-usb = "swupdate-usb@.service"
+SYSTEMD_SERVICE:${PN} = "swupdate.service swupdate.socket"
+SYSTEMD_SERVICE:${PN}-progress = "swupdate-progress.service"
+SYSTEMD_SERVICE:${PN}-usb = "swupdate-usb@.service"
