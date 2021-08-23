@@ -74,12 +74,20 @@ def swupdate_encrypt_file(f, out, key, ivt):
     encargs += ["-K", key, "-iv", ivt, "-nosalt"]
     subprocess.run(encargs, check=True)
 
-def swupdate_write_sha256(s, filename, hash):
+def swupdate_write_sha256(s):
+    import re
     write_lines = []
-
     with open(os.path.join(s, "sw-description"), 'r') as f:
-        for line in f:
-            write_lines.append(line.replace("@%s" % (filename), hash))
+       for line in f:
+          shastr = r"sha256.+=.+@(.+\")"
+          #m = re.match(r"^(?P<before_placeholder>.+)sha256.+=.+(?P<filename>\w+)", line)
+          m = re.match(r"^(?P<before_placeholder>.+)sha256.+=.+(?P<quote>[\'\"])@(?P<filename>.*)(?P=quote)", line)
+          if m:
+              filename = m.group('filename')
+              hash = swupdate_get_sha256(s, filename)
+              write_lines.append(line.replace("@%s" % (filename), hash))
+          else:
+              write_lines.append(line)
 
     with open(os.path.join(s, "sw-description"), 'w+') as f:
         for line in write_lines:
@@ -192,10 +200,7 @@ def prepare_sw_description(d, s, list_for_cpio):
     swupdate_expand_bitbake_variables(d, s)
     swupdate_expand_auto_versions(d, s, list_for_cpio)
 
-    for file in list_for_cpio:
-        if file != 'sw-description' and swupdate_is_hash_needed(s, file):
-            hash = swupdate_get_sha256(s, file)
-            swupdate_write_sha256(s, file, hash)
+    swupdate_write_sha256(s)
 
     encrypt = d.getVar('SWUPDATE_ENCRYPT_SWDESC', True)
     if encrypt:
