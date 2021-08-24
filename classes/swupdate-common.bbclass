@@ -129,7 +129,7 @@ def swupdate_expand_bitbake_variables(d, s):
         for line in write_lines:
             f.write(line)
 
-def swupdate_expand_auto_versions(d, s, list_for_cpio):
+def swupdate_expand_auto_versions(d, s):
     import re
     import oe.packagedata
     AUTO_VERSION_TAG = "@SWU_AUTO_VERSION"
@@ -169,7 +169,7 @@ def swupdate_expand_auto_versions(d, s, list_for_cpio):
 
         group = data[m.start():m.end()]
 
-        (package, pkg_name_defined) = get_package_name(group, list_for_cpio)
+        (package, pkg_name_defined) = get_package_name(group, (d.getVar('SWUPDATE_IMAGES', True) or "").split())
 
         pkg_info = os.path.join(d.getVar('PKGDATA_DIR'), 'runtime-reverse', package)
         pkgdata = oe.packagedata.read_pkgdatafile(pkg_info)
@@ -194,11 +194,11 @@ def swupdate_expand_auto_versions(d, s, list_for_cpio):
     with open(os.path.join(s, "sw-description"), 'w+') as f:
         f.write(data)
 
-def prepare_sw_description(d, s, list_for_cpio):
+def prepare_sw_description(d, s):
     import shutil
 
     swupdate_expand_bitbake_variables(d, s)
-    swupdate_expand_auto_versions(d, s, list_for_cpio)
+    swupdate_expand_auto_versions(d, s)
 
     swupdate_write_sha256(s)
 
@@ -340,7 +340,7 @@ python do_swuimage () {
             if not add_image_to_swu(deploydir, image, s, encrypted):
                 bb.fatal("swupdate cannot find %s image file" % image)
 
-    prepare_sw_description(d, s, list_for_cpio)
+    prepare_sw_description(d, s)
 
     line = 'for i in ' + ' '.join(list_for_cpio) + '; do echo $i;done | cpio -ov -H crc >' + os.path.join(imgdeploydir,d.getVar('IMAGE_NAME', True) + '.swu')
     os.system("cd " + s + ";" + line)
