@@ -15,13 +15,6 @@ python () {
     d.appendVarFlag('do_swuimage', 'depends', deps)
 }
 
-def swupdate_is_hash_needed(s, filename):
-    with open(os.path.join(s, "sw-description"), 'r') as f:
-        for line in f:
-            if line.find("@%s" % (filename)) != -1:
-                return True
-    return False
-
 def swupdate_getdepends(d):
     def adddep(depstr, deps):
         for i in (depstr or "").split():
@@ -348,5 +341,3 @@ python do_swuimage () {
     line = 'ln -sf ' + d.getVar('IMAGE_NAME', True) + '.swu ' + d.getVar('IMAGE_LINK_NAME', True) + '.swu'
     os.system("cd " + imgdeploydir + "; " + line)
 }
-
-
