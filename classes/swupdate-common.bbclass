@@ -191,9 +191,10 @@ def swupdate_expand_auto_versions(d, s):
     with open(os.path.join(s, "sw-description"), 'w+') as f:
         f.write(data)
 
-def prepare_sw_description(d, s):
+def prepare_sw_description(d):
     import shutil
 
+    s = d.getVar('S', True)
     swupdate_expand_bitbake_variables(d, s)
     swupdate_expand_auto_versions(d, s)
 
@@ -337,7 +338,7 @@ python do_swuimage () {
             if not add_image_to_swu(deploydir, image, s, encrypted):
                 bb.fatal("swupdate cannot find %s image file" % image)
 
-    prepare_sw_description(d, s)
+    prepare_sw_description(d)
 
     line = 'for i in ' + ' '.join(list_for_cpio) + '; do echo $i;done | cpio -ov -H crc >' + os.path.join(imgdeploydir,d.getVar('IMAGE_NAME', True) + '.swu')
     os.system("cd " + s + ";" + line)
