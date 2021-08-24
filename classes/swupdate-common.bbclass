@@ -1,12 +1,16 @@
-DEPENDS += "${@ 'openssl-native' if d.getVar('SWUPDATE_SIGNING', True) else ''}"
+DEPENDS += "\
+    cpio-native \
+    ${@ 'openssl-native' if d.getVar('SWUPDATE_SIGNING', True) else ''} \
+"
+
 do_swuimage[umask] = "022"
 SSTATETASKS += "do_swuimage"
 SSTATE_SKIP_CREATION_task-swuimage = '1'
-IMGDEPLOYDIR = "${WORKDIR}/deploy-${PN}-swuimage"
+SWUDEPLOYDIR = "${WORKDIR}/deploy-${PN}-swuimage"
 
-do_swuimage[dirs] = "${TOPDIR}"
-do_swuimage[cleandirs] += "${S} ${IMGDEPLOYDIR}"
-do_swuimage[sstate-inputdirs] = "${IMGDEPLOYDIR}"
+do_swuimage[dirs] = "${SWUDEPLOYDIR}"
+do_swuimage[cleandirs] += "${SWUDEPLOYDIR}"
+do_swuimage[sstate-inputdirs] = "${SWUDEPLOYDIR}"
 do_swuimage[sstate-outputdirs] = "${DEPLOY_DIR_IMAGE}"
 do_swuimage[stamp-extra-info] = "${MACHINE}"
 
@@ -309,7 +313,7 @@ python do_swuimage () {
 
     # Search for images listed in SWUPDATE_IMAGES in the DEPLOY directory.
     deploydir = d.getVar('DEPLOY_DIR_IMAGE', True)
-    imgdeploydir = d.getVar('IMGDEPLOYDIR', True)
+    imgdeploydir = d.getVar('SWUDEPLOYDIR', True)
     for image in images:
         fstypes = (d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image, True) or "").split()
         encrypted = (d.getVarFlag("SWUPDATE_IMAGES_ENCRYPTED", image, True) or "")
