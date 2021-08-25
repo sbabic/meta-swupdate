@@ -17,6 +17,8 @@ do_swuimage[stamp-extra-info] = "${MACHINE}"
 python () {
     deps = " " + swupdate_getdepends(d)
     d.appendVarFlag('do_swuimage', 'depends', deps)
+    d.delVarFlag('do_fetch', 'noexec')
+    d.delVarFlag('do_unpack', 'noexec')
 }
 
 def swupdate_getdepends(d):
