@@ -267,18 +267,15 @@ def prepare_sw_description(d):
         else:
             bb.fatal("Unrecognized SWUPDATE_SIGNING mechanism.");
 
-python do_swuimage () {
+
+def swupdate_add_src_uri(d, list_for_cpio):
     import shutil
 
-    workdir = d.getVar('WORKDIR', True)
-    images = (d.getVar('SWUPDATE_IMAGES', True) or "").split()
     s = d.getVar('S', True)
-    shutil.copyfile(os.path.join(workdir, "sw-description"), os.path.join(s, "sw-description"))
-    fetch = bb.fetch2.Fetch([], d)
-    list_for_cpio = ["sw-description"]
 
     if d.getVar('SWUPDATE_SIGNING', True):
         list_for_cpio.append('sw-description.sig')
+    fetch = bb.fetch2.Fetch([], d)
 
     # Add files listed in SRC_URI to the swu file
     for url in fetch.urls:
@@ -299,24 +296,30 @@ python do_swuimage () {
                 shutil.copyfile(local, dst)
             list_for_cpio.append(filename)
 
-    def add_image_to_swu(deploydir, imagename, s, encrypt):
-        src = os.path.join(deploydir, imagename)
-        if not os.path.isfile(src):
-            return False
-        target_imagename = os.path.basename(imagename)  # allow images in subfolders of DEPLOY_DIR_IMAGE
-        dst = os.path.join(s, target_imagename)
-        if encrypt == '1':
-            key,iv = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE', True))
-            bb.note("Encryption requested for %s" %(imagename))
-            swupdate_encrypt_file(src, dst, key, iv)
-        else:
-            shutil.copyfile(src, dst)
-        list_for_cpio.append(target_imagename)
-        return True
+def add_image_to_swu(deploydir, imagename, s, encrypt, list_for_cpio):
+    import shutil
 
+    src = os.path.join(deploydir, imagename)
+    if not os.path.isfile(src):
+        return False
+    target_imagename = os.path.basename(imagename)  # allow images in subfolders of DEPLOY_DIR_IMAGE
+    dst = os.path.join(s, target_imagename)
+    if encrypt == '1':
+        key,iv = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE', True))
+        bb.note("Encryption requested for %s" %(imagename))
+        swupdate_encrypt_file(src, dst, key, iv)
+    else:
+        shutil.copyfile(src, dst)
+    list_for_cpio.append(target_imagename)
+    return True
+
+def swupdate_add_artifacts(d, list_for_cpio):
+    import shutil
     # Search for images listed in SWUPDATE_IMAGES in the DEPLOY directory.
+    images = (d.getVar('SWUPDATE_IMAGES', True) or "").split()
     deploydir = d.getVar('DEPLOY_DIR_IMAGE', True)
     imgdeploydir = d.getVar('SWUDEPLOYDIR', True)
+    s = d.getVar('S', True)
     for image in images:
         fstypes = (d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image, True) or "").split()
         encrypted = (d.getVarFlag("SWUPDATE_IMAGES_ENCRYPTED", image, True) or "")
@@ -331,20 +334,41 @@ python do_swuimage () {
             for fstype in fstypes:
                 image_found = False
                 for imagebase in imagebases:
-                    image_found = add_image_to_swu(deploydir, imagebase + fstype, s, encrypted)
+                    image_found = add_image_to_swu(deploydir, imagebase + fstype, s, encrypted, list_for_cpio)
                     if image_found:
                         break
                 if not image_found:
                     bb.fatal("swupdate cannot find image file: %s" % os.path.join(deploydir, imagebase + fstype))
         else:  # Allow also complete entries like "image.ext4.gz" in SWUPDATE_IMAGES
-            if not add_image_to_swu(deploydir, image, s, encrypted):
+            if not add_image_to_swu(deploydir, image, s, encrypted, list_for_cpio):
                 bb.fatal("swupdate cannot find %s image file" % image)
+
+
+def swupdate_create_cpio(d, swudeploydir, list_for_cpio):
+    s = d.getVar('S', True)
+    os.chdir(s)
+    updateimage = d.getVar('IMAGE_NAME', True) + '.swu'
+    updateimage_link =  d.getVar('IMAGE_LINK_NAME', True) + '.swu'
+    line = 'for i in ' + ' '.join(list_for_cpio) + '; do echo $i;done | cpio -ov -H crc > ' + os.path.join(swudeploydir, updateimage)
+    os.system(line)
+    os.chdir(swudeploydir)
+    os.symlink(updateimage, updateimage_link)
+
+python do_swuimage () {
+    import shutil
+
+    list_for_cpio = ["sw-description"]
+    workdir = d.getVar('WORKDIR', True)
+    s = d.getVar('S', True)
+    imgdeploydir = d.getVar('SWUDEPLOYDIR', True)
+    shutil.copyfile(os.path.join(workdir, "sw-description"), os.path.join(s, "sw-description"))
+
+    # Add artifacts added via SRC_URI
+    swupdate_add_src_uri(d, list_for_cpio)
+    # Add artifacts set via SWUPDATE_IMAGES
+    swupdate_add_artifacts(d, list_for_cpio)
 
     prepare_sw_description(d)
 
-    line = 'for i in ' + ' '.join(list_for_cpio) + '; do echo $i;done | cpio -ov -H crc >' + os.path.join(imgdeploydir,d.getVar('IMAGE_NAME', True) + '.swu')
-    os.system("cd " + s + ";" + line)
-
-    line = 'ln -sf ' + d.getVar('IMAGE_NAME', True) + '.swu ' + d.getVar('IMAGE_LINK_NAME', True) + '.swu'
-    os.system("cd " + imgdeploydir + "; " + line)
+    swupdate_create_cpio(d, imgdeploydir, list_for_cpio)
 }
