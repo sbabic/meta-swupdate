@@ -9,7 +9,6 @@
 # swupdate.
 
 inherit swupdate-common.bbclass
-inherit image-artifact-names
 
 S = "${WORKDIR}/${PN}"
 
