@@ -296,7 +296,7 @@ def swupdate_add_src_uri(d, list_for_cpio):
                 shutil.copyfile(local, dst)
             list_for_cpio.append(filename)
 
-def add_image_to_swu(deploydir, imagename, s, encrypt, list_for_cpio):
+def add_image_to_swu(d, deploydir, imagename, s, encrypt, list_for_cpio):
     import shutil
 
     src = os.path.join(deploydir, imagename)
@@ -334,13 +334,13 @@ def swupdate_add_artifacts(d, list_for_cpio):
             for fstype in fstypes:
                 image_found = False
                 for imagebase in imagebases:
-                    image_found = add_image_to_swu(deploydir, imagebase + fstype, s, encrypted, list_for_cpio)
+                    image_found = add_image_to_swu(d, deploydir, imagebase + fstype, s, encrypted, list_for_cpio)
                     if image_found:
                         break
                 if not image_found:
                     bb.fatal("swupdate cannot find image file: %s" % os.path.join(deploydir, imagebase + fstype))
         else:  # Allow also complete entries like "image.ext4.gz" in SWUPDATE_IMAGES
-            if not add_image_to_swu(deploydir, image, s, encrypted, list_for_cpio):
+            if not add_image_to_swu(d, deploydir, image, s, encrypted, list_for_cpio):
                 bb.fatal("swupdate cannot find %s image file" % image)
 
 
