@@ -30,6 +30,10 @@ python do_swupdate_copy_swdescription() {
        bb.fatal("SWUPDATE_IMAGES_FSTYPES[%s] is not set !" % image)
 }
 
-do_swupdate_copy_swdescription[nostamp] = "1"
 addtask swupdate_copy_swdescription before do_image_complete after do_unpack
 addtask swuimage after do_swupdate_copy_swdescription do_image_complete before do_build
+
+# Read all variables from sw-description file and add them to the vardeps of the do_swuimage task. Bitbake
+# cannot know that the do_swuimage task which evaluates the templated sw-description file needs to be executed
+# if a variable which is refered by the sw-description file but not by the recipe itself.
+do_swuimage[vardeps] ?= "${@swupdate_find_bitbake_variables(d)}"
