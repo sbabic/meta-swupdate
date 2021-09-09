@@ -128,6 +128,39 @@ def swupdate_expand_bitbake_variables(d, s):
         for line in write_lines:
             f.write(line)
 
+# Get all the variables referred by the sw-description at parse time.
+def swupdate_find_bitbake_variables(d):
+    import re
+
+    vardeps = []
+    filespath = d.getVar('FILESPATH')
+    sw_desc_path = bb.utils.which(filespath, "sw-description")
+    try:
+        with open(sw_desc_path, "r") as f:
+            for line in f:
+                found = False
+                while True:
+                    m = re.match(r"^(?P<before_placeholder>.+)@@(?P<bitbake_variable_name>\w+)@@(?P<after_placeholder>.+)$", line)
+                    if m:
+                        bitbake_variable_value = m.group('bitbake_variable_name')
+                        vardeps.append(bitbake_variable_value)
+                        line = m.group('before_placeholder') + bitbake_variable_value + m.group('after_placeholder')
+                        found = True
+                        continue
+                    else:
+                        m = re.match(r"^(?P<before_placeholder>.+)@@(?P<bitbake_variable_name>.+)\[(?P<flag_var_name>.+)\]@@(?P<after_placeholder>.+)$", line)
+                        if m:
+                            bitbake_variable_value = m.group('bitbake_variable_name')
+                            vardeps.append(bitbake_variable_value)
+                            flag_name = m.group('flag_var_name')
+                            vardeps.append(flag_name)
+                            line = m.group('before_placeholder') + bitbake_variable_value + m.group('after_placeholder')
+                            continue
+                        break
+    except IOError:
+        pass
+    return ' '.join(set(vardeps))
+
 def swupdate_expand_auto_versions(d, s):
     import re
     import oe.packagedata
