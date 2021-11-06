@@ -5,7 +5,7 @@ DEPENDS = "lua"
 
 RDEPENDS_${PN} += "lua"
 
-SRC_URI = "git://github.com/diegonehab/luasocket;protocol=https \
+SRC_URI = "git://github.com/diegonehab/luasocket;protocol=https;branch=master \
 	file://0001-fix-for-OE.patch \
 "
 

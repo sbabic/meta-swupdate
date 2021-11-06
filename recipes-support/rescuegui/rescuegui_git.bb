@@ -10,7 +10,7 @@ inherit update-rc.d
 DEPENDS += "swupdate lua luafilesystem"
 RDEPENDS_${PN} += "swupdate-tools swupdate-lua"
 
-SRC_URI = "git://github.com/sbabic/SWUpdateGUI.git;protocol=https \
+SRC_URI = "git://github.com/sbabic/SWUpdateGUI.git;protocol=https;branch=master \
      	   file://rescuegui \
 	   file://config.lua \
 	"
