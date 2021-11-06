@@ -16,7 +16,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=0636e73ff0215e8d672dc4c32c317bb3 \
 
 inherit cml1 update-rc.d systemd pkgconfig
 
-SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=https \
+SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=https;branch=master \
     file://defconfig \
     file://swupdate \
     file://swupdate.sh \
