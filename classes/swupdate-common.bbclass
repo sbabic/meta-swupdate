@@ -1,6 +1,6 @@
 DEPENDS += "\
     cpio-native \
-    ${@ 'openssl-native' if d.getVar('SWUPDATE_SIGNING', True) else ''} \
+    ${@ 'openssl-native' if d.getVar('SWUPDATE_SIGNING') or d.getVar('SWUPDATE_ENCRYPT_SWDESC') or d.getVarFlags('SWUPDATE_IMAGES_ENCRYPTED') else ''} \
 "
 
 do_swuimage[umask] = "022"
@@ -30,11 +30,12 @@ def swupdate_getdepends(d):
     deps = []
     images = (d.getVar('IMAGE_DEPENDS', True) or "").split()
     for image in images:
-            adddep(image , deps)
+        adddep(image , deps)
 
     depstr = ""
     for dep in deps:
         depstr += " " + dep + ":do_build"
+
     return depstr
 
 def swupdate_get_sha256(s, filename):
@@ -228,6 +229,7 @@ def swupdate_expand_auto_versions(d, s):
 
 def prepare_sw_description(d):
     import shutil
+    import subprocess
 
     s = d.getVar('S', True)
     swupdate_expand_bitbake_variables(d, s)
@@ -247,13 +249,19 @@ def prepare_sw_description(d):
         bb.warn('SWUPDATE_SIGNING = "1" is deprecated, falling back to "RSA". It is advised to set it to "RSA" if using RSA signing.')
         signing = "RSA"
     if signing:
+        def get_pwd_file_args():
+            pwd_args = []
+            pwd_file = d.getVar('SWUPDATE_PASSWORD_FILE', True)
+            if pwd_file:
+                pwd_args = ["-passin", "file:%s" % pwd_file]
+            return pwd_args
+
+        sw_desc_sig = os.path.join(s, 'sw-description.sig')
+        sw_desc =  os.path.join(s, 'sw-description.plain' if encrypt else 'sw-description')
+
         if signing == "CUSTOM":
-            sign_tool = d.getVar('SWUPDATE_SIGN_TOOL', True)
-            if sign_tool:
-                ret = os.system(sign_tool)
-                if ret != 0:
-                    bb.fatal("Failed to sign with %s" % (sign_tool))
-            else:
+            signcmd = d.getVar('SWUPDATE_SIGN_TOOL', True)
+            if not sign_tool:
                 bb.fatal("Custom SWUPDATE_SIGN_TOOL is not given")
         elif signing == "RSA":
             privkey = d.getVar('SWUPDATE_PRIVATE_KEY', True)
@@ -261,18 +269,7 @@ def prepare_sw_description(d):
                 bb.fatal("SWUPDATE_PRIVATE_KEY isn't set")
             if not os.path.exists(privkey):
                 bb.fatal("SWUPDATE_PRIVATE_KEY %s doesn't exist" % (privkey))
-            passout = d.getVar('SWUPDATE_PASSWORD_FILE', True)
-            if passout:
-                passout = "-passin file:'%s' " % (passout)
-            else:
-                passout = ""
-            signcmd = "openssl dgst -sha256 -sign '%s' %s -out '%s' '%s'" % (
-                privkey,
-                passout,
-                os.path.join(s, 'sw-description.sig'),
-                os.path.join(s, 'sw-description.plain' if encrypt else 'sw-description'))
-            if os.system(signcmd) != 0:
-                bb.fatal("Failed to sign sw-description with %s" % (privkey))
+            signcmd = ["openssl", "dgst", "-sha256", "-sign", privkey] + get_pwd_file_args() + ["-out", sw_desc_sig, sw_desc]
         elif signing == "CMS":
             cms_cert = d.getVar('SWUPDATE_CMS_CERT', True)
             if not cms_cert:
@@ -284,21 +281,10 @@ def prepare_sw_description(d):
                 bb.fatal("SWUPDATE_CMS_KEY isn't set")
             if not os.path.exists(cms_key):
                 bb.fatal("SWUPDATE_CMS_KEY %s doesn't exist" % (cms_key))
-            passout = d.getVar('SWUPDATE_PASSWORD_FILE', True)
-            if passout:
-                passout = "-passin file:'%s' " % (passout)
-            else:
-                passout = ""
-            signcmd = "openssl cms -sign -in '%s' -out '%s' -signer '%s' -inkey '%s' %s -outform DER -nosmimecap -binary" % (
-                os.path.join(s, 'sw-description.plain' if encrypt else 'sw-description'),
-                os.path.join(s, 'sw-description.sig'),
-                cms_cert,
-                cms_key,
-                passout)
-            if os.system(signcmd) != 0:
-                bb.fatal("Failed to sign sw-description with %s" % (privkey))
+            signcmd = ["openssl", "cms", "-sign", "-in", sw_desc, "-out", sw_desc_sig, "-signer", cms_cert, "-inkey", cms_key] + get_pwd_file_args() + ["-outform", "DER", "-nosmimecap", "-binary"]
         else:
-            bb.fatal("Unrecognized SWUPDATE_SIGNING mechanism.");
+            bb.fatal("Unrecognized SWUPDATE_SIGNING mechanism.")
+        subprocess.run(signcmd, check=True)
 
 
 def swupdate_add_src_uri(d, list_for_cpio):
