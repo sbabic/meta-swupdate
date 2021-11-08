@@ -11,17 +11,14 @@
 inherit swupdate-common.bbclass
 inherit image-artifact-names
 
-S = "${WORKDIR}/${PN}"
-
 SRC_URI += "file://sw-description"
-SWUPDATE_IMAGES += "${IMAGE_BASENAME}"
+SWUPDATE_IMAGES += "${IMAGE_LINK_NAME}"
 
 python do_swupdate_copy_swdescription() {
-
     import shutil
 
     workdir = d.getVar('S', True)
-    image = d.getVar('IMAGE_BASENAME', True)
+    image = d.getVar('IMAGE_LINK_NAME', True)
     filespath = d.getVar('FILESPATH')
     sw_desc_path = bb.utils.which(filespath, "sw-description")
     shutil.copyfile(sw_desc_path, os.path.join(workdir, "sw-description"))
