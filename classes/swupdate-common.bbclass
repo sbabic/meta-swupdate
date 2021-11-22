@@ -261,7 +261,7 @@ def prepare_sw_description(d):
 
         if signing == "CUSTOM":
             signcmd = d.getVar('SWUPDATE_SIGN_TOOL', True)
-            if not sign_tool:
+            if not signcmd:
                 bb.fatal("Custom SWUPDATE_SIGN_TOOL is not given")
         elif signing == "RSA":
             privkey = d.getVar('SWUPDATE_PRIVATE_KEY', True)
