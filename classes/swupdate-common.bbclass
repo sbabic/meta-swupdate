@@ -260,7 +260,11 @@ def prepare_sw_description(d):
         sw_desc =  os.path.join(s, 'sw-description.plain' if encrypt else 'sw-description')
 
         if signing == "CUSTOM":
-            signcmd = d.getVar('SWUPDATE_SIGN_TOOL', True)
+            signcmd = []
+            sign_tool = d.getVar('SWUPDATE_SIGN_TOOL', True)
+            signtool = sign_tool.split()
+            for i in range(len(signtool)):
+                signcmd.append(signtool[i])
             if not signcmd:
                 bb.fatal("Custom SWUPDATE_SIGN_TOOL is not given")
         elif signing == "RSA":
