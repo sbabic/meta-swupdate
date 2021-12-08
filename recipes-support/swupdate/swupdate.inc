@@ -38,6 +38,7 @@ PACKAGES =+ " \
     ${PN}-progress \
     ${PN}-tools \
     ${PN}-tools-hawkbit \
+    ${PN}-tools-ipc \
     ${PN}-usb \
     ${PN}-www \
 "
@@ -46,6 +47,8 @@ wwwdir ?= "/www"
 
 # tools is now an empty meta package for backward compatibility
 ALLOW_EMPTY:${PN}-tools = "1"
+ALLOW_EMPTY:${PN}-tools-hawkbit = "1"
+ALLOW_EMPTY:${PN}-tools-ipc = "1"
 
 FILES:${PN}-client = "${bindir}/swupdate-client"
 FILES:${PN}-lua += "${libdir}/lua/"
@@ -61,6 +64,9 @@ FILES:${PN}-usb = " \
 FILES:${PN}-tools-hawkbit = " \
     ${bindir}/swupdate-hawkbitcfg \
     ${bindir}/swupdate-sendtohawkbit \
+"
+FILES:${PN}-tools-ipc = " \
+    ${bindir}/swupdate-ipc \
 "
 FILES:${PN} += " \
     ${libdir}/tmpfiles.d \
