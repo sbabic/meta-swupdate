@@ -47,8 +47,8 @@ wwwdir ?= "/www"
 
 # tools is now an empty meta package for backward compatibility
 ALLOW_EMPTY_${PN}-tools = "1"
-+ALLOW_EMPTY_${PN}-tools-hawkbit = "1"
-+ALLOW_EMPTY_${PN}-tools-ipc = "1"
+ALLOW_EMPTY_${PN}-tools-hawkbit = "1"
+ALLOW_EMPTY_${PN}-tools-ipc = "1"
 
 FILES_${PN}-client = "${bindir}/swupdate-client"
 FILES_${PN}-lua += "${libdir}/lua/"
