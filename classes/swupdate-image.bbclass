@@ -14,14 +14,30 @@ inherit image-artifact-names
 S = "${WORKDIR}/${PN}"
 
 SRC_URI += "file://sw-description"
-SWUPDATE_IMAGES += "${IMAGE_BASENAME}"
+SWUPDATE_IMAGES += "${IMAGE_LINK_NAME}"
+
+python () {
+    image = d.getVar('IMAGE_LINK_NAME', True)
+    if d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image) is None:
+       flag = d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", d.getVar('IMAGE_BASENAME'))
+       if flag:
+          d.setVarFlag("SWUPDATE_IMAGES_FSTYPES", image, flag)
+       else:
+          fstypes = d.getVar('IMAGE_FSTYPES').split()
+          if not fstypes
+              bb.fatal("SWUPDATE_IMAGES_FSTYPES[%s] is not set !" % image)
+          for t in fstypes:
+              bb.warn("SWUPDATE_IMAGES_FSTYPES[%s] not set, setting to %s" % (image, t))
+              d.setVarFlag("SWUPDATE_IMAGES_FSTYPES", image, "." + t)
+              break
+}
 
 python do_swupdate_copy_swdescription() {
 
     import shutil
 
     workdir = d.getVar('S', True)
-    image = d.getVar('IMAGE_BASENAME', True)
+    image = d.getVar('IMAGE_LINK_NAME', True)
     filespath = d.getVar('FILESPATH')
     sw_desc_path = bb.utils.which(filespath, "sw-description")
     shutil.copyfile(sw_desc_path, os.path.join(workdir, "sw-description"))
