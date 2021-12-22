@@ -23,7 +23,7 @@ python () {
           d.setVarFlag("SWUPDATE_IMAGES_FSTYPES", image, flag)
        else:
           fstypes = d.getVar('IMAGE_FSTYPES').split()
-          if not fstypes
+          if not fstypes:
               bb.fatal("SWUPDATE_IMAGES_FSTYPES[%s] is not set !" % image)
           for t in fstypes:
               bb.warn("SWUPDATE_IMAGES_FSTYPES[%s] not set, setting to %s" % (image, t))
