@@ -81,7 +81,7 @@ def swupdate_write_sha256(s):
        for line in f:
           shastr = r"sha256.+=.+@(.+\")"
           #m = re.match(r"^(?P<before_placeholder>.+)sha256.+=.+(?P<filename>\w+)", line)
-          m = re.match(r"^(?P<before_placeholder>.+)[sha256|version].+[=:].*(?P<quote>[\'\"])@(?P<filename>.*)(?P=quote)", line)
+          m = re.match(r"^(?P<before_placeholder>.+)(sha256|version).+[=:].*(?P<quote>[\'\"])@(?P<filename>.*)(?P=quote)", line)
           if m:
               filename = m.group('filename')
               hash = swupdate_get_sha256(s, filename)
