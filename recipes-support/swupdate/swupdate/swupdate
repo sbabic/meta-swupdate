@@ -76,6 +76,14 @@ do_stop() {
 		# Exit when fail to stop, the kill would complain when fail
 		kill -s 15 $pid >/dev/null && rm -f $PIDFILE && \
 			echo "Stopped $DESC ($pid)." || exit $?
+
+                # Wait up to 10 seconds for the process to exit
+                for i in `seq 10`; do
+                        if ! pidofproc $NAME > /dev/null; then
+                                break
+                        fi
+                        sleep 1
+                done
 		;;
 	*)
 		echo "$DESC is not running; none killed." >&2
