@@ -288,7 +288,7 @@ def prepare_sw_description(d):
             signcmd = ["openssl", "cms", "-sign", "-in", sw_desc, "-out", sw_desc_sig, "-signer", cms_cert, "-inkey", cms_key] + get_pwd_file_args() + ["-outform", "DER", "-nosmimecap", "-binary"]
         else:
             bb.fatal("Unrecognized SWUPDATE_SIGNING mechanism.")
-        subprocess.run(signcmd, check=True)
+        subprocess.run(' '.join(signcmd), shell=True, check=True)
 
 
 def swupdate_add_src_uri(d, list_for_cpio):
