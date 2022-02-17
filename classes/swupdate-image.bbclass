@@ -8,7 +8,7 @@
 # The generated output file is an swu archive ready to be uploaded to a device running
 # swupdate.
 
-inherit swupdate-common.bbclass
+inherit swupdate-common
 
 S = "${WORKDIR}/${PN}"
 
