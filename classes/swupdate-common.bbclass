@@ -296,8 +296,6 @@ def swupdate_add_src_uri(d, list_for_cpio):
 
     s = d.getVar('S', True)
 
-    if d.getVar('SWUPDATE_SIGNING', True):
-        list_for_cpio.append('sw-description.sig')
     fetch = bb.fetch2.Fetch([], d)
 
     # Add files listed in SRC_URI to the swu file
@@ -386,8 +384,13 @@ python do_swuimage () {
     imgdeploydir = d.getVar('SWUDEPLOYDIR', True)
     shutil.copyfile(os.path.join(workdir, "sw-description"), os.path.join(s, "sw-description"))
 
+    if d.getVar('SWUPDATE_SIGNING', True):
+        list_for_cpio.append('sw-description.sig')
+
     # Add artifacts added via SRC_URI
-    swupdate_add_src_uri(d, list_for_cpio)
+    if not d.getVar('INHIBIT_SWUPDATE_ADD_SRC_URI', True):
+        swupdate_add_src_uri(d, list_for_cpio)
+
     # Add artifacts set via SWUPDATE_IMAGES
     swupdate_add_artifacts(d, list_for_cpio)
 
