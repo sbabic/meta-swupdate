@@ -38,7 +38,7 @@ def swupdate_getdepends(d):
 
     return depstr
 
-def swupdate_get_sha256(s, filename):
+def swupdate_get_sha256(d, s, filename):
     import hashlib
 
     m = hashlib.sha256()
@@ -84,7 +84,7 @@ def swupdate_write_sha256(s):
           m = re.match(r"^(?P<before_placeholder>.+)(sha256|version).+[=:].*(?P<quote>[\'\"])@(?P<filename>.*)(?P=quote)", line)
           if m:
               filename = m.group('filename')
-              hash = swupdate_get_sha256(s, filename)
+              hash = swupdate_get_sha256(None, s, filename)
               write_lines.append(line.replace("@%s" % (filename), hash))
           else:
               write_lines.append(line)
@@ -92,6 +92,34 @@ def swupdate_write_sha256(s):
     with open(os.path.join(s, "sw-description"), 'w+') as f:
         for line in write_lines:
             f.write(line)
+
+def swupdate_create_func_line(s, function, parms):
+    parmlist = parms.split(',')
+    cmd = "'" + s + "'"
+    for parm in parmlist:
+        if len(cmd):
+           cmd = cmd + ','
+        cmd = cmd + "'" + parm + "'"
+    cmd = function + '(' + cmd + ')'
+    return cmd
+
+def swupdate_exec_functions(d, s, write_lines):
+    import re
+    for index, line in enumerate(write_lines):
+        m = re.match(r"^(?P<before_placeholder>.+)\$(?P<bitbake_function_name>\w+)\((?P<parms>.+)\)(?P<after_placeholder>.+)$", line)
+        if m:
+            bb.warn("Found function")
+            fun = m.group('bitbake_function_name') + "(d, \"" + s + "\", \"" + m.group('parms') + "\")"
+            ret = eval(fun)
+            bb.warn("Fun : %s" % fun)
+            bb.warn ("%s return %s " % (m.group('bitbake_function_name'), ret))
+            cmd = swupdate_create_func_line(s, m.group('bitbake_function_name'), m.group('parms') )
+            bb.warn ("Returned command %s" % cmd)
+            line = m.group('before_placeholder') + ret + m.group('after_placeholder') + "\n"
+            #ret = eval(cmd)
+            bb.warn ("==> Returned command %s : %s" % (cmd, ret))
+            write_lines[index] = line
+
 
 def swupdate_expand_bitbake_variables(d, s):
     write_lines = []
@@ -124,6 +152,8 @@ def swupdate_expand_bitbake_variables(d, s):
                     break
 
             write_lines.append(line)
+
+    swupdate_exec_functions(d, s, write_lines)
 
     with open(os.path.join(s, "sw-description"), 'w+') as f:
         for line in write_lines:
