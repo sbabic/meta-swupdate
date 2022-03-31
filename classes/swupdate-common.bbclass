@@ -21,6 +21,13 @@ python () {
     d.delVarFlag('do_unpack', 'noexec')
 }
 
+def get_pwd_file_args(d, passfile):
+    pwd_args = []
+    pwd_file = d.getVar(passfile, True)
+    if pwd_file:
+       pwd_args = ["-passin", "file:%s" % pwd_file]
+    return pwd_args
+
 def swupdate_getdepends(d):
     def adddep(depstr, deps):
         for i in (depstr or "").split():
@@ -279,12 +286,6 @@ def prepare_sw_description(d):
         bb.warn('SWUPDATE_SIGNING = "1" is deprecated, falling back to "RSA". It is advised to set it to "RSA" if using RSA signing.')
         signing = "RSA"
     if signing:
-        def get_pwd_file_args():
-            pwd_args = []
-            pwd_file = d.getVar('SWUPDATE_PASSWORD_FILE', True)
-            if pwd_file:
-                pwd_args = ["-passin", "file:%s" % pwd_file]
-            return pwd_args
 
         sw_desc_sig = os.path.join(s, 'sw-description.sig')
         sw_desc =  os.path.join(s, 'sw-description.plain' if encrypt else 'sw-description')
@@ -303,7 +304,7 @@ def prepare_sw_description(d):
                 bb.fatal("SWUPDATE_PRIVATE_KEY isn't set")
             if not os.path.exists(privkey):
                 bb.fatal("SWUPDATE_PRIVATE_KEY %s doesn't exist" % (privkey))
-            signcmd = ["openssl", "dgst", "-sha256", "-sign", privkey] + get_pwd_file_args() + ["-out", sw_desc_sig, sw_desc]
+            signcmd = ["openssl", "dgst", "-sha256", "-sign", privkey] + get_pwd_file_args(d, 'SWUPDATE_PASSWORD_FILE') + ["-out", sw_desc_sig, sw_desc]
         elif signing == "CMS":
             cms_cert = d.getVar('SWUPDATE_CMS_CERT', True)
             if not cms_cert:
@@ -315,7 +316,8 @@ def prepare_sw_description(d):
                 bb.fatal("SWUPDATE_CMS_KEY isn't set")
             if not os.path.exists(cms_key):
                 bb.fatal("SWUPDATE_CMS_KEY %s doesn't exist" % (cms_key))
-            signcmd = ["openssl", "cms", "-sign", "-in", sw_desc, "-out", sw_desc_sig, "-signer", cms_cert, "-inkey", cms_key] + get_pwd_file_args() + ["-outform", "DER", "-nosmimecap", "-binary"]
+            signcmd = ["openssl", "cms", "-sign", "-in", sw_desc, "-out", sw_desc_sig, "-signer", cms_cert, "-inkey", cms_key] + \
+                        get_pwd_file_args(d, 'SWUPDATE_PASSWORD_FILE') + ["-outform", "DER", "-nosmimecap", "-binary"]
         else:
             bb.fatal("Unrecognized SWUPDATE_SIGNING mechanism.")
         subprocess.run(' '.join(signcmd), shell=True, check=True)
