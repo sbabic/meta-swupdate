@@ -1,5 +1,7 @@
 # Copyright (C) 2015-2021 Stefano Babic <sbabic@denx.de>
 #
+# SPDX-License-Identifier: GPLv3
+#
 # This class is thought to be used in an image recipe.
 # It generates a SWU file from the image itself
 # User *must* add a sw-descitpion file

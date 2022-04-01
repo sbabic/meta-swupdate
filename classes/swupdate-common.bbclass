@@ -1,3 +1,7 @@
+# Copyright (C) 2015-2022 Stefano Babic
+#
+# SPDX-License-Identifier: GPLv3
+
 inherit swupdate-lib
 
 DEPENDS += "\
