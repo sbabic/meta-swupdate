@@ -75,7 +75,7 @@ def swupdate_sign_file(d, s, filename):
 
     return hash
 
-def swupdate_auto_versions(d, s, parms):
+def swupdate_get_pkgvar(d, s, parms):
     import re
     import oe.packagedata
 
