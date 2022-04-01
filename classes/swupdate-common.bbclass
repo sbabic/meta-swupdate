@@ -51,19 +51,6 @@ def swupdate_getdepends(d):
 
     return depstr
 
-def swupdate_get_sha256(d, s, filename):
-    import hashlib
-
-    m = hashlib.sha256()
-
-    with open(os.path.join(s, filename), 'rb') as f:
-        while True:
-            data = f.read(1024)
-            if not data:
-                break
-            m.update(data)
-    return m.hexdigest()
-
 def swupdate_extract_keys(keyfile_path):
     try:
         with open(keyfile_path, 'r') as f:
