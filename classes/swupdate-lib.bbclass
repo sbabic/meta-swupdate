@@ -1,3 +1,7 @@
+# Copyright (C) 2015-2022 Stefano Babic
+#
+# SPDX-License-Identifier: GPLv3
+
 DEPENDS += "python3-magic-native zstd-native"
 
 def swupdate_encrypt_file(f, out, key, ivt):

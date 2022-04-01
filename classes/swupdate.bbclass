@@ -1,5 +1,7 @@
 # Copyright (C) 2015-2021 Stefano Babic <sbabic@denx.de>
 #
+# SPDX-License-Identifier: GPLv3
+#
 # Some parts from the patch class
 #
 # swupdate allows to generate a compound image for the
