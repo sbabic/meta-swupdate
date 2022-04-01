@@ -75,3 +75,38 @@ def swupdate_sign_file(d, s, filename):
 
     return hash
 
+def swupdate_auto_versions(d, s, parms):
+    import re
+    import oe.packagedata
+
+    def get_package_name(group):
+        package = None
+
+        pkgvar = group.split('@')
+        package = pkgvar[0]
+        if len(pkgvar) > 1:
+            varname = pkgvar[1]
+        else:
+            varname = 'PV'
+
+        return (package, varname)
+
+    if parms is None:
+        return "undefined"
+
+    group = parms
+
+    (package, key) = get_package_name(group)
+
+    bb.debug(2, "Package %s defined %s" %(package, key))
+
+    pkg_info = os.path.join(d.getVar('PKGDATA_DIR'), 'runtime-reverse', package)
+    pkgdata = oe.packagedata.read_pkgdatafile(pkg_info)
+
+    if not key in pkgdata.keys():
+        bb.warn("\"%s\" not set for package %s - using \"1.0\"" % (key, package))
+        version = "1.0"
+    else:
+        version = pkgdata[key].split('+')[0]
+
+    return version

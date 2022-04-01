@@ -153,78 +153,12 @@ def swupdate_find_bitbake_variables(d):
         pass
     return ' '.join(set(vardeps))
 
-def swupdate_expand_auto_versions(d, s):
-    import re
-    import oe.packagedata
-    AUTO_VERSION_TAG = "@SWU_AUTO_VERSION"
-    AUTOVERSION_REGEXP = "version\s*=\s*\"%s" % AUTO_VERSION_TAG
-
-    with open(os.path.join(s, "sw-description"), 'r') as f:
-        data = f.read()
-
-    def get_package_name(group, file_list):
-        package = None
-
-        m = re.search(r"%s:(?P<package>.+?(?=[\"@]))" % (AUTOVERSION_REGEXP), group)
-        if m:
-            package = m.group('package')
-            return (package, True)
-
-        for filename in file_list:
-            if filename in group:
-                package = filename
-
-        if not package:
-            bb.fatal("Failed to find file in group %s" % (group))
-
-        return (package, False)
-
-    def get_packagedata_key(group):
-        m = re.search(r"%s.+?(?<=@)(?P<key>.+?(?=\"))" % (AUTOVERSION_REGEXP), group)
-        if m:
-            return (m.group('key'), True)
-        return ("PV", False)
-
-    regexp = re.compile(r"\{[^\{]*%s.[^\}]*\}" % (AUTOVERSION_REGEXP))
-    while True:
-        m = regexp.search(data)
-        if not m:
-            break
-
-        group = data[m.start():m.end()]
-
-        (package, pkg_name_defined) = get_package_name(group, (d.getVar('SWUPDATE_IMAGES', True) or "").split())
-
-        pkg_info = os.path.join(d.getVar('PKGDATA_DIR'), 'runtime-reverse', package)
-        pkgdata = oe.packagedata.read_pkgdatafile(pkg_info)
-
-        (key, key_defined) = get_packagedata_key(group)
-
-        if not key in pkgdata.keys():
-            bb.warn("\"%s\" not set for package %s - using \"1.0\"" % (key, package))
-            version = "1.0"
-        else:
-            version = pkgdata[key].split('+')[0]
-
-        replace_str = AUTO_VERSION_TAG
-        if pkg_name_defined:
-            replace_str = replace_str + ":" + package
-        if key_defined:
-            replace_str = replace_str + "@" + key
-
-        group = group.replace(replace_str, version)
-        data = data[:m.start()] + group + data[m.end():]
-
-    with open(os.path.join(s, "sw-description"), 'w+') as f:
-        f.write(data)
-
 def prepare_sw_description(d):
     import shutil
     import subprocess
 
     s = d.getVar('S', True)
     swupdate_expand_bitbake_variables(d, s)
-    swupdate_expand_auto_versions(d, s)
 
     swupdate_write_sha256(s)
 
