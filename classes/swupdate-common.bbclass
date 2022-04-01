@@ -100,31 +100,15 @@ def swupdate_write_sha256(s):
         for line in write_lines:
             f.write(line)
 
-def swupdate_create_func_line(s, function, parms):
-    parmlist = parms.split(',')
-    cmd = "'" + s + "'"
-    for parm in parmlist:
-        if len(cmd):
-           cmd = cmd + ','
-        cmd = cmd + "'" + parm + "'"
-    cmd = function + '(' + cmd + ')'
-    return cmd
-
 def swupdate_exec_functions(d, s, write_lines):
     import re
     for index, line in enumerate(write_lines):
         m = re.match(r"^(?P<before_placeholder>.+)\$(?P<bitbake_function_name>\w+)\((?P<parms>.+)\)(?P<after_placeholder>.+)$", line)
         if m:
-            bb.warn("Found function")
             fun = m.group('bitbake_function_name') + "(d, \"" + s + "\", \"" + m.group('parms') + "\")"
             ret = eval(fun)
-            bb.warn("Fun : %s" % fun)
-            bb.warn ("%s return %s " % (m.group('bitbake_function_name'), ret))
-            cmd = swupdate_create_func_line(s, m.group('bitbake_function_name'), m.group('parms') )
-            bb.warn ("Returned command %s" % cmd)
+            bb.debug (2, "%s return %s " % (m.group('bitbake_function_name'), ret))
             line = m.group('before_placeholder') + ret + m.group('after_placeholder') + "\n"
-            #ret = eval(cmd)
-            bb.warn ("==> Returned command %s : %s" % (cmd, ret))
             write_lines[index] = line
 
 
