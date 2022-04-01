@@ -1,3 +1,5 @@
+inherit swupdate-lib
+
 DEPENDS += "\
     cpio-native \
     ${@ 'openssl-native' if d.getVar('SWUPDATE_SIGNING') or d.getVar('SWUPDATE_ENCRYPT_SWDESC') or d.getVarFlags('SWUPDATE_IMAGES_ENCRYPTED') else ''} \
