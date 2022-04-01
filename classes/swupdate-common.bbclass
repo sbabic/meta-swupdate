@@ -51,23 +51,6 @@ def swupdate_getdepends(d):
 
     return depstr
 
-def swupdate_extract_keys(keyfile_path):
-    try:
-        with open(keyfile_path, 'r') as f:
-            lines = f.readlines()
-    except IOError:
-        bb.fatal("Failed to open file with keys %s" % (keyfile))
-
-    data = {}
-    for _ in lines:
-        k,v = _.split('=',maxsplit=1)
-        data[k.rstrip()] = v
-
-    key = data['key'].rstrip('\n')
-    iv = data['iv'].rstrip('\n')
-
-    return key,iv
-
 def swupdate_write_sha256(s):
     import re
     write_lines = []
