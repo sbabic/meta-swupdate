@@ -68,12 +68,6 @@ def swupdate_extract_keys(keyfile_path):
 
     return key,iv
 
-def swupdate_encrypt_file(f, out, key, ivt):
-    import subprocess
-    encargs = ["openssl", "enc", "-aes-256-cbc", "-in", f, "-out", out]
-    encargs += ["-K", key, "-iv", ivt, "-nosalt"]
-    subprocess.run(encargs, check=True)
-
 def swupdate_write_sha256(s):
     import re
     write_lines = []
