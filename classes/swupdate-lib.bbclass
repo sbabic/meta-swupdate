@@ -40,6 +40,13 @@ def swupdate_get_sha256(d, s, filename):
             m.update(data)
     return m.hexdigest()
 
+def swupdate_get_size(d, s, filename):
+    import os
+
+    fname = os.path.join(s, filename)
+    fsize = os.path.getsize(fname)
+    return str(fsize)
+
 def swupdate_sign_file(d, s, filename):
     import subprocess
     import magic
