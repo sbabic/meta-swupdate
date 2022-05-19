@@ -15,7 +15,7 @@ def swupdate_extract_keys(keyfile_path):
         with open(keyfile_path, 'r') as f:
             lines = f.readlines()
     except IOError:
-        bb.fatal("Failed to open file with keys %s" % (keyfile))
+        bb.fatal("Failed to open file with keys %s" % (keyfile_path))
 
     data = {}
     for _ in lines:
