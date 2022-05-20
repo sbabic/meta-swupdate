@@ -181,6 +181,9 @@ python () {
     if 'CONFIG_DISKPART=y\n' in features:
         depends += ' util-linux e2fsprogs'
 
+    if 'CONFIG_DELTA=y\n' in features:
+        depends += ' zchunk'
+
     d.setVar('DEPENDS', depends)
 
     if 'CONFIG_MONGOOSE=y\n' in features:
