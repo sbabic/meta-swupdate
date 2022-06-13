@@ -4,7 +4,7 @@ Documentation=https://github.com/sbabic/swupdate
 Documentation=https://sbabic.github.io/swupdate
 
 [Service]
-Type=exec
+Type=notify
 ExecStart=@LIBDIR@/swupdate/swupdate.sh
 KillMode=mixed
 
