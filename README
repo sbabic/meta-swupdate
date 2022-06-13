@@ -22,8 +22,8 @@ line `version = "@@DISTRO_VERSION@@";` in your sw-description file.
 Image hashing
 -------------
 
-During creation of the update file, occurrences of @IMAGE (where IMAGE is an
-image filename) are replaced with the sha256 hash of the image.
+During creation of the update file, to get the sha256 hash of the image,
+pass $swupdate_get_sha256(IMAGE) (where IMAGE is an image filename).
 
 BitBake auto versions
 ---------------------
