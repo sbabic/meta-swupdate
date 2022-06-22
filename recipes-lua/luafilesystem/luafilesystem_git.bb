@@ -8,8 +8,8 @@ SRC_URI = "git://github.com/keplerproject/luafilesystem;protocol=https;branch=ma
 	file://0001-Fix-for-OE.patch"
 
 # Modify these as desired
-PV = "1.0+git${SRCPV}"
-SRCREV = "1dfb8c41e8a7e689959baeaf2961437db9615f74"
+PV = "1.8.0"
+SRCREV = "7c6e1b013caec0602ca4796df3b1d7253a2dd258"
 
 inherit pkgconfig
 
