@@ -1,43 +1,48 @@
-From c3154899776586c291dd9bc6369d7091efac19ff Mon Sep 17 00:00:00 2001
+From 55709c14d9ae4becd2d716117604b5d399465b63 Mon Sep 17 00:00:00 2001
 From: Kas User <kas@example.com>
-Date: Mon, 14 May 2018 10:25:49 +0200
+Date: Wed, 22 Jun 2022 14:05:03 +0200
 Subject: [PATCH] Fix for OE
 
-Signed-off-by: Kas User <kas@example.com>
 ---
  Makefile |  2 +-
- config   | 14 +++++++-------
- 2 files changed, 8 insertions(+), 8 deletions(-)
+ config   | 16 ++++++++--------
+ 2 files changed, 9 insertions(+), 9 deletions(-)
 
+diff --git a/Makefile b/Makefile
+index a7312a4..4786d36 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -12,7 +12,7 @@ OBJS= src/$T.o
  lib: src/lfs.so
  
  src/lfs.so: $(OBJS)
--	MACOSX_DEPLOYMENT_TARGET="10.3"; export MACOSX_DEPLOYMENT_TARGET; $(CC) $(LIB_OPTION) -o src/lfs.so $(OBJS)
-+	MACOSX_DEPLOYMENT_TARGET="10.3"; export MACOSX_DEPLOYMENT_TARGET; $(CC) $(LIB_OPTION) ${LDFLAGS} -o src/lfs.so $(OBJS)
+-	MACOSX_DEPLOYMENT_TARGET=$(MACOSX_DEPLOYMENT_TARGET); export MACOSX_DEPLOYMENT_TARGET; $(CC) $(LIB_OPTION) -o src/lfs.so $(OBJS)
++	MACOSX_DEPLOYMENT_TARGET=$(MACOSX_DEPLOYMENT_TARGET); export MACOSX_DEPLOYMENT_TARGET; $(CC) $(LIB_OPTION) ${LDFLAGS} -o src/lfs.so $(OBJS)
  
  test: lib
  	LUA_CPATH=./src/?.so lua tests/test.lua
+diff --git a/config b/config
+index 33fe514..575d043 100644
 --- a/config
 +++ b/config
-@@ -1,25 +1,25 @@
+@@ -1,28 +1,28 @@
  # Installation directories
  
  # Default installation prefix
 -PREFIX=/usr/local
--
 +PREFIX ?= /usr/local
 +BASELIB ?= /lib
+ 
+-LUA_VERSION = 5.1
++LUA_VERSION ?= `pkg-config --modversion lua | cut -d'.' -f1,2`
+ 
  # System's libraries directory (where binary libraries are installed)
--LUA_LIBDIR= $(PREFIX)/lib/lua/5.1
-+LUAVER ?= `pkg-config --modversion lua | cut -d'.' -f1,2`
-+LUA_LIBDIR = $(PREFIX)$(BASELIB)/lua/$(LUAVER)
+-LUA_LIBDIR= $(PREFIX)/lib/lua/$(LUA_VERSION)
++LUA_LIBDIR= $(PREFIX)$(BASELIB)/lua/$(LUA_VERSION)
  
  # Lua includes directory
  LUA_INC += -I$(PREFIX)/include
- LUA_INC += -I/usr/include/lua5.1
+ LUA_INC += -I/usr/include/lua$(LUA_VERSION) -I/usr/include/lua/$(LUA_VERSION)
 +LUA_INC = `pkg-config --cflags lua`
  
  # OS dependent
@@ -45,7 +50,8 @@ Signed-off-by: Kas User <kas@example.com>
 +LIB_OPTION= -shared ${LDFLAGS} #for Linux
  #LIB_OPTION= -bundle -undefined dynamic_lookup #for MacOS X
  
- LIBNAME= $T.so.$V
+ # Minimum runtime OS version on macOS
+ MACOSX_DEPLOYMENT_TARGET= 10.5
  
  # Compilation directives
 -WARN= -O2 -Wall -fPIC -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -pedantic
