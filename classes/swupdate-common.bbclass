@@ -289,11 +289,14 @@ def swupdate_create_cpio(d, swudeploydir, list_for_cpio):
     s = d.getVar('S', True)
     os.chdir(s)
     updateimage = d.getVar('IMAGE_NAME', True) + '.swu'
-    updateimage_link =  d.getVar('IMAGE_LINK_NAME', True) + '.swu'
     line = 'for i in ' + ' '.join(list_for_cpio) + '; do echo $i;done | cpio -ov -H crc > ' + os.path.join(swudeploydir, updateimage)
     os.system(line)
     os.chdir(swudeploydir)
-    os.symlink(updateimage, updateimage_link)
+    updateimage_link = d.getVar('IMAGE_LINK_NAME', True)
+    if updateimage_link:
+        updateimage_link += '.swu'
+        if updateimage_link != updateimage:
+            os.symlink(updateimage, updateimage_link)
 
 python do_swuimage () {
     import shutil
