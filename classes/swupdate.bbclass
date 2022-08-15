@@ -33,7 +33,7 @@
 #   corresponding image files cannot be found in the ${DEPLOY_DIR_IMAGE} folder, an
 #   image file with exactly the name as specified in SWUPDATE_IMAGES is searched for.
 
-inherit swupdate-common.bbclass
+inherit swupdate-common
 inherit image-artifact-names
 
 S = "${WORKDIR}/${PN}"
