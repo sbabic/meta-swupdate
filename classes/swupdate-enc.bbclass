@@ -19,5 +19,5 @@ swu_encrypt_file() {
 
 CONVERSIONTYPES += "enc"
 
-CONVERSION_DEPENDS_enc = "openssl-native coreutils-native"
-CONVERSION_CMD_enc="swu_encrypt_file ${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type} ${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}.enc"
+CONVERSION_DEPENDS:enc = "openssl-native coreutils-native"
+CONVERSION_CMD:enc="swu_encrypt_file ${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type} ${IMAGE_NAME}${IMAGE_NAME_SUFFIX}.${type}.enc"
