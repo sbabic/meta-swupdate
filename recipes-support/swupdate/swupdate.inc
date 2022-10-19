@@ -201,17 +201,21 @@ python () {
     d.setVar('SWUPDATE_SW_VERSIONS_FILE', '/etc/sw-versions')
     for feature in features:
         if feature.startswith('CONFIG_SOCKET_CTRL_PATH='):
-            ctrl_path = feature.split('=')[1].strip()
-            d.setVar('SWUPDATE_SOCKET_CTRL_PATH', ctrl_path)
+            ctrl_path = feature.split('=')[1].strip().replace('""','')
+            if ctrl_path != "":
+               d.setVar('SWUPDATE_SOCKET_CTRL_PATH', ctrl_path)
         elif feature.startswith('CONFIG_SOCKET_PROGRESS_PATH='):
-            prog_path = feature.split('=')[1].strip()
-            d.setVar('SWUPDATE_SOCKET_PROGRESS_PATH', prog_path)
+            prog_path = feature.split('=')[1].strip().replace('""','')
+            if prog_path != "":
+               d.setVar('SWUPDATE_SOCKET_PROGRESS_PATH', prog_path)
         elif feature.startswith('CONFIG_HW_COMPATIBILITY_FILE='):
-            hwrev_file = feature.split('=')[1].strip()
-            d.setVar('SWUPDATE_HW_COMPATIBILITY_FILE', hwrev_file)
+            hwrev_file = feature.split('=')[1].strip().replace('""','')
+            if hwrev_file != "":
+               d.setVar('SWUPDATE_HW_COMPATIBILITY_FILE', hwrev_file)
         elif feature.startswith('CONFIG_SW_VERSIONS_FILE='):
-            swver_file = feature.split('=')[1].strip()
-            d.setVar('SWUPDATE_SW_VERSIONS_FILE', swver_file)
+            swver_file = feature.split('=')[1].strip().replace('""','')
+            if swver_file != "":
+               d.setVar('SWUPDATE_SW_VERSIONS_FILE', swver_file)
 }
 
 do_configure () {
