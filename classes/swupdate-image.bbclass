@@ -51,6 +51,12 @@ python do_swupdate_copy_swdescription() {
 addtask swupdate_copy_swdescription before do_image_complete after do_unpack
 addtask swuimage after do_swupdate_copy_swdescription do_image_complete before do_build
 
+# define setscene task
+python do_swuimage_setscene () {
+    sstate_setscene(d)
+}
+addtask do_swuimage_setscene
+
 # Read all variables from sw-description file and add them to the vardeps of the do_swuimage task. Bitbake
 # cannot know that the do_swuimage task which evaluates the templated sw-description file needs to be executed
 # if a variable which is refered by the sw-description file but not by the recipe itself.
