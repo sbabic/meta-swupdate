@@ -11,7 +11,7 @@ DEPENDS += "\
 
 do_swuimage[umask] = "022"
 SSTATETASKS += "do_swuimage"
-SSTATE_SKIP_CREATION_task-swuimage = '1'
+SSTATE_SKIP_CREATION:task-swuimage = '1'
 SWUDEPLOYDIR = "${WORKDIR}/deploy-${PN}-swuimage"
 
 do_swuimage[dirs] = "${SWUDEPLOYDIR}"
