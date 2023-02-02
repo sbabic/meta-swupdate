@@ -134,6 +134,8 @@ python () {
 
 
     depends = d.getVar('DEPENDS', False)
+    pn = d.getVar('PN')
+    rdepends = d.getVar("RDEPENDS:%s" % pn) or ""
 
     if 'CONFIG_REMOTE_HANDLER=y\n' in features:
         depends += ' zeromq'
@@ -159,6 +161,7 @@ python () {
 
     if 'CONFIG_UBOOT=y\n' in features:
         depends += ' libubootenv'
+        rdepends += ' libubootenv'
 
     if 'CONFIG_DOWNLOAD=y\n' in features or 'CONFIG_SURICATTA=y\n' in features:
         depends += ' curl'
@@ -177,6 +180,7 @@ python () {
 
     if 'CONFIG_BOOTLOADER_EBG=y\n' in features:
         depends += ' efibootguard'
+        rdepends += ' efibootguard'
 
     if 'CONFIG_ZSTD=y\n' in features:
         depends += ' zstd'
@@ -188,6 +192,7 @@ python () {
         depends += ' zchunk'
 
     d.setVar('DEPENDS', depends)
+    d.setVar("RDEPENDS:%s" % pn, rdepends)
 
     if 'CONFIG_MONGOOSE=y\n' in features:
         d.setVar('SWUPDATE_MONGOOSE', 'true')
