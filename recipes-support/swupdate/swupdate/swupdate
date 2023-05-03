@@ -90,13 +90,7 @@ do_stop() {
 		;;
 	esac
 
-	# Wait for children to finish too if this is a daemon that forks
-	# and if the daemon is only ever run from this initscript.
-	# If the above conditions are not satisfied then add some other code
-	# that waits for the process to drop all resources that could be
-	# needed by services started subsequently.  A last resort is to
-	# sleep for some time.
-	return $status
+	return 0
 }
 
 #
