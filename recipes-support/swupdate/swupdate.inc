@@ -130,9 +130,10 @@ python () {
     features = features.splitlines(True)
 
 
-    depends = d.getVar('DEPENDS', False)
+    depends = ''
     pn = d.getVar('PN')
-    rdepends = d.getVar("RDEPENDS:%s" % pn) or ""
+    rdepends = ''
+    mlprefix = d.getVar("MLPREFIX") or ""
 
     if 'CONFIG_REMOTE_HANDLER=y\n' in features:
         depends += ' zeromq'
@@ -188,8 +189,22 @@ python () {
     if 'CONFIG_DELTA=y\n' in features:
         depends += ' zchunk'
 
-    d.setVar('DEPENDS', depends)
-    d.setVar("RDEPENDS:%s" % pn, rdepends)
+    if mlprefix:
+        deps = ' '
+        rdeps = ' '
+        for dep in depends.split():
+            dep = mlprefix + dep + ' '
+            deps += dep
+
+         for rdep in rdepends.split():
+             rdep = mlprefix + dep + ' '
+             rdeps += rdep
+
+        depends = deps
+        repends = rdeps
+
+    d.appendVar('DEPENDS', depends)
+    d.appendVar("RDEPENDS:%s" % pn, rdepends)
 
     if 'CONFIG_MONGOOSE=y\n' in features:
         d.setVar('SWUPDATE_MONGOOSE', 'true')
