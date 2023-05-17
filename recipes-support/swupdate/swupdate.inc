@@ -196,9 +196,9 @@ python () {
             dep = mlprefix + dep + ' '
             deps += dep
 
-         for rdep in rdepends.split():
-             rdep = mlprefix + dep + ' '
-             rdeps += rdep
+        for rdep in rdepends.split():
+            rdep = mlprefix + dep + ' '
+            rdeps += rdep
 
         depends = deps
         repends = rdeps
