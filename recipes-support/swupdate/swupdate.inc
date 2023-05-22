@@ -70,7 +70,7 @@ FILES:${PN}-tools-ipc = " \
     ${bindir}/swupdate-ipc \
 "
 FILES:${PN} += " \
-    ${libdir}/tmpfiles.d \
+    ${nonarch_libdir}/tmpfiles.d \
     ${libdir}/swupdate/* \
     ${systemd_system_unitdir}/swupdate.socket \
     ${systemd_system_unitdir}/swupdate.service \
@@ -289,8 +289,8 @@ do_install () {
     install -m 644 ${WORKDIR}/swupdate-progress.service ${D}${systemd_system_unitdir}
 
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
-        install -d ${D}${libdir}/tmpfiles.d
-        install -m 0644 ${WORKDIR}/tmpfiles-swupdate.conf ${D}${libdir}/tmpfiles.d/swupdate.conf
+        install -d ${D}${nonarch_libdir}/tmpfiles.d
+        install -m 0644 ${WORKDIR}/tmpfiles-swupdate.conf ${D}${nonarch_libdir}/tmpfiles.d/swupdate.conf
         install -d ${D}${sysconfdir}/udev/rules.d
         install -m 0644 ${WORKDIR}/swupdate-usb.rules ${D}${sysconfdir}/udev/rules.d/
     else
