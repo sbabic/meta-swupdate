@@ -186,6 +186,9 @@ python () {
     if 'CONFIG_DISKPART=y\n' in features:
         depends += ' util-linux e2fsprogs'
 
+    if 'CONFIG_BTRFS_FILESYSTEM=y\n' in features:
+        depends += ' btrfs-tools'
+
     if 'CONFIG_DELTA=y\n' in features:
         depends += ' zchunk'
 
