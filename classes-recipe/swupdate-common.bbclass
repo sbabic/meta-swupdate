@@ -215,6 +215,7 @@ def swupdate_add_src_uri(d, list_for_cpio):
     import shutil
 
     s = d.getVar('S', True)
+    exclude = (d.getVar("SWUPDATE_SRC_URI_EXCLUDE") or "").split()
 
     fetch = bb.fetch2.Fetch([], d)
 
@@ -222,6 +223,8 @@ def swupdate_add_src_uri(d, list_for_cpio):
     for url in fetch.urls:
         local = fetch.localpath(url)
         filename = os.path.basename(local)
+        if filename in exclude:
+            continue
         aes_file = d.getVar('SWUPDATE_AES_FILE', True)
         if aes_file:
             key,iv = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE', True))
