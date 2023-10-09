@@ -62,6 +62,8 @@ There are 3 signing mechanisms supported by meta-swupdate at the moment:
 
   * Set `SWUPDATE_CMS_KEY ` to the full path of private key file
 
+  * (Optional) Set `SWUPDATE_CMS_EXTRA_CERTS` to a space delimited list of intermediate certificate files
+
 3. Custom signing tool:
 
   * Set variable: `SWUPDATE_SIGNING = "CUSTOM"`
