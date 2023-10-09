@@ -34,6 +34,18 @@ def get_pwd_file_args(d, passfile):
        pwd_args = ["-passin", "file:%s" % pwd_file]
     return pwd_args
 
+def get_certfile_args(d):
+    extra_certs = d.getVar('SWUPDATE_CMS_EXTRA_CERTS', True)
+    if not extra_certs:
+        return []
+    certfile_args = []
+    extra_paths = extra_certs.split()
+    for crt_path in extra_paths:
+        if not os.path.exists(crt_path):
+            bb.fatal("SWUPDATE_CMS_EXTRA_CERTS path %s doesn't exist" % (crt_path))
+        certfile_args.extend(["-certfile", crt_path])
+    return certfile_args
+
 def swupdate_getdepends(d):
     def adddep(depstr, deps):
         for i in (depstr or "").split():
@@ -205,7 +217,9 @@ def prepare_sw_description(d):
             if not os.path.exists(cms_key):
                 bb.fatal("SWUPDATE_CMS_KEY %s doesn't exist" % (cms_key))
             signcmd = ["openssl", "cms", "-sign", "-in", sw_desc, "-out", sw_desc_sig, "-signer", cms_cert, "-inkey", cms_key] + \
-                        get_pwd_file_args(d, 'SWUPDATE_PASSWORD_FILE') + ["-outform", "DER", "-nosmimecap", "-binary"]
+                        ["-outform", "DER", "-nosmimecap", "-binary"] + \
+                        get_pwd_file_args(d, 'SWUPDATE_PASSWORD_FILE') + \
+                        get_certfile_args(d)
         else:
             bb.fatal("Unrecognized SWUPDATE_SIGNING mechanism.")
         subprocess.run(' '.join(signcmd), shell=True, check=True)
