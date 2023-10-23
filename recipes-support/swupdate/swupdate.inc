@@ -192,6 +192,9 @@ python () {
     if 'CONFIG_DELTA=y\n' in features:
         depends += ' zchunk'
 
+    if 'CONFIG_EXT_FILESYSTEM=y\n' in features:
+        depends += ' e2fsprogs'
+
     if mlprefix:
         deps = ' '
         rdeps = ' '
