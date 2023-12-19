@@ -1,7 +1,7 @@
 SUMMARY="Image updater for Yocto projects"
 DESCRIPTION = "Application for automatic software update from USB Pen"
 SECTION="swupdate"
-DEPENDS += "libconfig zlib libubootenv"
+DEPENDS += "libconfig zlib libubootenv json-c"
 
 # SWUpdate licensing is described in the following pages:
 # https://sbabic.github.io/swupdate/licensing.html
