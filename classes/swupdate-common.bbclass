@@ -69,7 +69,7 @@ def swupdate_write_sha256(s):
     with open(os.path.join(s, "sw-description"), 'r') as f:
        for line in f:
           shastr = r"sha256.+=.+@(.+\")"
-          m = re.match(r"^(?P<before_placeholder>.+)(sha256|version).+[=:].*(?P<quote>[\'\"])@(?P<filename>.*)(?P=quote)", line)
+          m = re.match(r"^(?P<before_placeholder>.*)(sha256|version).+[=:].*(?P<quote>[\'\"])@(?P<filename>.*)(?P=quote)", line)
           if m:
               filename = m.group('filename')
               bb.warn("Syntax for sha256 changed, please use $swupdate_get_sha256(%s)" % filename)
@@ -85,7 +85,7 @@ def swupdate_write_sha256(s):
 def swupdate_exec_functions(d, s, write_lines):
     import re
     for index, line in enumerate(write_lines):
-        m = re.match(r"^(?P<before_placeholder>.+)\$(?P<bitbake_function_name>\w+)\((?P<parms>.+)\)(?P<after_placeholder>.+)$", line)
+        m = re.match(r"^(?P<before_placeholder>.*)\$(?P<bitbake_function_name>\w+)\((?P<parms>.+)\)(?P<after_placeholder>.*)$", line)
         if m:
             fun = m.group('bitbake_function_name') + "(d, \"" + s + "\", \"" + m.group('parms') + "\")"
             ret = eval(fun)
@@ -102,7 +102,7 @@ def swupdate_expand_bitbake_variables(d, s):
         for line in f:
             found = False
             while True:
-                m = re.match(r"^(?P<before_placeholder>.+)@@(?P<bitbake_variable_name>\w+)@@(?P<after_placeholder>.+)$", line)
+                m = re.match(r"^(?P<before_placeholder>.*)@@(?P<bitbake_variable_name>\w+)@@(?P<after_placeholder>.*)$", line)
                 if m:
                     bitbake_variable_value = d.getVar(m.group('bitbake_variable_name'), True)
                     if bitbake_variable_value is None:
@@ -112,7 +112,7 @@ def swupdate_expand_bitbake_variables(d, s):
                     found = True
                     continue
                 else:
-                    m = re.match(r"^(?P<before_placeholder>.+)@@(?P<bitbake_variable_name>.+)\[(?P<flag_var_name>.+)\]@@(?P<after_placeholder>.+)$", line)
+                    m = re.match(r"^(?P<before_placeholder>.*)@@(?P<bitbake_variable_name>.+)\[(?P<flag_var_name>.+)\]@@(?P<after_placeholder>.*)$", line)
                     if m:
                        bitbake_variable_value = (d.getVarFlag(m.group('bitbake_variable_name'), m.group('flag_var_name'), True) or "")
                        if bitbake_variable_value is None:
@@ -144,7 +144,7 @@ def swupdate_find_bitbake_variables(d):
             for line in f:
                 found = False
                 while True:
-                    m = re.match(r"^(?P<before_placeholder>.+)@@(?P<bitbake_variable_name>\w+)@@(?P<after_placeholder>.+)$", line)
+                    m = re.match(r"^(?P<before_placeholder>.*)@@(?P<bitbake_variable_name>\w+)@@(?P<after_placeholder>.*)$", line)
                     if m:
                         bitbake_variable_value = m.group('bitbake_variable_name')
                         vardeps.append(bitbake_variable_value)
@@ -152,7 +152,7 @@ def swupdate_find_bitbake_variables(d):
                         found = True
                         continue
                     else:
-                        m = re.match(r"^(?P<before_placeholder>.+)@@(?P<bitbake_variable_name>.+)\[(?P<flag_var_name>.+)\]@@(?P<after_placeholder>.+)$", line)
+                        m = re.match(r"^(?P<before_placeholder>.*)@@(?P<bitbake_variable_name>.+)\[(?P<flag_var_name>.+)\]@@(?P<after_placeholder>.*)$", line)
                         if m:
                             bitbake_variable_value = m.group('bitbake_variable_name')
                             vardeps.append(bitbake_variable_value)
