@@ -1,6 +1,6 @@
 SUMMARY = "Loader for swupdate"
 LICENSE = "MIT"
-SECTION = ""
+SECTION = "devel/lua"
 DEPENDS = "lua"
 LIC_FILES_CHKSUM = "file://${WORKDIR}/swupdate_handlers.lua;md5=354cf4af377edd962d2e8d78085d3ed7;beginline=1;endline=19"
 
