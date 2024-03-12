@@ -1,0 +1,34 @@
+From fee1c3febbb45bdc691c1fde79f537cdfc74ffc5 Mon Sep 17 00:00:00 2001
+From: Stefano Babic <stefano.babic@swupdate.org>
+Date: Mon, 19 Feb 2024 19:05:29 +0100
+Subject: [PATCH] BUG: regression checking IVT
+
+e48a866542 creates a regression bug. A valid IVT pointer is always
+passed because it is generally a zeroed array of chars, so passing null
+length string is a valid case and not an error, and in that case the IVT
+from the file should be taken.
+
+Signed-off-by: Stefano Babic <stefano.babic@swupdate.org>
+Signed-off-by: Ayoub Zaki <ayoub.zaki@embetrix.com>
+---
+ core/cpio_utils.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/core/cpio_utils.c b/core/cpio_utils.c
+index e5de2a7..7948dc2 100644
+--- a/core/cpio_utils.c
++++ b/core/cpio_utils.c
+@@ -514,8 +514,8 @@ static int __swupdate_copy(int fdin, unsigned char *inbuf, void *out, size_t nby
+ 
+ 	if (encrypted) {
+ 		aes_key = get_aes_key();
+-		if (imgivt) {
+-			if (!strlen(imgivt) || !is_hex_str(imgivt) || ascii_to_bin(ivtbuf, sizeof(ivtbuf), imgivt)) {
++		if (imgivt && strlen(imgivt)) {
++			if (!is_hex_str(imgivt) || ascii_to_bin(ivtbuf, sizeof(ivtbuf), imgivt)) {
+ 				ERROR("Invalid image ivt");
+ 				return -EINVAL;
+ 			}
+-- 
+2.34.1
+
