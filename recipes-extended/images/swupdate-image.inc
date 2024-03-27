@@ -4,6 +4,8 @@ USE_DEVFS = "1"
 # This variable is triggered to check if sysvinit must be overwritten by a single rcS
 export SYSVINIT = "no"
 
+VIRTUAL-RUNTIME_initscripts-swupdate = 'initscripts-swupdate'
+
 IMAGE_INSTALL = "base-files \
 		base-passwd \
 		busybox \
@@ -12,7 +14,7 @@ IMAGE_INSTALL = "base-files \
 		libconfig \
 		swupdate \
 		swupdate-www \
-                ${@bb.utils.contains('SWUPDATE_INIT', 'tiny', 'virtual/initscripts-swupdate', 'initscripts sysvinit', d)} \
+                ${@bb.utils.contains('SWUPDATE_INIT', 'tiny', '${VIRTUAL-RUNTIME_initscripts-swupdate}', 'initscripts sysvinit', d)} \
 		util-linux-sfdisk \
 		 "
 

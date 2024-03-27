@@ -7,8 +7,6 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 SRC_URI = "file://rcS.swupdate \
 	"
 
-RPROVIDES:${PN} += "virtual/initscripts-swupdate"
-
 S = "${WORKDIR}"
 
 inherit allarch update-alternatives
