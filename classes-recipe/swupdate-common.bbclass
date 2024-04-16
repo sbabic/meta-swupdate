@@ -102,7 +102,7 @@ def swupdate_expand_bitbake_variables(d, s):
         for line in f:
             found = False
             while True:
-                m = re.match(r"^(?P<before_placeholder>.+)@@(?P<bitbake_variable_name>\w+)@@(?P<after_placeholder>.+)$", line)
+                m = re.match(r"^(?P<before_placeholder>.*)@@(?P<bitbake_variable_name>\w+)@@(?P<after_placeholder>.*)$", line)
                 if m:
                     bitbake_variable_value = d.getVar(m.group('bitbake_variable_name'), True)
                     if bitbake_variable_value is None:
@@ -112,7 +112,7 @@ def swupdate_expand_bitbake_variables(d, s):
                     found = True
                     continue
                 else:
-                    m = re.match(r"^(?P<before_placeholder>.+)@@(?P<bitbake_variable_name>.+)\[(?P<flag_var_name>.+)\]@@(?P<after_placeholder>.+)$", line)
+                    m = re.match(r"^(?P<before_placeholder>.*)@@(?P<bitbake_variable_name>.+)\[(?P<flag_var_name>.+)\]@@(?P<after_placeholder>.*)$", line)
                     if m:
                        bitbake_variable_value = (d.getVarFlag(m.group('bitbake_variable_name'), m.group('flag_var_name'), True) or "")
                        if bitbake_variable_value is None:
@@ -144,7 +144,7 @@ def swupdate_find_bitbake_variables(d):
             for line in f:
                 found = False
                 while True:
-                    m = re.match(r"^(?P<before_placeholder>.+)@@(?P<bitbake_variable_name>\w+)@@(?P<after_placeholder>.+)$", line)
+                    m = re.match(r"^(?P<before_placeholder>.*)@@(?P<bitbake_variable_name>\w+)@@(?P<after_placeholder>.*)$", line)
                     if m:
                         bitbake_variable_value = m.group('bitbake_variable_name')
                         vardeps.append(bitbake_variable_value)
@@ -152,7 +152,7 @@ def swupdate_find_bitbake_variables(d):
                         found = True
                         continue
                     else:
-                        m = re.match(r"^(?P<before_placeholder>.+)@@(?P<bitbake_variable_name>.+)\[(?P<flag_var_name>.+)\]@@(?P<after_placeholder>.+)$", line)
+                        m = re.match(r"^(?P<before_placeholder>.*)@@(?P<bitbake_variable_name>.+)\[(?P<flag_var_name>.+)\]@@(?P<after_placeholder>.*)$", line)
                         if m:
                             bitbake_variable_value = m.group('bitbake_variable_name')
                             vardeps.append(bitbake_variable_value)
