@@ -12,6 +12,13 @@ This layer depends on:
 URI: git://github.com/openembedded/meta-openembedded.git
 subdirectory: meta-oe
 
+Documentation for the layer
+---------------------------
+
+Documentation for meta-swupdate is part of SWUpdate's docs.
+
+Check for http://sbabic.github.io/swupdate/building-with-yocto.html.
+
 BitBake variable expansion
 --------------------------
 
@@ -73,7 +80,7 @@ mechanism must exist to provide the passphrase.
 Maintainer
 ----------
 
-Stefano Babic <sbabic@denx.de>
+Stefano Babic <stefano.babic@swupdate.org>
 
 Submitting patches
 ------------------
