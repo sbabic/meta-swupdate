@@ -1,3 +1,4 @@
+inherit image_types
 #
 # The key must be generated as described in doc
 # with
