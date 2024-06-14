@@ -179,6 +179,7 @@ def prepare_sw_description(d):
         bb.note("Encryption of sw-description")
         shutil.copyfile(os.path.join(s, 'sw-description'), os.path.join(s, 'sw-description.plain'))
         key,iv = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE'))
+        iv = swupdate_get_IV(d, s, 'sw-description')
         swupdate_encrypt_file(os.path.join(s, 'sw-description.plain'), os.path.join(s, 'sw-description'), key, iv)
 
     signing = d.getVar('SWUPDATE_SIGNING')
@@ -249,6 +250,7 @@ def swupdate_add_src_uri(d, list_for_cpio):
                 bb.note("Encryption requested for %s" %(filename))
                 if not key or not iv:
                     bb.fatal("Encryption required, but no key found")
+                iv = swupdate_get_IV(d, s, filename)
                 swupdate_encrypt_file(local, dst, key, iv)
             else:
                 shutil.copyfile(local, dst)
@@ -265,6 +267,7 @@ def add_image_to_swu(d, deploydir, imagename, s, encrypt, list_for_cpio):
     if encrypt == '1':
         key,iv = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE'))
         bb.note("Encryption requested for %s" %(imagename))
+        iv = swupdate_get_IV(d, s, imagename)
         swupdate_encrypt_file(src, dst, key, iv)
     else:
         shutil.copyfile(src, dst)
