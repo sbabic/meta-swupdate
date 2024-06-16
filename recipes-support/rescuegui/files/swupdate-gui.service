@@ -1,0 +1,11 @@
+[Unit]
+Description=SWUpdate Light GUI
+After=swupdate.service
+
+[Service]
+Type=Simple
+ExecStartPre=/bin/sh -c "echo 0 > /sys/class/graphics/fbcon/cursor_blink"
+ExecStart=/usr/bin/recovery_gui
+
+[Install]
+WantedBy=multi-user.target
