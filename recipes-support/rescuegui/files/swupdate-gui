@@ -1,0 +1,72 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          recovery_gui
+# Required-Start:    $local_fs
+# Should-Start:
+# Required-Stop:     $local_fs
+# Should-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start recovery_gui application
+### END INIT INFO
+
+# The definition of actions:
+# start         start the service
+# stop          stop the service
+# restart       stop and restart the service if the service is already running,
+#               otherwise start the service
+
+# The start, stop, and  restart, actions shall be supported
+# by all init scripts;
+
+# PATH should only include /usr/* if it runs after the mountnfs.sh script
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+
+DESC="GUI for SWUpdate"
+NAME="recovery_gui"
+DAEMON=/usr/bin/recovery_gui
+PIDFILE=/var/run/$NAME.pid
+
+# Exit if the package is not installed
+[ -x "$DAEMON" ] || exit 0
+
+# Function that starts the daemon/service
+#
+do_start() {
+	echo "Starting $DESC ..."
+
+	#Export the the screen orientation
+	rotation=$(fw_printenv -n screen_orientation)
+	export SCREEN_ORIENTATION_ANGLE=${rotation}
+	echo 0 > /sys/class/graphics/fbcon/cursor_blink
+	export LD_PRELOAD=/lib/libpthread.so.0
+
+	#Start recovery_gui
+	start-stop-daemon --start --background --pidfile $PIDFILE --make-pidfile --exec $DAEMON
+}
+
+#
+# Function that stops the daemon/service
+#
+do_stop() {
+	echo "Stopping $DESC"
+	#Stop recovery_gui
+	start-stop-daemon --stop --pidfile $PIDFILE
+}
+
+case "$1" in
+start)
+	do_start
+	;;
+stop)
+	do_stop || exit $?
+	;;
+restart)
+	do_stop
+	do_start
+	;;
+*)
+	echo "Usage: $0 {start|stop|restart}" >&2
+	exit 3
+	;;
+esac
