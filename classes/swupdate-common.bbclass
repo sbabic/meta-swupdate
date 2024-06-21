@@ -69,7 +69,7 @@ def swupdate_write_sha256(s):
     with open(os.path.join(s, "sw-description"), 'r') as f:
        for line in f:
           shastr = r"sha256.+=.+@(.+\")"
-          m = re.match(r"^(?P<before_placeholder>.+)(sha256|version).+[=:].*(?P<quote>[\'\"])@(?P<filename>.*)(?P=quote)", line)
+          m = re.match(r"^(?P<before_placeholder>.*)(sha256|version).+[=:].*(?P<quote>[\'\"])@(?P<filename>.*)(?P=quote)", line)
           if m:
               filename = m.group('filename')
               bb.warn("Syntax for sha256 changed, please use $swupdate_get_sha256(%s)" % filename)
@@ -85,7 +85,7 @@ def swupdate_write_sha256(s):
 def swupdate_exec_functions(d, s, write_lines):
     import re
     for index, line in enumerate(write_lines):
-        m = re.match(r"^(?P<before_placeholder>.+)\$(?P<bitbake_function_name>\w+)\((?P<parms>.+)\)(?P<after_placeholder>.+)$", line)
+        m = re.match(r"^(?P<before_placeholder>.*)\$(?P<bitbake_function_name>\w+)\((?P<parms>.+)\)(?P<after_placeholder>.*)$", line)
         if m:
             fun = m.group('bitbake_function_name') + "(d, \"" + s + "\", \"" + m.group('parms') + "\")"
             ret = eval(fun)
