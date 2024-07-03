@@ -19,7 +19,7 @@ SRC_URI += "file://sw-description"
 SWUPDATE_IMAGES += "${IMAGE_LINK_NAME}"
 
 python () {
-    image = d.getVar('IMAGE_LINK_NAME', True)
+    image = d.getVar('IMAGE_LINK_NAME')
     if d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image) is None:
        flag = d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", d.getVar('IMAGE_BASENAME'))
        if flag:
@@ -38,8 +38,8 @@ python do_swupdate_copy_swdescription() {
 
     import shutil
 
-    workdir = d.getVar('S', True)
-    image = d.getVar('IMAGE_LINK_NAME', True)
+    workdir = d.getVar('S')
+    image = d.getVar('IMAGE_LINK_NAME')
     filespath = d.getVar('FILESPATH')
     sw_desc_path = bb.utils.which(filespath, "sw-description")
     shutil.copyfile(sw_desc_path, os.path.join(workdir, "sw-description"))
