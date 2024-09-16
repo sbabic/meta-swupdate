@@ -148,7 +148,7 @@ python () {
     if 'CONFIG_JSON=y\n' in features:
         depends += ' json-c'
 
-    if 'CONFIG_SYSTEMD=y\n' in features:
+    if 'CONFIG_SYSTEMD=y\n' in features or bb.utils.contains('DISTRO_FEATURES', 'systemd', True, False ,d):
         depends += ' systemd'
 
     if 'CONFIG_ARCHIVE=y\n' in features:
@@ -243,6 +243,14 @@ python () {
             if swver_file != "":
                d.setVar('SWUPDATE_SW_VERSIONS_FILE', swver_file)
 }
+
+# in case systemd is set as a distro feature this will add it to the defconfig
+update_config_systemd(){
+    if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
+        sed -i -e 's/# CONFIG_SYSTEMD is not set/CONFIG_SYSTEMD=y/g' ${WORKDIR}/defconfig;
+    fi
+}
+do_configure[prefuncs] += "update_config_systemd"
 
 do_configure () {
     cat > ${WORKDIR}/.config <<HEREDOC
