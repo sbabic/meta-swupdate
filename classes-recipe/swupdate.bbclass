@@ -36,8 +36,6 @@
 inherit swupdate-common
 inherit image-artifact-names
 
-S = "${WORKDIR}/${PN}"
-
 IMAGE_DEPENDS ?= ""
 
 do_configure[noexec] = "1"

@@ -4,6 +4,9 @@
 
 inherit swupdate-lib
 
+S = "${WORKDIR}/sources"
+UNPACKDIR = "${S}"
+
 DEPENDS += "\
     cpio-native \
     ${@ 'openssl-native' if d.getVar('SWUPDATE_SIGNING') or d.getVar('SWUPDATE_ENCRYPT_SWDESC') or d.getVarFlags('SWUPDATE_IMAGES_ENCRYPTED') else ''} \
@@ -322,10 +325,8 @@ python do_swuimage () {
     import shutil
 
     list_for_cpio = ["sw-description"]
-    unpackdir = d.getVar('UNPACKDIR')
     s = d.getVar('S')
     imgdeploydir = d.getVar('SWUDEPLOYDIR')
-    shutil.copyfile(os.path.join(unpackdir, "sw-description"), os.path.join(s, "sw-description"))
 
     if d.getVar('SWUPDATE_SIGNING'):
         list_for_cpio.append('sw-description.sig')
