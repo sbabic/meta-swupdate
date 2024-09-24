@@ -7,7 +7,7 @@ DEPENDS += "libconfig zlib libubootenv json-c"
 # https://sbabic.github.io/swupdate/licensing.html
 # rst form: file://doc/source/licensing.rst
 LICENSE = "GPL-2.0-or-later & LGPL-2.1-only & MIT"
-LICENSE:${PN}-lua = "LGPL-2.1-only"
+LICENSE:${PN}-lua = "LGPL-2.1-only & MIT"
 LICENSE:${PN}-www = "MIT"
 
 LIC_FILES_CHKSUM = "file://LICENSES/GPL-2.0-only.txt;md5=4ee23c52855c222cba72583d301d2338 \
