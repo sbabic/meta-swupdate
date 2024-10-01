@@ -319,10 +319,12 @@ python do_swuimage () {
     import shutil
 
     list_for_cpio = ["sw-description"]
-    workdir = d.getVar('WORKDIR', True)
+    unpackdir = d.getVar('UNPACKDIR', True)
     s = d.getVar('S', True)
     imgdeploydir = d.getVar('SWUDEPLOYDIR', True)
-    shutil.copyfile(os.path.join(workdir, "sw-description"), os.path.join(s, "sw-description"))
+    if not os.path.exists(s):
+        os.makedirs(s)
+    shutil.copyfile(os.path.join(unpackdir, "sw-description"), os.path.join(s, "sw-description"))
 
     if d.getVar('SWUPDATE_SIGNING', True):
         list_for_cpio.append('sw-description.sig')
