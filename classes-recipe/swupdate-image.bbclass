@@ -16,10 +16,10 @@ inherit image-artifact-names
 S = "${WORKDIR}/${PN}"
 
 SRC_URI += "file://sw-description"
-SWUPDATE_IMAGES += "${IMAGE_LINK_NAME}"
+SWUPDATE_IMAGES += "${IMAGE_BASENAME}"
 
 python () {
-    image = d.getVar('IMAGE_LINK_NAME')
+    image = d.getVar('IMAGE_BASENAME')
     if d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image) is None:
        flag = d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", d.getVar('IMAGE_BASENAME'))
        if flag:
