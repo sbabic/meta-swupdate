@@ -39,13 +39,9 @@ python do_swupdate_copy_swdescription() {
     import shutil
 
     workdir = d.getVar('S')
-    image = d.getVar('IMAGE_LINK_NAME')
     filespath = d.getVar('FILESPATH')
     sw_desc_path = bb.utils.which(filespath, "sw-description")
     shutil.copyfile(sw_desc_path, os.path.join(workdir, "sw-description"))
-
-    if d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image) is None:
-       bb.fatal("SWUPDATE_IMAGES_FSTYPES[%s] is not set !" % image)
 }
 
 addtask swupdate_copy_swdescription before do_image_complete after do_unpack
