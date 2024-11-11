@@ -20,7 +20,9 @@ SWUPDATE_IMAGES += "${IMAGE_BASENAME}"
 
 python () {
     image = d.getVar('IMAGE_BASENAME')
-    if d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image) is None:
+    t = d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image)
+    suffix = d.getVar("IMAGE_NAME_SUFFIX") or ""
+    if t is None:
        flag = d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", d.getVar('IMAGE_BASENAME'))
        if flag:
           d.setVarFlag("SWUPDATE_IMAGES_FSTYPES", image, flag)
@@ -30,8 +32,10 @@ python () {
               bb.fatal("SWUPDATE_IMAGES_FSTYPES[%s] is not set !" % image)
           for t in fstypes:
               bb.warn("SWUPDATE_IMAGES_FSTYPES[%s] not set, setting to %s" % (image, t))
-              d.setVarFlag("SWUPDATE_IMAGES_FSTYPES", image, "." + t)
+              d.setVarFlag("SWUPDATE_IMAGES_FSTYPES", image, suffix + "." + t)
               break
+    else:
+       d.setVarFlag("SWUPDATE_IMAGES_FSTYPES", image, suffix + t)
 }
 
 python do_swupdate_copy_swdescription() {
