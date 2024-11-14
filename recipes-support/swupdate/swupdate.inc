@@ -10,10 +10,18 @@ LICENSE = "GPL-2.0-or-later & LGPL-2.1-only & MIT"
 LICENSE:${PN}-lua = "LGPL-2.1-only & MIT"
 LICENSE:${PN}-www = "MIT"
 
-LIC_FILES_CHKSUM = "file://LICENSES/GPL-2.0-only.txt;md5=4ee23c52855c222cba72583d301d2338 \
-                    file://LICENSES/LGPL-2.1-or-later.txt;md5=4fbd65380cdd255951079008b364516c \
-                    file://LICENSES/MIT.txt;md5=838c366f69b72c5df05c96dff79b35f2 \
-                    file://LICENSES/BSD-3-Clause.txt;md5=4a1190eac56a9db675d58ebe86eaf50c"
+LIC_FILES_CHKSUM = " \
+    file://LICENSES/BSD-1-Clause.txt;md5=4c75b3902cf6a01969906bcae9cf8cd6 \
+    file://LICENSES/BSD-3-Clause.txt;md5=4a1190eac56a9db675d58ebe86eaf50c \
+    file://LICENSES/CC0-1.0.txt;md5=0ceb3372c9595f0a8067e55da801e4a1 \
+    file://LICENSES/CC-BY-SA-4.0.txt;md5=7130783469368ceb248a4f03e89ea4b8 \
+    file://LICENSES/GPL-2.0-only.txt;md5=4ee23c52855c222cba72583d301d2338 \
+    file://LICENSES/GPL-2.0-or-later.txt;md5=261bea1168c0bdfa73232ee90df11eb6 \
+    file://LICENSES/ISC.txt;md5=a6fd9988b21ff227cdfb961fd4b23ba4 \
+    file://LICENSES/LGPL-2.1-or-later.txt;md5=4fbd65380cdd255951079008b364516c \
+    file://LICENSES/MIT.txt;md5=838c366f69b72c5df05c96dff79b35f2 \
+    file://LICENSES/OFL-1.1.txt;md5=7a75f82b54b8af9107d35c6d3cab23ac \
+"
 
 inherit cml1 update-rc.d systemd pkgconfig
 
