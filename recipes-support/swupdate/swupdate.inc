@@ -7,6 +7,7 @@ DEPENDS += "libconfig zlib libubootenv json-c"
 # https://sbabic.github.io/swupdate/licensing.html
 # rst form: file://doc/source/licensing.rst
 LICENSE = "GPL-2.0-only & GPL-2.0-or-later & LGPL-2.1-or-later & LGPL-2.1-only & MIT & ISC & BSD-1-Clause & BSD-3-Clause"
+LICENSE:${PN}-ipc = "LGPL-2.1-or-later"
 LICENSE:${PN}-lua = "LGPL-2.1-only & MIT"
 LICENSE:${PN}-www = "MIT"
 
@@ -43,6 +44,7 @@ LTOEXTRA += "-flto-partition=none"
 
 PACKAGES =+ " \
     ${PN}-client \
+    ${PN}-ipc \
     ${PN}-lua \
     ${PN}-progress \
     ${PN}-tools \
@@ -60,6 +62,7 @@ ALLOW_EMPTY:${PN}-tools-hawkbit = "1"
 ALLOW_EMPTY:${PN}-tools-ipc = "1"
 
 FILES:${PN}-client = "${bindir}/swupdate-client"
+FILES:${PN}-ipc = "${libdir}/libswupdate${SOLIBS}"
 FILES:${PN}-lua += "${libdir}/lua/"
 FILES:${PN}-progress = " \
     ${bindir}/swupdate-progress \
@@ -95,6 +98,9 @@ RDEPENDS:${PN}-usb += "${PN}-client"
 RDEPENDS:${PN}-tools += "${PN}-client ${PN}-progress ${PN}-tools-hawkbit \
     ${@bb.utils.contains('DISTRO_FEATURES','systemd','${PN}-usb','',d)} \
 "
+
+RDEPENDS:${PN}-dev += "${PN}-ipc"
+RRECOMMENDS:${PN} += "${PN}-ipc"
 
 S = "${WORKDIR}/git"
 B = "${WORKDIR}/build"
