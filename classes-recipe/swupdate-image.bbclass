@@ -46,7 +46,7 @@ python do_swupdate_copy_swdescription() {
     shutil.copyfile(sw_desc_path, os.path.join(workdir, "sw-description"))
 }
 
-addtask swupdate_copy_swdescription before do_image_complete after do_unpack
+addtask swupdate_copy_swdescription before do_image_complete after do_image
 addtask swuimage after do_swupdate_copy_swdescription do_image_complete before do_build
 
 # define setscene task
