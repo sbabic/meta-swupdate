@@ -17,7 +17,8 @@ LIC_FILES_CHKSUM = "file://LICENSES/GPL-2.0-only.txt;md5=4ee23c52855c222cba72583
 
 inherit cml1 update-rc.d systemd pkgconfig
 
-SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=https;branch=master \
+SRCBRANCH ?= "master"
+SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=https;branch=${SRCBRANCH} \
     file://defconfig \
     file://swupdate \
     file://swupdate.sh \
