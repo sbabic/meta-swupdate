@@ -2,6 +2,7 @@ From 55709c14d9ae4becd2d716117604b5d399465b63 Mon Sep 17 00:00:00 2001
 From: Kas User <kas@example.com>
 Date: Wed, 22 Jun 2022 14:05:03 +0200
 Subject: [PATCH] Fix for OE
+Upstream-Status: Inappropriate [oe specific]
 
 ---
  Makefile |  2 +-
