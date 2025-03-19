@@ -208,6 +208,14 @@ def prepare_sw_description(d):
             if not os.path.exists(privkey):
                 bb.fatal("SWUPDATE_PRIVATE_KEY %s doesn't exist" % (privkey))
             signcmd = ["openssl", "dgst", "-sha256", "-sign", privkey] + get_pwd_file_args(d, 'SWUPDATE_PASSWORD_FILE') + ["-out", sw_desc_sig, sw_desc]
+        elif signing == "RSA-PSS":
+            privkey = d.getVar('SWUPDATE_PRIVATE_KEY', True)
+            if not privkey:
+                bb.fatal("SWUPDATE_PRIVATE_KEY isn't set")
+            if not os.path.exists(privkey):
+                bb.fatal("SWUPDATE_PRIVATE_KEY %s doesn't exist" % (privkey))
+            signcmd = ["openssl", "dgst", "-sha256", "-sign", privkey] + get_pwd_file_args(d, 'SWUPDATE_PASSWORD_FILE') + \
+                      ["-sigopt", "rsa_padding_mode:pss", "-sigopt", "rsa_pss_saltlen:-2", "-out", sw_desc_sig, sw_desc]
         elif signing == "CMS":
             cms_cert = d.getVar('SWUPDATE_CMS_CERT')
             if not cms_cert:
