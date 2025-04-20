@@ -1,6 +1,6 @@
-SUMMARY="Image updater for Yocto projects"
+SUMMARY = "Image updater for Yocto projects"
 DESCRIPTION = "Application for automatic software update from USB Pen"
-SECTION="swupdate"
+SECTION = "swupdate"
 DEPENDS += "libconfig zlib libubootenv json-c"
 
 # SWUpdate licensing is described in the following pages:
