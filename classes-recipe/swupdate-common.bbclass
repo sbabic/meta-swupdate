@@ -66,24 +66,16 @@ def swupdate_getdepends(d):
 
     return depstr
 
-def swupdate_write_sha256(s):
+def swupdate_write_sha256(s, lines):
     import re
-    write_lines = []
-    with open(os.path.join(s, "sw-description"), 'r') as f:
-       for line in f:
-          shastr = r"sha256.+=.+@(.+\")"
-          m = re.match(r"^(?P<before_placeholder>.+)(sha256|version).+[=:].*(?P<quote>[\'\"])@(?P<filename>.*)(?P=quote)", line)
-          if m:
-              filename = m.group('filename')
-              bb.warn("Syntax for sha256 changed, please use $swupdate_get_sha256(%s)" % filename)
-              hash = swupdate_get_sha256(None, s, filename)
-              write_lines.append(line.replace("@%s" % (filename), hash))
-          else:
-              write_lines.append(line)
-
-    with open(os.path.join(s, "sw-description"), 'w+') as f:
-        for line in write_lines:
-            f.write(line)
+    for index, line in enumerate(lines):
+       shastr = r"sha256.+=.+@(.+\")"
+       m = re.match(r"^(?P<before_placeholder>.+)(sha256|version).+[=:].*(?P<quote>[\'\"])@(?P<filename>.*)(?P=quote)", line)
+       if m:
+           filename = m.group('filename')
+           bb.warn("Syntax for sha256 changed, please use $swupdate_get_sha256(%s)" % filename)
+           hash = swupdate_get_sha256(None, s, filename)
+           lines[index] = line.replace("@%s" % (filename), hash)
 
 def swupdate_exec_functions(d, s, write_lines):
     import re
@@ -130,6 +122,7 @@ def swupdate_expand_bitbake_variables(d, s):
             write_lines.append(line)
 
     swupdate_exec_functions(d, s, write_lines)
+    swupdate_write_sha256(s, write_lines)
 
     with open(os.path.join(s, "sw-description"), 'w+') as f:
         for line in write_lines:
@@ -174,8 +167,6 @@ def prepare_sw_description(d):
 
     s = d.getVar('S')
     swupdate_expand_bitbake_variables(d, s)
-
-    swupdate_write_sha256(s)
 
     encrypt = d.getVar('SWUPDATE_ENCRYPT_SWDESC')
     if encrypt:
