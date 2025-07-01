@@ -27,12 +27,12 @@ def swupdate_extract_keys(keyfile_path):
 
     return key,iv
 
-def swupdate_get_sha256(d, s, filename):
+def swupdate_get_sha256(d, dirname, filename):
     import hashlib
 
     m = hashlib.sha256()
 
-    with open(os.path.join(s, filename), 'rb') as f:
+    with open(os.path.join(dirname, filename), 'rb') as f:
         while True:
             data = f.read(1024)
             if not data:
@@ -40,12 +40,12 @@ def swupdate_get_sha256(d, s, filename):
             m.update(data)
     return m.hexdigest()
 
-def swupdate_get_IV(d, s, filename):
+def swupdate_get_IV(d, _, filename):
     # By default preserve original behavior: use IV from SWUPDATE_AES_FILE.
     key,iv = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE', True))
     return iv
 
-def swupdate_get_unique_IV(d, s, filename):
+def swupdate_get_unique_IV(d, _, filename):
     # New behavior: use unique random IV for each filename.
     from secrets import token_hex
     iv = d.getVarFlag("SWUPDATE_IV", filename, True)
@@ -54,19 +54,19 @@ def swupdate_get_unique_IV(d, s, filename):
         d.setVarFlag("SWUPDATE_IV", filename, iv)
     return iv
 
-def swupdate_get_size(d, s, filename):
+def swupdate_get_size(d, dirname, filename):
     import os
 
-    fname = os.path.join(s, filename)
+    fname = os.path.join(dirname, filename)
     fsize = os.path.getsize(fname)
     return str(fsize)
 
-def swupdate_sign_file(d, s, filename):
+def swupdate_sign_file(d, dirname, filename):
     import subprocess
     import magic
     import base64
 
-    fname = os.path.join(s, filename)
+    fname = os.path.join(dirname, filename)
     mime = magic.Magic(mime=True)
     ftype = mime.from_file(fname)
 
@@ -96,7 +96,7 @@ def swupdate_sign_file(d, s, filename):
 
     return hash
 
-def swupdate_get_pkgvar(d, s, parms):
+def swupdate_get_pkgvar(d, _, parms):
     import re
     import oe.packagedata
 
