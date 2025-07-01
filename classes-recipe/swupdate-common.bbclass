@@ -5,6 +5,7 @@
 inherit swupdate-lib
 
 S = "${WORKDIR}/sources"
+B = "${WORKDIR}/build"
 UNPACKDIR = "${S}"
 
 DEPENDS += "\
@@ -18,7 +19,7 @@ SSTATE_SKIP_CREATION:task-swuimage = '1'
 SWUDEPLOYDIR = "${WORKDIR}/deploy-${PN}-swuimage"
 
 do_swuimage[dirs] = "${SWUDEPLOYDIR}"
-do_swuimage[cleandirs] += "${SWUDEPLOYDIR}"
+do_swuimage[cleandirs] += "${B} ${SWUDEPLOYDIR}"
 do_swuimage[sstate-inputdirs] = "${SWUDEPLOYDIR}"
 do_swuimage[sstate-outputdirs] = "${DEPLOY_DIR_IMAGE}"
 do_swuimage[stamp-extra-info] = "${MACHINE}"
@@ -66,7 +67,7 @@ def swupdate_getdepends(d):
 
     return depstr
 
-def swupdate_write_sha256(s, lines):
+def swupdate_write_sha256(b, lines):
     import re
     for index, line in enumerate(lines):
        shastr = r"sha256.+=.+@(.+\")"
@@ -74,22 +75,22 @@ def swupdate_write_sha256(s, lines):
        if m:
            filename = m.group('filename')
            bb.warn("Syntax for sha256 changed, please use $swupdate_get_sha256(%s)" % filename)
-           hash = swupdate_get_sha256(None, s, filename)
+           hash = swupdate_get_sha256(None, b, filename)
            lines[index] = line.replace("@%s" % (filename), hash)
 
-def swupdate_exec_functions(d, s, write_lines):
+def swupdate_exec_functions(d, b, write_lines):
     import re
     for index, line in enumerate(write_lines):
         m = re.match(r"^(?P<before_placeholder>.+)\$(?P<bitbake_function_name>\w+)\((?P<parms>.+)\)(?P<after_placeholder>.+)$", line)
         if m:
-            fun = m.group('bitbake_function_name') + "(d, \"" + s + "\", \"" + m.group('parms') + "\")"
+            fun = m.group('bitbake_function_name') + "(d, \"" + b + "\", \"" + m.group('parms') + "\")"
             ret = eval(fun)
             bb.debug (2, "%s return %s " % (m.group('bitbake_function_name'), ret))
             line = m.group('before_placeholder') + ret + m.group('after_placeholder') + "\n"
             write_lines[index] = line
 
 
-def swupdate_expand_bitbake_variables(d, s):
+def swupdate_expand_bitbake_variables(d, s, b):
     write_lines = []
 
     with open(os.path.join(s, "sw-description"), 'r') as f:
@@ -121,10 +122,10 @@ def swupdate_expand_bitbake_variables(d, s):
 
             write_lines.append(line)
 
-    swupdate_exec_functions(d, s, write_lines)
-    swupdate_write_sha256(s, write_lines)
+    swupdate_exec_functions(d, b, write_lines)
+    swupdate_write_sha256(b, write_lines)
 
-    with open(os.path.join(s, "sw-description"), 'w+') as f:
+    with open(os.path.join(b, "sw-description"), 'w+') as f:
         for line in write_lines:
             f.write(line)
 
@@ -166,15 +167,16 @@ def prepare_sw_description(d):
     import subprocess
 
     s = d.getVar('S')
-    swupdate_expand_bitbake_variables(d, s)
+    b = d.getVar('B')
+    swupdate_expand_bitbake_variables(d, s, b)
 
     encrypt = d.getVar('SWUPDATE_ENCRYPT_SWDESC')
     if encrypt:
         bb.note("Encryption of sw-description")
-        shutil.copyfile(os.path.join(s, 'sw-description'), os.path.join(s, 'sw-description.plain'))
+        shutil.copyfile(os.path.join(b, 'sw-description'), os.path.join(b, 'sw-description.plain'))
         key,iv = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE'))
-        iv = swupdate_get_IV(d, s, 'sw-description')
-        swupdate_encrypt_file(os.path.join(s, 'sw-description.plain'), os.path.join(s, 'sw-description'), key, iv)
+        iv = swupdate_get_IV(d, None, 'sw-description')
+        swupdate_encrypt_file(os.path.join(b, 'sw-description.plain'), os.path.join(b, 'sw-description'), key, iv)
 
     signing = d.getVar('SWUPDATE_SIGNING')
     if signing == "1":
@@ -182,8 +184,8 @@ def prepare_sw_description(d):
         signing = "RSA"
     if signing:
 
-        sw_desc_sig = os.path.join(s, 'sw-description.sig')
-        sw_desc =  os.path.join(s, 'sw-description.plain' if encrypt else 'sw-description')
+        sw_desc_sig = os.path.join(b, 'sw-description.sig')
+        sw_desc =  os.path.join(b, 'sw-description.plain' if encrypt else 'sw-description')
 
         if signing == "CUSTOM":
             signcmd = []
@@ -223,7 +225,7 @@ def prepare_sw_description(d):
 def swupdate_add_src_uri(d, list_for_cpio):
     import shutil
 
-    s = d.getVar('S')
+    b = d.getVar('B')
     exclude = (d.getVar("SWUPDATE_SRC_URI_EXCLUDE") or "").split()
 
     fetch = bb.fetch2.Fetch([], d)
@@ -239,29 +241,29 @@ def swupdate_add_src_uri(d, list_for_cpio):
             key,iv = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE'))
         if (filename != 'sw-description') and (os.path.isfile(local)):
             encrypted = (d.getVarFlag("SWUPDATE_IMAGES_ENCRYPTED", filename) or "")
-            dst = os.path.join(s, "%s" % filename )
+            dst = os.path.join(b, filename)
             if encrypted == '1':
                 bb.note("Encryption requested for %s" %(filename))
                 if not key or not iv:
                     bb.fatal("Encryption required, but no key found")
-                iv = swupdate_get_IV(d, s, filename)
+                iv = swupdate_get_IV(d, None, filename)
                 swupdate_encrypt_file(local, dst, key, iv)
             else:
                 shutil.copyfile(local, dst)
             list_for_cpio.append(filename)
 
-def add_image_to_swu(d, deploydir, imagename, s, encrypt, list_for_cpio):
+def add_image_to_swu(d, deploydir, imagename, b, encrypt, list_for_cpio):
     import shutil
 
     src = os.path.join(deploydir, imagename)
     if not os.path.isfile(src):
         return False
     target_imagename = os.path.basename(imagename)  # allow images in subfolders of DEPLOY_DIR_IMAGE
-    dst = os.path.join(s, target_imagename)
+    dst = os.path.join(b, target_imagename)
     if encrypt == '1':
         key,iv = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE'))
         bb.note("Encryption requested for %s" %(imagename))
-        iv = swupdate_get_IV(d, s, imagename)
+        iv = swupdate_get_IV(d, None, imagename)
         swupdate_encrypt_file(src, dst, key, iv)
     else:
         shutil.copyfile(src, dst)
@@ -274,7 +276,7 @@ def swupdate_add_artifacts(d, list_for_cpio):
     images = (d.getVar('SWUPDATE_IMAGES') or "").split()
     deploydir = d.getVar('DEPLOY_DIR_IMAGE')
     imgdeploydir = d.getVar('SWUDEPLOYDIR')
-    s = d.getVar('S')
+    b = d.getVar('B')
     for image in images:
         fstypes = (d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image) or "").split()
         encrypted = (d.getVarFlag("SWUPDATE_IMAGES_ENCRYPTED", image) or "")
@@ -289,19 +291,19 @@ def swupdate_add_artifacts(d, list_for_cpio):
             for fstype in fstypes:
                 image_found = False
                 for imagebase in imagebases:
-                    image_found = add_image_to_swu(d, deploydir, imagebase + fstype, s, encrypted, list_for_cpio)
+                    image_found = add_image_to_swu(d, deploydir, imagebase + fstype, b, encrypted, list_for_cpio)
                     if image_found:
                         break
                 if not image_found:
                     bb.fatal("swupdate cannot find image file: %s" % os.path.join(deploydir, imagebase + fstype))
         else:  # Allow also complete entries like "image.ext4.gz" in SWUPDATE_IMAGES
-            if not add_image_to_swu(d, deploydir, image, s, encrypted, list_for_cpio):
+            if not add_image_to_swu(d, deploydir, image, b, encrypted, list_for_cpio):
                 bb.fatal("swupdate cannot find %s image file" % image)
 
 
 def swupdate_create_cpio(d, swudeploydir, list_for_cpio):
-    s = d.getVar('S')
-    os.chdir(s)
+    b = d.getVar('B')
+    os.chdir(b)
     updateimage = d.getVar('IMAGE_NAME') + '.swu'
     line = 'for i in ' + ' '.join(list_for_cpio) + '; do echo $i;done | cpio -ov -H crc --reproducible > ' + os.path.join(swudeploydir, updateimage)
     os.system(line)
@@ -316,7 +318,6 @@ python do_swuimage () {
     import shutil
 
     list_for_cpio = ["sw-description"]
-    s = d.getVar('S')
     imgdeploydir = d.getVar('SWUDEPLOYDIR')
 
     if d.getVar('SWUPDATE_SIGNING'):
