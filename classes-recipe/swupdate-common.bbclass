@@ -4,8 +4,7 @@
 
 inherit swupdate-lib
 
-S = "${WORKDIR}/sources"
-UNPACKDIR = "${S}"
+S = "${UNPACKDIR}"
 
 DEPENDS += "\
     cpio-native \

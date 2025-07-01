@@ -15,7 +15,6 @@ SRC_URI = "git://github.com/sbabic/SWUpdateGUI.git;protocol=https;branch=main \
 	"
 SRCREV = "d6bd129b4cea1e5c53bcad077a7d25af8260ef84"
 
-S = "${WORKDIR}/git"
 
 inherit cmake update-rc.d systemd
 

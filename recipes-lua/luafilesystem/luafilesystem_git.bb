@@ -13,7 +13,6 @@ SRCREV = "7c6e1b013caec0602ca4796df3b1d7253a2dd258"
 
 inherit pkgconfig
 
-S = "${WORKDIR}/git"
 
 EXTRA_OEMAKE = 'PREFIX=${D}/${prefix} CROSS_COMPILE=${TARGET_PREFIX} CC="${CC} -fpic" LDFLAGS="${LDFLAGS}"'
 

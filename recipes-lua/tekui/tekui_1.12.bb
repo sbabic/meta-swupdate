@@ -23,7 +23,6 @@ SRCREV = "b0a20f57e47548099e443d54fc6fb33666543b72"
 
 PR = "r1"
 
-S = "${WORKDIR}/git"
 
 PACKAGES += "${PN}-examples"
 FILES:${PN} = "${libdir} ${datadir}/lua"

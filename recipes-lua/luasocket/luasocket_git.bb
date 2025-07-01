@@ -13,7 +13,6 @@ SRC_URI = "git://github.com/diegonehab/luasocket;protocol=https;branch=master \
 PV = "0.0+git${SRCPV}"
 SRCREV = "652959890943c34d7180cae372339b91e62f0d7b"
 
-S = "${WORKDIR}/git"
 
 FILES:${PN} = "${libdir} ${datadir}/lua"
 
