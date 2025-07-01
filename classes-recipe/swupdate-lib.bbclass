@@ -40,12 +40,12 @@ def swupdate_get_sha256(d, dirname, filename):
             m.update(data)
     return m.hexdigest()
 
-def swupdate_get_IV(d, s, filename):
+def swupdate_get_IV(d, _, filename):
     # By default preserve original behavior: use IV from SWUPDATE_AES_FILE.
     key,iv = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE', True))
     return iv
 
-def swupdate_get_unique_IV(d, s, filename):
+def swupdate_get_unique_IV(d, _, filename):
     # New behavior: use unique random IV for each filename.
     from secrets import token_hex
     iv = d.getVarFlag("SWUPDATE_IV", filename, True)
@@ -96,7 +96,7 @@ def swupdate_sign_file(d, dirname, filename):
 
     return hash
 
-def swupdate_get_pkgvar(d, s, parms):
+def swupdate_get_pkgvar(d, _, parms):
     import re
     import oe.packagedata
 
