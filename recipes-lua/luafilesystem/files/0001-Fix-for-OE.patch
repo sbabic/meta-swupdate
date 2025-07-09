@@ -3,6 +3,7 @@ From: Kas User <kas@example.com>
 Date: Wed, 22 Jun 2022 14:05:03 +0200
 Subject: [PATCH] Fix for OE
 
+Upstream-Status: Pending
 ---
  Makefile |  2 +-
  config   | 16 ++++++++--------
