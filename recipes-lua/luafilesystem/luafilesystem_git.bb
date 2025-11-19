@@ -20,7 +20,7 @@ EXTRA_OEMAKE = 'PREFIX=${D}/${prefix} CROSS_COMPILE=${TARGET_PREFIX} CC="${CC} -
 # recipe automatically - you will need to examine the Makefile yourself and ensure
 # that the appropriate arguments are passed in.
 
-FILES:${PN} = "${libdir} ${datadir}/lua"
+FILES:${PN} = "${nonarch_base_libdir} ${datadir}/lua"
 
 do_configure () {
 	# Specify any needed configure commands here
