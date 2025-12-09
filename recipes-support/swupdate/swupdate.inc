@@ -1,5 +1,6 @@
 SUMMARY = "Image updater for Yocto projects"
 DESCRIPTION = "Application for automatic software update from USB Pen"
+HOMEPAGE = "https://swupdate.org"
 SECTION = "swupdate"
 DEPENDS += "libconfig zlib libubootenv json-c"
 
