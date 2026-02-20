@@ -38,7 +38,7 @@ SRC_URI = "git://github.com/sbabic/swupdate.git;protocol=https;branch=${SRCBRANC
     file://swupdate-usb@.service \
     file://swupdate-progress.service \
     file://tmpfiles-swupdate.conf \
-    file://10-mongoose-args \
+    file://10-mongoose-args.in \
     file://90-start-progress \
 "
 
@@ -295,7 +295,9 @@ do_install () {
     install -m 755 ${WORKDIR}/swupdate.sh ${D}${libdir}/swupdate
     sed -i 's#@LIBDIR@#${libdir}#g' ${D}${libdir}/swupdate/swupdate.sh
     if ${SWUPDATE_MONGOOSE}; then
-        install -m 644 ${WORKDIR}/10-mongoose-args ${D}${libdir}/swupdate/conf.d/
+        install -m 644 ${WORKDIR}/10-mongoose-args.in ${D}${libdir}/swupdate/conf.d/10-mongoose-args
+        sed -e "s#@@wwwdir@@#${wwwdir}#g" \
+            -i ${D}${libdir}/swupdate/conf.d/10-mongoose-args
     fi
     install -d ${D}${systemd_unitdir}/system
     install -m 644 ${WORKDIR}/swupdate.service ${D}${systemd_system_unitdir}
