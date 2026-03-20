@@ -1,5 +1,5 @@
 LICENSE = "MIT"
-LIC_FILES_CHKSUM = "file://LICENSE;md5=d9b7e441d51a96b17511ee3be5a75857"
+LIC_FILES_CHKSUM = "file://LICENSE;md5=eea9910b0620641551736d969a197076"
 
 DEPENDS = "lua"
 
@@ -8,8 +8,8 @@ SRC_URI = "git://github.com/keplerproject/luafilesystem;protocol=https;branch=ma
 	file://0001-Fix-for-OE.patch"
 
 # Modify these as desired
-PV = "1.8.0"
-SRCREV = "7c6e1b013caec0602ca4796df3b1d7253a2dd258"
+PV = "1.9.0"
+SRCREV = "a186cca5833691e830ed255e38ace8ff6b870dbf"
 
 inherit pkgconfig
 
