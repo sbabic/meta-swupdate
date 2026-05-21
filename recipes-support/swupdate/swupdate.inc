@@ -199,6 +199,9 @@ python () {
     if 'CONFIG_ZSTD=y\n' in features:
         depends += ' zstd'
 
+    if 'CONFIG_XZ=y\n' in features:
+        depends += ' xz'
+
     if 'CONFIG_DISKPART=y\n' in features:
         depends += ' util-linux e2fsprogs'
 
