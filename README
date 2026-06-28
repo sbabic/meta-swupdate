@@ -64,6 +64,12 @@ There are 3 signing mechanisms supported by meta-swupdate at the moment:
 
   * (Optional) Set `SWUPDATE_CMS_EXTRA_CERTS` to a space delimited list of intermediate certificate files
 
+  * (Optional) Set `SWUPDATE_CMS_MD` to the message digest algorithm passed to
+    `openssl cms -sign` via `-md` (e.g. `sha256`, `sha512`). When unset, openssl
+    picks the signing key's default digest. This is required for signing keys
+    that have no default digest such as ML-DSA where openssl otherwise fails
+    with "no default digest".
+
 3. Custom signing tool:
 
   * Set variable: `SWUPDATE_SIGNING = "CUSTOM"`

@@ -216,8 +216,10 @@ def prepare_sw_description(d):
                 bb.fatal("SWUPDATE_CMS_KEY isn't set")
             if not os.path.exists(cms_key):
                 bb.fatal("SWUPDATE_CMS_KEY %s doesn't exist" % (cms_key))
+            cms_md = d.getVar('SWUPDATE_CMS_MD')
+            md_args = ["-md", cms_md] if cms_md else []
             signcmd = ["openssl", "cms", "-sign", "-in", sw_desc, "-out", sw_desc_sig, "-signer", cms_cert, "-inkey", cms_key] + \
-                        ["-outform", "DER", "-nosmimecap", "-binary"] + \
+                        ["-outform", "DER", "-nosmimecap", "-binary"] + md_args + \
                         get_pwd_file_args(d, 'SWUPDATE_PASSWORD_FILE') + \
                         get_certfile_args(d)
         else:
