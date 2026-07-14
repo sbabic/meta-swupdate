@@ -206,19 +206,24 @@ def prepare_sw_description(d):
                 bb.fatal("SWUPDATE_PRIVATE_KEY %s doesn't exist" % (privkey))
             signcmd = ["openssl", "dgst", "-sha256", "-sign", privkey] + get_pwd_file_args(d, 'SWUPDATE_PASSWORD_FILE') + ["-out", sw_desc_sig, sw_desc]
         elif signing == "CMS":
-            cms_cert = d.getVar('SWUPDATE_CMS_CERT')
-            if not cms_cert:
+            cms_certs = (d.getVar('SWUPDATE_CMS_CERT') or "").split()
+            if not cms_certs:
                 bb.fatal("SWUPDATE_CMS_CERT is not set")
-            if not os.path.exists(cms_cert):
-                bb.fatal("SWUPDATE_CMS_CERT %s doesn't exist" % (cms_cert))
-            cms_key = d.getVar('SWUPDATE_CMS_KEY')
-            if not cms_key:
+            cms_keys = (d.getVar('SWUPDATE_CMS_KEY') or "").split()
+            if not cms_keys:
                 bb.fatal("SWUPDATE_CMS_KEY isn't set")
-            if not os.path.exists(cms_key):
-                bb.fatal("SWUPDATE_CMS_KEY %s doesn't exist" % (cms_key))
+            if len(cms_certs) != len(cms_keys):
+                bb.fatal("SWUPDATE_CMS_CERT and SWUPDATE_CMS_KEY must list the same number of entries (got %d certs, %d keys)" % (len(cms_certs), len(cms_keys)))
+            signer_args = []
+            for cms_cert, cms_key in zip(cms_certs, cms_keys):
+                if not os.path.exists(cms_cert):
+                    bb.fatal("SWUPDATE_CMS_CERT %s doesn't exist" % (cms_cert))
+                if not os.path.exists(cms_key):
+                    bb.fatal("SWUPDATE_CMS_KEY %s doesn't exist" % (cms_key))
+                signer_args += ["-signer", cms_cert, "-inkey", cms_key]
             cms_md = d.getVar('SWUPDATE_CMS_MD')
             md_args = ["-md", cms_md] if cms_md else []
-            signcmd = ["openssl", "cms", "-sign", "-in", sw_desc, "-out", sw_desc_sig, "-signer", cms_cert, "-inkey", cms_key] + \
+            signcmd = ["openssl", "cms", "-sign", "-in", sw_desc, "-out", sw_desc_sig] + signer_args + \
                         ["-outform", "DER", "-nosmimecap", "-binary"] + md_args + \
                         get_pwd_file_args(d, 'SWUPDATE_PASSWORD_FILE') + \
                         get_certfile_args(d)
