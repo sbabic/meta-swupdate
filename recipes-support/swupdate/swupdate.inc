@@ -10,7 +10,7 @@ DEPENDS += "libconfig zlib libubootenv json-c"
 LICENSE = "GPL-2.0-only & GPL-2.0-or-later & LGPL-2.1-or-later & LGPL-2.1-only & MIT & ISC & BSD-1-Clause & BSD-3-Clause"
 LICENSE:${PN}-ipc = "LGPL-2.1-or-later"
 LICENSE:${PN}-lua = "LGPL-2.1-only & MIT"
-LICENSE:${PN}-www = "MIT"
+LICENSE:${PN}-www = "MIT & OFL-1.1"
 
 LIC_FILES_CHKSUM = " \
     file://LICENSES/BSD-1-Clause.txt;md5=4c75b3902cf6a01969906bcae9cf8cd6 \
