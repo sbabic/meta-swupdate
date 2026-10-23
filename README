@@ -12,6 +12,19 @@ This layer depends on:
 URI: git://github.com/openembedded/meta-openembedded.git
 subdirectory: meta-oe
 
+Recovery GUI in Rust (swupdategui-rs)
+-------------------------------------
+
+swupdategui-rs needs more than scarthgap provides:
+
+* Rust >= 1.77 (scarthgap ships 1.75), for example from
+  URI: https://git.yoctoproject.org/meta-lts-mixins
+  branch: scarthgap/rust
+* clang-native, from
+  URI: https://github.com/kraj/meta-clang
+  branch: scarthgap
+* LVGL >= 9.2: this layer provides LVGL 9.2.2
+
 Documentation for the layer
 ---------------------------
 
