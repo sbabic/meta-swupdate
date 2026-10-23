@@ -13,6 +13,7 @@ SRC_URI = "git://github.com/sbabic/SWUpdateGUI.git;protocol=https;branch=main \
 	file://swupdate-gui \
 	file://swupdate-gui.service \
 	file://0001-Ported-to-lvgl-9.4.patch \
+	file://90-recovery-gui.rules \
 	"
 SRCREV = "d6bd129b4cea1e5c53bcad077a7d25af8260ef84"
 
@@ -39,7 +40,13 @@ do_install:append () {
         install -m 0755 ${S}/scripts/recovery-get-dhcp-status.sh ${D}${bindir}
         install -m 0755 ${S}/scripts/recovery-set-dhcp.sh ${D}${bindir}
         install -m 0755 ${S}/scripts/recovery-set-static.sh ${D}${bindir}
+
+        # The GUI opens /dev/fb and /dev/input/{keyboard0,touchscreen0}
+        install -d ${D}${sysconfdir}/udev/rules.d
+        install -m 0644 ${UNPACKDIR}/90-recovery-gui.rules ${D}${sysconfdir}/udev/rules.d/
 }
+
+FILES:${PN} += "${sysconfdir}/udev/rules.d/90-recovery-gui.rules"
 
 RDEPENDS:${PN}:append = " \
 	swupdate \
