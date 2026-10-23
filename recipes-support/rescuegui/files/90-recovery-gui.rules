@@ -1,0 +1,5 @@
+# swupdate-gui (recovery_gui) opens fixed device names:
+# /dev/fb, /dev/input/keyboard0 and /dev/input/touchscreen0
+SUBSYSTEM=="graphics", KERNEL=="fb0", SYMLINK+="fb"
+SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_INPUT_KEYBOARD}=="1", SYMLINK+="input/keyboard0"
+SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_INPUT_TOUCHSCREEN}=="1", SYMLINK+="input/touchscreen0"
