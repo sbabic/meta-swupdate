@@ -1,0 +1,220 @@
+From a5b2f9fcead3ddbea046e9e1b3e807d251a406f3 Mon Sep 17 00:00:00 2001
+From: Stefano Babic <stefano.babic@swupdate.org>
+Date: Tue, 28 Apr 2026 09:51:36 +0200
+Subject: [PATCH] Ported to lvgl 9.4
+
+There are some incompatibilities in the API, so port to 9.4.0.
+
+Upstream-Status: Pending
+
+Signed-off-by: Stefano Babic <stefano.babic@swupdate.org>
+---
+ CMakeLists.txt             |  2 +-
+ rec-screen-file-browser.c  | 12 ++++++------
+ rec-screen-main.c          |  2 +-
+ rec-screen-network-setup.c | 18 +++++++++---------
+ rec-screen-progress.c      |  8 ++++----
+ 5 files changed, 21 insertions(+), 21 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 156dfb0..ff003e2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ 
+-cmake_minimum_required( VERSION 3.1 )
++cmake_minimum_required(VERSION 4.1)
+ project( recovery_gui )
+ 
+ 
+diff --git a/rec-screen-file-browser.c b/rec-screen-file-browser.c
+index a7673a1..920e0ad 100644
+--- a/rec-screen-file-browser.c
++++ b/rec-screen-file-browser.c
+@@ -166,7 +166,7 @@ rec_screen_file_clearDryRunChk(struct FileBrowserScreen *FileBrowser)
+ static void rec_screen_file_onClickDryRunChk(lv_event_t *E)
+ {
+ 	struct FileBrowserScreen *FileBrowser =
+-		(struct FileBrowserScreen *)E->user_data;
++		(struct FileBrowserScreen *)lv_event_get_user_data(E);
+ 
+ 	lv_event_code_t Code = lv_event_get_code(E);
+ 	if (LV_EVENT_VALUE_CHANGED == Code) {
+@@ -286,7 +286,7 @@ rec_screen_file_updateCurrentDir(struct FileBrowserScreen *FileBrowser,
+ 
+ static void rec_screen_file_onClickDirEntry(lv_event_t *E)
+ {
+-	const char *SelectedDir = (const char *)E->user_data;
++	const char *SelectedDir = (const char *)lv_event_get_user_data(E);
+ 	struct FileBrowserScreen *FileBrowser = AccessFileBrowserScreen();
+ 
+ 	const bool Status =
+@@ -313,7 +313,7 @@ static void rec_screen_file_onClickDirEntry(lv_event_t *E)
+ static void rec_screen_file_onClickFileEntry(lv_event_t *E)
+ {
+ 	struct FileBrowserScreen *FileBrowser =
+-		(struct FileBrowserScreen *)E->user_data;
++		(struct FileBrowserScreen *)lv_event_get_user_data(E);
+ 
+ 	lv_obj_t *CheckBox = lv_event_get_target(E);
+ 	const char *FileInfo = lv_checkbox_get_text(CheckBox);
+@@ -476,7 +476,7 @@ rec_screen_file_createFileList(struct FileBrowserScreen *FileBrowser)
+ static void rec_screen_file_onClickButtonStart(lv_event_t *E)
+ {
+ 	struct FileBrowserScreen *FileBrowser =
+-		(struct FileBrowserScreen *)E->user_data;
++		(struct FileBrowserScreen *)lv_event_get_user_data(E);
+ 
+ 	rec_screen_progress_showScreen();
+ 
+@@ -540,7 +540,7 @@ rec_screen_file_createStartButton(struct FileBrowserScreen *FileBrowser)
+ static void rec_screen_file_onClickRescanButton(lv_event_t *E)
+ {
+ 	struct FileBrowserScreen *FileBrowser =
+-		(struct FileBrowserScreen *)E->user_data;
++		(struct FileBrowserScreen *)lv_event_get_user_data(E);
+ 
+ 	rec_screen_file_deleteFileEntries(FileBrowser);
+ 
+@@ -574,7 +574,7 @@ rec_screen_file_createRescanButton(struct FileBrowserScreen *FileBrowser)
+ static void rec_screen_file_onClickCancelButton(lv_event_t *E)
+ {
+ 	struct FileBrowserScreen *FileBrowser =
+-		(struct FileBrowserScreen *)E->user_data;
++		(struct FileBrowserScreen *)lv_event_get_user_data(E);
+ 	rec_screen_file_deleteFileEntries(FileBrowser);
+ 
+ 	rec_screen_main_showScreen();
+diff --git a/rec-screen-main.c b/rec-screen-main.c
+index 19f1e60..90883ef 100644
+--- a/rec-screen-main.c
++++ b/rec-screen-main.c
+@@ -80,7 +80,7 @@ static void rec_screen_main_OnClickNetworkSettingButton(lv_event_t *Event)
+ 
+ static void rec_screen_main_onClickRestartButton(lv_event_t *Event)
+ {
+-	struct MainScreen *MainScreen = (struct MainScreen *)Event->user_data;
++	struct MainScreen *MainScreen = (struct MainScreen *)lv_event_get_user_data(Event);
+ 
+ 	const int rebootStatus = system("reboot");
+ 	if (0 != rebootStatus) {
+diff --git a/rec-screen-network-setup.c b/rec-screen-network-setup.c
+index 230e66f..dbd9ab3 100644
+--- a/rec-screen-network-setup.c
++++ b/rec-screen-network-setup.c
+@@ -548,9 +548,9 @@ static void rec_screen_network_InterfaceList_handleTableRowSelection(
+ 
+ static void rec_screen_network_InterfaceList_onClickTableRow(lv_event_t *E)
+ {
+-	const struct Ipv4Info *IpInfo = (struct Ipv4Info *)E->user_data;
++	const struct Ipv4Info *IpInfo = (struct Ipv4Info *)lv_event_get_user_data(E);
+ 
+-	lv_obj_t *Button = E->current_target;
++	lv_obj_t *Button = lv_event_get_current_target_obj(E);
+ 
+ 	lv_obj_t *Checkbox = lv_obj_get_child(Button, 1);
+ 
+@@ -600,7 +600,7 @@ static void rec_screen_network_InterfaceList_createTableRowEntry_IpAddress(
+ 	lv_obj_t *IpAddrLabel = lv_label_create(Button);
+ 
+ 	lv_obj_set_width(IpAddrLabel, LV_PCT(25));
+-	lv_obj_set_style_text_align(IpAddrLabel, LV_ALIGN_LEFT_MID,
++	lv_obj_set_style_text_align(IpAddrLabel, LV_TEXT_ALIGN_LEFT,
+ 				    LV_PART_MAIN);
+ 	lv_label_set_text(IpAddrLabel, IpInfo->Address);
+ 
+@@ -614,7 +614,7 @@ static void rec_screen_network_InterfaceList_createTableRowEntry_Netmask(
+ 	lv_obj_t *NetmaskLabel = lv_label_create(Button);
+ 
+ 	lv_obj_set_width(NetmaskLabel, LV_PCT(25));
+-	lv_obj_set_style_text_align(NetmaskLabel, LV_ALIGN_LEFT_MID,
++	lv_obj_set_style_text_align(NetmaskLabel, LV_TEXT_ALIGN_LEFT,
+ 				    LV_PART_MAIN);
+ 	lv_label_set_text(NetmaskLabel, IpInfo->Netmask);
+ 
+@@ -628,7 +628,7 @@ static void rec_screen_network_InterfaceList_createTableRowEntry_Dhcp(
+ 	lv_obj_t *DhcpLabel = lv_label_create(Button);
+ 
+ 	lv_obj_set_width(DhcpLabel, LV_PCT(25));
+-	lv_obj_set_style_text_align(DhcpLabel, LV_ALIGN_LEFT_MID, LV_PART_MAIN);
++	lv_obj_set_style_text_align(DhcpLabel, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
+ 
+ 	const char *dhcpFieldText = util_networking_getDhcpText(IpInfo);
+ 	lv_label_set_text(DhcpLabel, dhcpFieldText);
+@@ -701,7 +701,7 @@ rec_screen_network_InterfaceList_createTableInterfaceNameColumnHeader(
+ 
+ 	lv_obj_set_width(NetIfHeader, LV_PCT(25));
+ 	lv_label_set_text(NetIfHeader, "NETIF");
+-	lv_obj_set_style_text_align(NetIfHeader, LV_ALIGN_LEFT_MID,
++	lv_obj_set_style_text_align(NetIfHeader, LV_TEXT_ALIGN_LEFT,
+ 				    LV_PART_MAIN);
+ }
+ 
+@@ -712,7 +712,7 @@ rec_screen_network_InterfaceList_createTableIpAddrColumnHeader(lv_obj_t *Header)
+ 
+ 	lv_obj_set_width(IpAddressHeader, LV_PCT(25));
+ 	lv_label_set_text(IpAddressHeader, "IP ADDRESS");
+-	lv_obj_set_style_text_align(IpAddressHeader, LV_ALIGN_LEFT_MID,
++	lv_obj_set_style_text_align(IpAddressHeader, LV_TEXT_ALIGN_LEFT,
+ 				    LV_PART_MAIN);
+ }
+ 
+@@ -723,7 +723,7 @@ static void rec_screen_network_InterfaceList_createTableNetmaskColumnHeader(
+ 
+ 	lv_obj_set_width(NetmaskHeader, LV_PCT(25));
+ 	lv_label_set_text(NetmaskHeader, "NETMASK");
+-	lv_obj_set_style_text_align(NetmaskHeader, LV_ALIGN_LEFT_MID,
++	lv_obj_set_style_text_align(NetmaskHeader, LV_TEXT_ALIGN_LEFT,
+ 				    LV_PART_MAIN);
+ }
+ 
+@@ -734,7 +734,7 @@ rec_screen_network_InterfaceList_createTableDhcpColumnHeader(lv_obj_t *Header)
+ 
+ 	lv_obj_set_width(DhcpHeader, LV_PCT(25));
+ 	lv_label_set_text(DhcpHeader, "DHCP");
+-	lv_obj_set_style_text_align(DhcpHeader, LV_ALIGN_LEFT_MID,
++	lv_obj_set_style_text_align(DhcpHeader, LV_TEXT_ALIGN_LEFT,
+ 				    LV_PART_MAIN);
+ }
+ 
+diff --git a/rec-screen-progress.c b/rec-screen-progress.c
+index 82513fd..a326646 100644
+--- a/rec-screen-progress.c
++++ b/rec-screen-progress.c
+@@ -585,21 +585,21 @@ rec_screen_progressScreen_showLogMessages(struct ProgressScreen *ProgressScreen)
+ 
+ static void rec_screen_progress_onClickShowLogsButton(lv_event_t *E)
+ {
+-	struct ProgressScreen *ProgressScreen = E->user_data;
++	struct ProgressScreen *ProgressScreen = lv_event_get_user_data(E);
+ 
+ 	rec_screen_progressScreen_showLogMessages(ProgressScreen);
+ }
+ 
+ static void rec_screen_progress_onClickBackButton(lv_event_t *E)
+ {
+-	struct ProgressScreen *ProgressScreen = E->user_data;
++	struct ProgressScreen *ProgressScreen = lv_event_get_user_data(E);
+ 
+ 	rec_screen_progressScreen_showProgressBars(ProgressScreen);
+ }
+ 
+ static void rec_screen_progress_onClickExportLogsButton(lv_event_t *E)
+ {
+-	struct ProgressScreen *screen = E->user_data;
++	struct ProgressScreen *screen = lv_event_get_user_data(E);
+ 
+ 	char *filename = NULL;
+ 	const int res = util_files_export_swupdate_logs(&filename);
+@@ -636,7 +636,7 @@ static void rec_screen_progressScreen_createLogsMessagesTextArea(
+ 	lv_obj_center(ProgressScreen->logMessages.TextArea);
+ 
+ 	lv_obj_set_style_text_align(ProgressScreen->logMessages.TextArea,
+-				    LV_ALIGN_LEFT_MID, LV_PART_MAIN);
++				    LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
+ }
+ 
+ /**
+-- 
+2.43.0
+

@@ -12,6 +12,7 @@ DEPENDS:append = " \
 SRC_URI = "git://github.com/sbabic/SWUpdateGUI.git;protocol=https;branch=main \
 	file://swupdate-gui \
 	file://swupdate-gui.service \
+	file://0001-Ported-to-lvgl-9.4.patch \
 	"
 SRCREV = "d6bd129b4cea1e5c53bcad077a7d25af8260ef84"
 
