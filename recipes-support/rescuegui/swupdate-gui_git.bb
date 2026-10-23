@@ -43,7 +43,7 @@ do_install:append () {
 
         # The GUI opens /dev/fb and /dev/input/{keyboard0,touchscreen0}
         install -d ${D}${sysconfdir}/udev/rules.d
-        install -m 0644 ${UNPACKDIR}/90-recovery-gui.rules ${D}${sysconfdir}/udev/rules.d/
+        install -m 0644 ${WORKDIR}/90-recovery-gui.rules ${D}${sysconfdir}/udev/rules.d/
 }
 
 FILES:${PN} += "${sysconfdir}/udev/rules.d/90-recovery-gui.rules"
