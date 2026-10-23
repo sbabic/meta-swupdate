@@ -1,0 +1,16 @@
+[Unit]
+Description=SWUpdate Light GUI
+After=swupdate.service
+
+[Service]
+Type=simple
+ExecStartPre=-/bin/sh -c "echo 0 > /sys/class/graphics/fbcon/cursor_blink"
+# The GUI owns the framebuffer: detach the framebuffer console, otherwise
+# kernel messages (e.g. partition rescans during an update) are drawn over it
+ExecStartPre=-/bin/sh -c "for v in /sys/class/vtconsole/vtcon*; do grep -q 'frame buffer' $$v/name && echo 0 > $$v/bind; done"
+ExecStart=/usr/bin/recovery_gui
+ExecStopPost=-/bin/sh -c "for v in /sys/class/vtconsole/vtcon*; do grep -q 'frame buffer' $$v/name && echo 1 > $$v/bind; done"
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
