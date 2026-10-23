@@ -13,7 +13,7 @@ SRC_URI = "git://github.com/sbabic/SWUpdateGUI.git;protocol=https;branch=rust-po
 	file://swupdate-gui.service \
 	file://90-recovery-gui.rules \
 	"
-SRCREV = "e904a5768fba63dc484d2fdc948ae10772406af9"
+SRCREV = "de64c91ea54671f25c47029cfcd36fc8a7a05a41"
 
 S = "${WORKDIR}/git"
 
