@@ -25,6 +25,9 @@ swupdategui-rs needs more than scarthgap provides:
   branch: scarthgap
 * LVGL >= 9.2: this layer provides LVGL 9.2.2
 
+Without meta-clang or meta-lts-mixins the recipe is skipped, so builds that
+do not use the GUI need neither of them.
+
 Documentation for the layer
 ---------------------------
 
