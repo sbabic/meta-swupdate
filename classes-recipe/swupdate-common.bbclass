@@ -1,15 +1,29 @@
-# Copyright (C) 2015-2022 Stefano Babic
+# Copyright (C) 2015-2026 Stefano Babic
 #
 # SPDX-License-Identifier: GPLv3
+#
+# The SWU is created by swugenerator: this class collects the artifacts,
+# expands the BitBake variables and functions in sw-description and calls
+# swugenerator to hash, encrypt, sign and pack them.
 
 inherit swupdate-lib
 
 S = "${UNPACKDIR}"
 
 DEPENDS += "\
-    cpio-native \
+    swugenerator-native \
     ${@ 'openssl-native' if d.getVar('SWUPDATE_SIGNING') or d.getVar('SWUPDATE_ENCRYPT_SWDESC') or d.getVarFlags('SWUPDATE_IMAGES_ENCRYPTED') else ''} \
 "
+
+# Where the artifacts are collected for swugenerator
+SWUPDATE_ARTIFACTS_DIR = "${WORKDIR}/swu-artifacts"
+# Further arguments for swugenerator, e.g. "-l DEBUG"
+SWUGENERATOR_EXTRA_ARGS ??= ""
+# "1": a new IV for each encrypted artifact, else the IV of SWUPDATE_AES_FILE
+SWUPDATE_UNIQUE_IV ??= ""
+# "1": encrypted artifacts keep their name, as before swugenerator, else
+# swugenerator appends ".enc" to it, in the SWU and in sw-description
+SWUPDATE_KEEP_NAMES ??= "1"
 
 do_swuimage[umask] = "022"
 SSTATETASKS += "do_swuimage"
@@ -17,7 +31,7 @@ SSTATE_SKIP_CREATION:task-swuimage = '1'
 SWUDEPLOYDIR = "${WORKDIR}/deploy-${PN}-swuimage"
 
 do_swuimage[dirs] = "${SWUDEPLOYDIR}"
-do_swuimage[cleandirs] += "${SWUDEPLOYDIR}"
+do_swuimage[cleandirs] += "${SWUDEPLOYDIR} ${SWUPDATE_ARTIFACTS_DIR}"
 do_swuimage[sstate-inputdirs] = "${SWUDEPLOYDIR}"
 do_swuimage[sstate-outputdirs] = "${DEPLOY_DIR_IMAGE}"
 do_swuimage[stamp-extra-info] = "${IMAGE_MACHINE_SUFFIX}"
@@ -36,18 +50,6 @@ def get_pwd_file_args(d, passfile):
        pwd_args = ["-passin", "file:%s" % pwd_file]
     return pwd_args
 
-def get_certfile_args(d):
-    extra_certs = d.getVar('SWUPDATE_CMS_EXTRA_CERTS')
-    if not extra_certs:
-        return []
-    certfile_args = []
-    extra_paths = extra_certs.split()
-    for crt_path in extra_paths:
-        if not os.path.exists(crt_path):
-            bb.fatal("SWUPDATE_CMS_EXTRA_CERTS path %s doesn't exist" % (crt_path))
-        certfile_args.extend(["-certfile", crt_path])
-    return certfile_args
-
 def swupdate_getdepends(d):
     def adddep(depstr, deps):
         for i in (depstr or "").split():
@@ -65,38 +67,41 @@ def swupdate_getdepends(d):
 
     return depstr
 
-def swupdate_write_sha256(workdir):
-    import re
-    write_lines = []
-    with open(os.path.join(workdir, "sw-description"), 'r') as f:
-       for line in f:
-          shastr = r"sha256.+=.+@(.+\")"
-          m = re.match(r"^(?P<before_placeholder>.+)(sha256|version).+[=:].*(?P<quote>[\'\"])@(?P<filename>.*)(?P=quote)", line)
-          if m:
-              filename = m.group('filename')
-              bb.warn("Syntax for sha256 changed, please use $swupdate_get_sha256(%s)" % filename)
-              hash = swupdate_get_sha256(None, workdir, filename)
-              write_lines.append(line.replace("@%s" % (filename), hash))
-          else:
-              write_lines.append(line)
+# Functions that swugenerator runs itself, on the artifacts it packs
+SWUGENERATOR_FUNCTIONS = "swupdate_get_sha256 swupdate_get_size"
 
-    with open(os.path.join(workdir, "sw-description"), 'w+') as f:
-        for line in write_lines:
-            f.write(line)
+def swupdate_convert_old_sha256(lines):
+    import re
+    # sha256 = "@<file>" is the old syntax of $swupdate_get_sha256(<file>)
+    old = re.compile(r"^(?P<before_placeholder>.+)(sha256|version).+[=:].*(?P<quote>[\'\"])@(?P<filename>.*)(?P=quote)")
+    for index, line in enumerate(lines):
+        m = old.match(line)
+        if m:
+            filename = m.group('filename')
+            bb.warn("Syntax for sha256 changed, please use $swupdate_get_sha256(%s)" % filename)
+            lines[index] = line.replace("@%s" % filename, "$swupdate_get_sha256(%s)" % filename)
 
 def swupdate_exec_functions(d, s, write_lines):
     import re
+    keep = d.getVar('SWUGENERATOR_FUNCTIONS').split()
+    function = re.compile(r"\$(?P<bitbake_function_name>\w+)\((?P<parms>[^)]+)\)")
+
+    def call(m):
+        name = m.group('bitbake_function_name')
+        if name in keep:
+            return m.group(0)
+        try:
+            fn = eval(name)
+        except NameError:
+            bb.fatal("Function %s in sw-description is not defined" % name)
+        ret = fn(d, s, m.group('parms'))
+        bb.debug(2, "%s return %s " % (name, ret))
+        return str(ret)
+
     for index, line in enumerate(write_lines):
-        m = re.match(r"^(?P<before_placeholder>.+)\$(?P<bitbake_function_name>\w+)\((?P<parms>.+)\)(?P<after_placeholder>.+)$", line)
-        if m:
-            fun = m.group('bitbake_function_name') + "(d, \"" + s + "\", \"" + m.group('parms') + "\")"
-            ret = eval(fun)
-            bb.debug (2, "%s return %s " % (m.group('bitbake_function_name'), ret))
-            line = m.group('before_placeholder') + ret + m.group('after_placeholder') + "\n"
-            write_lines[index] = line
+        write_lines[index] = function.sub(call, line)
 
-
-def swupdate_expand_bitbake_variables(d, s, workdir):
+def swupdate_expand_bitbake_variables(d, s):
     write_lines = []
 
     with open(os.path.join(s, "sw-description"), 'r') as f:
@@ -117,8 +122,6 @@ def swupdate_expand_bitbake_variables(d, s, workdir):
                     m = re.match(r"^(?P<before_placeholder>.*)@@(?P<bitbake_variable_name>.+)\[(?P<flag_var_name>.+)\]@@(?P<after_placeholder>.*)$", line)
                     if m:
                        bitbake_variable_value = (d.getVarFlag(m.group('bitbake_variable_name'), m.group('flag_var_name'), True) or "")
-                       if bitbake_variable_value is None:
-                          bitbake_variable_value = ""
                        line = m.group('before_placeholder') + bitbake_variable_value + m.group('after_placeholder')
                        continue
 
@@ -127,12 +130,7 @@ def swupdate_expand_bitbake_variables(d, s, workdir):
                     break
 
             write_lines.append(line)
-
-    swupdate_exec_functions(d, workdir, write_lines)
-
-    with open(os.path.join(workdir, "sw-description"), 'w+') as f:
-        for line in write_lines:
-            f.write(line)
+    return write_lines
 
 # Get all the variables referred by the sw-description at parse time.
 def swupdate_find_bitbake_variables(d):
@@ -167,87 +165,43 @@ def swupdate_find_bitbake_variables(d):
         pass
     return ' '.join(set(vardeps))
 
-def prepare_sw_description(d):
-    import shutil
-    import subprocess
+def prepare_sw_description(d, artifacts):
+    """Expands the BitBake variables and functions of sw-description
 
+    The functions run by swugenerator are left in it. Returns the path
+    of the expanded sw-description.
+    """
     s = d.getVar('S')
     workdir = d.getVar('WORKDIR')
-    swupdate_expand_bitbake_variables(d, s, workdir)
+    write_lines = swupdate_expand_bitbake_variables(d, s)
+    swupdate_convert_old_sha256(write_lines)
+    swupdate_exec_functions(d, artifacts, write_lines)
 
-    swupdate_write_sha256(workdir)
+    swdesc = os.path.join(workdir, "sw-description")
+    with open(swdesc, 'w+') as f:
+        for line in write_lines:
+            f.write(line)
+    return swdesc
 
-    encrypt = d.getVar('SWUPDATE_ENCRYPT_SWDESC')
-    if encrypt:
-        bb.note("Encryption of sw-description")
-        shutil.copyfile(os.path.join(workdir, 'sw-description'), os.path.join(workdir, 'sw-description.plain'))
-        key,iv = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE'))
-        iv = swupdate_get_IV(d, workdir, 'sw-description')
-        swupdate_encrypt_file(os.path.join(workdir, 'sw-description.plain'), os.path.join(workdir, 'sw-description'), key, iv)
-
-    signing = d.getVar('SWUPDATE_SIGNING')
-    if signing == "1":
-        bb.warn('SWUPDATE_SIGNING = "1" is deprecated, falling back to "RSA". It is advised to set it to "RSA" if using RSA signing.')
-        signing = "RSA"
-    if signing:
-
-        sw_desc_sig = os.path.join(workdir, 'sw-description.sig')
-        sw_desc =  os.path.join(workdir, 'sw-description.plain' if encrypt else 'sw-description')
-
-        if signing == "CUSTOM":
-            signcmd = []
-            sign_tool = d.getVar('SWUPDATE_SIGN_TOOL')
-            signtool = sign_tool.split()
-            for i in range(len(signtool)):
-                signcmd.append(signtool[i])
-            if not signcmd:
-                bb.fatal("Custom SWUPDATE_SIGN_TOOL is not given")
-        elif signing == "RSA":
-            privkey = d.getVar('SWUPDATE_PRIVATE_KEY')
-            if not privkey:
-                bb.fatal("SWUPDATE_PRIVATE_KEY isn't set")
-            if not os.path.exists(privkey):
-                bb.fatal("SWUPDATE_PRIVATE_KEY %s doesn't exist" % (privkey))
-            signcmd = ["openssl", "dgst", "-sha256", "-sign", privkey] + get_pwd_file_args(d, 'SWUPDATE_PASSWORD_FILE') + ["-out", sw_desc_sig, sw_desc]
-        elif signing == "RSA-PSS":
-            privkey = d.getVar('SWUPDATE_PRIVATE_KEY', True)
-            if not privkey:
-                bb.fatal("SWUPDATE_PRIVATE_KEY isn't set")
-            if not os.path.exists(privkey):
-                bb.fatal("SWUPDATE_PRIVATE_KEY %s doesn't exist" % (privkey))
-            signcmd = ["openssl", "dgst", "-sha256", "-sign", privkey] + get_pwd_file_args(d, 'SWUPDATE_PASSWORD_FILE') + \
-                      ["-sigopt", "rsa_padding_mode:pss", "-sigopt", "rsa_pss_saltlen:-2", "-out", sw_desc_sig, sw_desc]
-        elif signing == "CMS":
-            cms_certs = (d.getVar('SWUPDATE_CMS_CERT') or "").split()
-            if not cms_certs:
-                bb.fatal("SWUPDATE_CMS_CERT is not set")
-            cms_keys = (d.getVar('SWUPDATE_CMS_KEY') or "").split()
-            if not cms_keys:
-                bb.fatal("SWUPDATE_CMS_KEY isn't set")
-            if len(cms_certs) != len(cms_keys):
-                bb.fatal("SWUPDATE_CMS_CERT and SWUPDATE_CMS_KEY must list the same number of entries (got %d certs, %d keys)" % (len(cms_certs), len(cms_keys)))
-            signer_args = []
-            for cms_cert, cms_key in zip(cms_certs, cms_keys):
-                if not os.path.exists(cms_cert):
-                    bb.fatal("SWUPDATE_CMS_CERT %s doesn't exist" % (cms_cert))
-                if not os.path.exists(cms_key):
-                    bb.fatal("SWUPDATE_CMS_KEY %s doesn't exist" % (cms_key))
-                signer_args += ["-signer", cms_cert, "-inkey", cms_key]
-            cms_md = d.getVar('SWUPDATE_CMS_MD')
-            md_args = ["-md", cms_md] if cms_md else []
-            signcmd = ["openssl", "cms", "-sign", "-in", sw_desc, "-out", sw_desc_sig] + signer_args + \
-                        ["-outform", "DER", "-nosmimecap", "-binary"] + md_args + \
-                        get_pwd_file_args(d, 'SWUPDATE_PASSWORD_FILE') + \
-                        get_certfile_args(d)
-        else:
-            bb.fatal("Unrecognized SWUPDATE_SIGNING mechanism.")
-        subprocess.run(' '.join(signcmd), shell=True, check=True)
-
-
-def swupdate_add_src_uri(d, list_for_cpio):
+def swupdate_stage_file(src, artifacts, list_for_swu):
+    """Puts an artifact where swugenerator looks for it, linked if possible"""
     import shutil
 
-    workdir = d.getVar('WORKDIR')
+    filename = os.path.basename(src)
+    dst = os.path.join(artifacts, filename)
+    if os.path.lexists(dst):
+        os.unlink(dst)
+    try:
+        # images in DEPLOY_DIR_IMAGE are often relative symlinks: link the
+        # file they point to, os.link() links the symlink itself before
+        # Python 3.14
+        os.link(os.path.realpath(src), dst)
+    except OSError:
+        shutil.copyfile(src, dst)
+    if filename not in list_for_swu:
+        list_for_swu.append(filename)
+
+def swupdate_add_src_uri(d, artifacts, list_for_swu):
     exclude = (d.getVar("SWUPDATE_SRC_URI_EXCLUDE") or "").split()
 
     fetch = bb.fetch2.Fetch([], d)
@@ -258,50 +212,23 @@ def swupdate_add_src_uri(d, list_for_cpio):
         filename = os.path.basename(local)
         if filename in exclude:
             continue
-        aes_file = d.getVar('SWUPDATE_AES_FILE')
-        if aes_file:
-            key,iv = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE'))
         if (filename != 'sw-description') and (os.path.isfile(local)):
-            encrypted = (d.getVarFlag("SWUPDATE_IMAGES_ENCRYPTED", filename) or "")
-            dst = os.path.join(workdir, "%s" % filename )
-            if encrypted == '1':
-                bb.note("Encryption requested for %s" %(filename))
-                if not key or not iv:
-                    bb.fatal("Encryption required, but no key found")
-                iv = swupdate_get_IV(d, workdir, filename)
-                swupdate_encrypt_file(local, dst, key, iv)
-            else:
-                shutil.copyfile(local, dst)
-            list_for_cpio.append(filename)
+            swupdate_stage_file(local, artifacts, list_for_swu)
 
-def add_image_to_swu(d, deploydir, imagename, s, encrypt, list_for_cpio):
-    import shutil
-
+def add_image_to_swu(d, deploydir, imagename, artifacts, list_for_swu):
     src = os.path.join(deploydir, imagename)
     if not os.path.isfile(src):
         return False
-    target_imagename = os.path.basename(imagename)  # allow images in subfolders of DEPLOY_DIR_IMAGE
-    dst = os.path.join(s, target_imagename)
-    if encrypt == '1':
-        key,iv = swupdate_extract_keys(d.getVar('SWUPDATE_AES_FILE'))
-        bb.note("Encryption requested for %s" %(imagename))
-        iv = swupdate_get_IV(d, s, imagename)
-        swupdate_encrypt_file(src, dst, key, iv)
-    else:
-        shutil.copyfile(src, dst)
-    list_for_cpio.append(target_imagename)
+    # allow images in subfolders of DEPLOY_DIR_IMAGE
+    swupdate_stage_file(src, artifacts, list_for_swu)
     return True
 
-def swupdate_add_artifacts(d, list_for_cpio):
-    import shutil
+def swupdate_add_artifacts(d, artifacts, list_for_swu):
     # Search for images listed in SWUPDATE_IMAGES in the DEPLOY directory.
     images = (d.getVar('SWUPDATE_IMAGES') or "").split()
     deploydir = d.getVar('DEPLOY_DIR_IMAGE')
-    imgdeploydir = d.getVar('SWUDEPLOYDIR')
-    workdir = d.getVar('WORKDIR')
     for image in images:
         fstypes = (d.getVarFlag("SWUPDATE_IMAGES_FSTYPES", image) or "").split()
-        encrypted = (d.getVarFlag("SWUPDATE_IMAGES_ENCRYPTED", image) or "")
         if fstypes:
             noappend_machine = d.getVarFlag("SWUPDATE_IMAGES_NOAPPEND_MACHINE", image)
             if noappend_machine == "0":  # Search for a file explicitly with IMAGE_MACHINE_SUFFIX
@@ -313,47 +240,149 @@ def swupdate_add_artifacts(d, list_for_cpio):
             for fstype in fstypes:
                 image_found = False
                 for imagebase in imagebases:
-                    image_found = add_image_to_swu(d, deploydir, imagebase + fstype, workdir, encrypted, list_for_cpio)
+                    image_found = add_image_to_swu(d, deploydir, imagebase + fstype, artifacts, list_for_swu)
                     if image_found:
                         break
                 if not image_found:
                     bb.fatal("swupdate cannot find image file: %s" % os.path.join(deploydir, imagebase + fstype))
         else:  # Allow also complete entries like "image.ext4.gz" in SWUPDATE_IMAGES
-            if not add_image_to_swu(d, deploydir, image, workdir, encrypted, list_for_cpio):
+            if not add_image_to_swu(d, deploydir, image, artifacts, list_for_swu):
                 bb.fatal("swupdate cannot find %s image file" % image)
 
+def swupdate_check_path(var, path):
+    # swugenerator separates the fields of -k with ","
+    if "," in path:
+        bb.fatal("%s %s: a path with \",\" cannot be passed to swugenerator" % (var, path))
+    if not os.path.exists(path):
+        bb.fatal("%s %s doesn't exist" % (var, path))
+    return path
 
-def swupdate_create_cpio(d, swudeploydir, list_for_cpio):
-    workdir = d.getVar('WORKDIR')
-    os.chdir(workdir)
+def swupdate_signing_args(d):
+    """swugenerator arguments for SWUPDATE_SIGNING"""
+    signing = d.getVar('SWUPDATE_SIGNING')
+    if not signing:
+        return []
+    if signing == "1":
+        bb.warn('SWUPDATE_SIGNING = "1" is deprecated, falling back to "RSA". It is advised to set it to "RSA" if using RSA signing.')
+        signing = "RSA"
+
+    passfile = d.getVar('SWUPDATE_PASSWORD_FILE')
+    pwd = [swupdate_check_path('SWUPDATE_PASSWORD_FILE', passfile)] if passfile else []
+
+    if signing in ("RSA", "RSA-PSS"):
+        privkey = d.getVar('SWUPDATE_PRIVATE_KEY')
+        if not privkey:
+            bb.fatal("SWUPDATE_PRIVATE_KEY isn't set")
+        mode = "RSA" if signing == "RSA" else "RSAPSS"
+        return ["-k", ",".join([mode, swupdate_check_path('SWUPDATE_PRIVATE_KEY', privkey)] + pwd)]
+
+    if signing == "CMS":
+        cms_certs = (d.getVar('SWUPDATE_CMS_CERT') or "").split()
+        if not cms_certs:
+            bb.fatal("SWUPDATE_CMS_CERT is not set")
+        cms_keys = (d.getVar('SWUPDATE_CMS_KEY') or "").split()
+        if not cms_keys:
+            bb.fatal("SWUPDATE_CMS_KEY isn't set")
+        if len(cms_certs) != len(cms_keys):
+            bb.fatal("SWUPDATE_CMS_CERT and SWUPDATE_CMS_KEY must list the same number of entries (got %d certs, %d keys)" % (len(cms_certs), len(cms_keys)))
+        args = []
+        for cms_cert, cms_key in zip(cms_certs, cms_keys):
+            args += ["-k", ",".join(["CMS", swupdate_check_path('SWUPDATE_CMS_KEY', cms_key),
+                                     swupdate_check_path('SWUPDATE_CMS_CERT', cms_cert)] + pwd)]
+        for crt_path in (d.getVar('SWUPDATE_CMS_EXTRA_CERTS') or "").split():
+            if not os.path.exists(crt_path):
+                bb.fatal("SWUPDATE_CMS_EXTRA_CERTS path %s doesn't exist" % (crt_path))
+            args += ["--cms-certfile", crt_path]
+        cms_md = d.getVar('SWUPDATE_CMS_MD')
+        if cms_md:
+            args += ["--cms-md", cms_md]
+        return args
+
+    if signing == "CUSTOM":
+        # swugenerator appends sw-description and the signature to the command
+        signtool = (d.getVar('SWUPDATE_SIGN_TOOL') or "").split()
+        if not signtool:
+            bb.fatal("Custom SWUPDATE_SIGN_TOOL is not given")
+        if any("," in arg for arg in signtool):
+            bb.fatal("SWUPDATE_SIGN_TOOL: an argument with \",\" cannot be passed to swugenerator")
+        return ["-k", ",".join(["CUSTOM"] + signtool)]
+
+    bb.fatal("Unrecognized SWUPDATE_SIGNING mechanism.")
+
+def swupdate_encryption_args(d, swdesc):
+    """swugenerator arguments for the encryption"""
+    import re
+
+    args = []
+    aes_file = d.getVar('SWUPDATE_AES_FILE')
+    encrypted_flags = [f for f, v in (d.getVarFlags('SWUPDATE_IMAGES_ENCRYPTED') or {}).items()
+                       if v == '1' and not f.startswith('_')]
+    with open(swdesc, 'r') as f:
+        text = f.read()
+    # swugenerator encrypts the artifacts with encrypted = true in sw-description
+    if encrypted_flags and not re.search(r"\bencrypted\b", text):
+        bb.warn("SWUPDATE_IMAGES_ENCRYPTED is set for %s, but sw-description has no "
+                "\"encrypted = true\": the artifacts are encrypted as sw-description says" %
+                " ".join(encrypted_flags))
+
+    if aes_file:
+        args += ["-K", aes_file]
+        # the IV of SWUPDATE_AES_FILE, as swupdate_get_IV() returns, unless
+        # SWUPDATE_UNIQUE_IV asks for a new IV for each artifact
+        if d.getVar('SWUPDATE_UNIQUE_IV') != "1":
+            args += ["-x"]
+    if d.getVar('SWUPDATE_ENCRYPT_SWDESC'):
+        if not aes_file:
+            bb.fatal("SWUPDATE_ENCRYPT_SWDESC is set, but SWUPDATE_AES_FILE is not")
+        args += ["-t"]
+    return args
+
+def swupdate_create_swu(d, swudeploydir, swdesc, artifacts, list_for_swu):
+    import shlex
+    import subprocess
+
     updateimage = d.getVar('IMAGE_NAME') + '.swu'
-    line = 'for i in ' + ' '.join(list_for_cpio) + '; do echo $i;done | cpio -ov -H crc --reproducible > ' + os.path.join(swudeploydir, updateimage)
-    os.system(line)
-    os.chdir(swudeploydir)
+    # the artifacts are packed as they are: images are already compressed
+    cmd = ["swugenerator", "-n", "-a", artifacts, "-s", swdesc,
+           "-o", os.path.join(swudeploydir, updateimage)]
+    cmd += swupdate_signing_args(d)
+    cmd += swupdate_encryption_args(d, swdesc)
+    if d.getVar('SWUPDATE_KEEP_NAMES') == "1":
+        cmd += ["--keep-names"]
+    # every collected file is packed, even if sw-description does not use it
+    for filename in list_for_swu:
+        cmd += ["--add-file", filename]
+    cmd += shlex.split(d.getVar('SWUGENERATOR_EXTRA_ARGS') or "")
+    cmd += ["create"]
+
+    bb.note("Running %s" % " ".join(cmd))
+    result = subprocess.run(cmd, cwd=artifacts, stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT, text=True)
+    if result.stdout:
+        bb.note(result.stdout)
+    if result.returncode:
+        bb.fatal("swugenerator failed with %d:\n%s" % (result.returncode, result.stdout))
+
     updateimage_link = d.getVar('IMAGE_LINK_NAME')
     if updateimage_link:
         updateimage_link += '.swu'
         if updateimage_link != updateimage:
-            os.symlink(updateimage, updateimage_link)
+            os.symlink(updateimage, os.path.join(swudeploydir, updateimage_link))
 
 python do_swuimage () {
-    import shutil
-
-    list_for_cpio = ["sw-description"]
-    s = d.getVar('S')
+    list_for_swu = []
+    artifacts = d.getVar('SWUPDATE_ARTIFACTS_DIR')
     imgdeploydir = d.getVar('SWUDEPLOYDIR')
-
-    if d.getVar('SWUPDATE_SIGNING'):
-        list_for_cpio.append('sw-description.sig')
+    bb.utils.mkdirhier(artifacts)
 
     # Add artifacts added via SRC_URI
     if not d.getVar('INHIBIT_SWUPDATE_ADD_SRC_URI'):
-        swupdate_add_src_uri(d, list_for_cpio)
+        swupdate_add_src_uri(d, artifacts, list_for_swu)
 
     # Add artifacts set via SWUPDATE_IMAGES
-    swupdate_add_artifacts(d, list_for_cpio)
+    swupdate_add_artifacts(d, artifacts, list_for_swu)
 
-    prepare_sw_description(d)
+    swdesc = prepare_sw_description(d, artifacts)
 
-    swupdate_create_cpio(d, imgdeploydir, list_for_cpio)
+    swupdate_create_swu(d, imgdeploydir, swdesc, artifacts, list_for_swu)
 }

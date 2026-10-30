@@ -19,6 +19,21 @@ Documentation for meta-swupdate is part of SWUpdate's docs.
 
 Check for http://sbabic.github.io/swupdate/building-with-yocto.html.
 
+Creating the SWU
+----------------
+
+The SWU is built by swugenerator (recipe swugenerator-native). The classes
+collect the artifacts, expand the BitBake variables and functions in
+sw-description and call swugenerator, which hashes, encrypts, signs and packs
+them. sw-description can be written in libconfig or in JSON.
+
+All files in SRC_URI and the images in SWUPDATE_IMAGES are packed, also the
+ones that sw-description does not reference. Images are packed as they are,
+swugenerator does not compress them again.
+
+Further arguments can be passed to swugenerator with
+`SWUGENERATOR_EXTRA_ARGS`, e.g. `SWUGENERATOR_EXTRA_ARGS = "-l DEBUG"`.
+
 BitBake variable expansion
 --------------------------
 
@@ -29,8 +44,15 @@ line `version = "@@DISTRO_VERSION@@";` in your sw-description file.
 Image hashing
 -------------
 
-During creation of the update file, to get the sha256 hash of the image,
-pass $swupdate_get_sha256(IMAGE) (where IMAGE is an image filename).
+swugenerator adds the sha256 hash to every artifact in sw-description. It
+can be set explicitly with $swupdate_get_sha256(IMAGE) (where IMAGE is an
+image filename), and $swupdate_get_size(IMAGE) inserts the size of an image.
+These two functions are run by swugenerator on the files it packs, encrypted
+ones included. The old syntax `sha256 = "@IMAGE"` is still accepted with a
+warning.
+
+Other `$function(parameters)` entries are BitBake functions of the layers,
+called as `function(d, s, parameters)`.
 
 BitBake auto versions
 ---------------------
@@ -84,14 +106,38 @@ There are 3 signing mechanisms supported by meta-swupdate at the moment:
 
   * Set variable: `SWUPDATE_SIGNING = "CUSTOM"`
 
-  * Set variable `SWUPDATE_SIGN_TOOL' to custom string that needs to be
-    executed in order to perform the signing
+  * Set variable `SWUPDATE_SIGN_TOOL` to the command that signs. Two
+    arguments are appended to it: the file to sign (sw-description) and the
+    file where the signature must be written. The command is not run by a
+    shell, and its arguments cannot contain ",".
 
 sw-description is signed and the signature is written to sw-description.sig
 which is included in the SWU file.
 
-Encrypted private keys are not currently supported since a secure
-mechanism must exist to provide the passphrase.
+For RSA and CMS, the passphrase of an encrypted private key can be read from
+the file set in `SWUPDATE_PASSWORD_FILE`. Paths of keys and certificates
+cannot contain ",".
+
+SWU encryption
+--------------
+
+  * Set `SWUPDATE_AES_FILE` to a file with the key and the IV, as
+    `openssl enc -P` prints them (`key=...` and `iv=...` lines).
+
+  * Mark the artifacts to encrypt with `encrypted = true;` in sw-description.
+    swugenerator encrypts them and adds `ivt`. `SWUPDATE_IMAGES_ENCRYPTED`
+    does not select the artifacts any more: a warning is printed if it is set
+    and sw-description has no encrypted entry.
+
+  * Encrypted artifacts keep their name, so that scripts in sw-description
+    can rely on it. With `SWUPDATE_KEEP_NAMES = ""`, swugenerator appends
+    ".enc" to their name in the SWU and in sw-description; this allows using
+    the same file encrypted and not in one SWU.
+
+  * The IV of `SWUPDATE_AES_FILE` is used for all artifacts. Set
+    `SWUPDATE_UNIQUE_IV = "1"` to use a new IV for each one.
+
+  * Set `SWUPDATE_ENCRYPT_SWDESC = "1"` to encrypt sw-description too.
 
 Maintainer
 ----------
