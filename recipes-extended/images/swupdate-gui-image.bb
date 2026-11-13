@@ -9,11 +9,8 @@ require swupdate-image.inc
 IMAGE_INSTALL += " \
 	freetype \
 	init-ifupdown \
-	lua \
-	luafilesystem \
-	rescuegui \
+	swupdategui-rs \
 	swupdate-tools \
-	tekui \
 	ttf-dejavu-sans \
 	ttf-dejavu-sans-mono \
 	ttf-dejavu-common \
