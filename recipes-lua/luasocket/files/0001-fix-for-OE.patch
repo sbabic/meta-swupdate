@@ -3,6 +3,8 @@ From: Kas User <kas@example.com>
 Date: Tue, 22 May 2018 19:20:04 +0200
 Subject: [PATCH] fix for OE
 
+Upstream-Status: Inappropriate [oe specific]
+
 Signed-off-by: Kas User <kas@example.com>
 ---
  makefile | 4 +++-
