@@ -3,6 +3,8 @@ From: Stefano Babic <sbabic@denx.de>
 Date: Fri, 12 Oct 2018 12:00:50 +0200
 Subject: [PATCH] Fix config for OE
 
+Upstream-Status: Inappropriate [oe specific]
+
 Signed-off-by: Stefano Babic <sbabic@denx.de>
 ---
  config | 60 +++++++++++++++++++++++-----------------------------------
