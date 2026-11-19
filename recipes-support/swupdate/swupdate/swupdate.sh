@@ -16,13 +16,14 @@ for f in `(test -d @LIBDIR@/swupdate/conf.d/ && ls -1 @LIBDIR@/swupdate/conf.d/;
   fi
 done
 
-#  handle variable escaping in a simmple way. Use exec to forward open filedescriptors from systemd open.
-if [ "$SWUPDATE_WEBSERVER_ARGS" != "" -a  "$SWUPDATE_SURICATTA_ARGS" != "" ]; then
-  exec /usr/bin/swupdate $SWUPDATE_ARGS -w "$SWUPDATE_WEBSERVER_ARGS" -u "$SWUPDATE_SURICATTA_ARGS"
-elif [ "$SWUPDATE_WEBSERVER_ARGS" != "" ]; then
-  exec /usr/bin/swupdate $SWUPDATE_ARGS -w "$SWUPDATE_WEBSERVER_ARGS"
-elif [ "$SWUPDATE_SURICATTA_ARGS" != "" ]; then
-  exec /usr/bin/swupdate $SWUPDATE_ARGS -u "$SWUPDATE_SURICATTA_ARGS"
-else
-  exec /usr/bin/swupdate $SWUPDATE_ARGS
+if [ "${SWUPDATE_WEBSERVER_ARGS}" != "" ]; then
+  SWUPDATE_ARGS="${SWUPDATE_ARGS} -w '${SWUPDATE_WEBSERVER_ARGS}'"
 fi
+
+if [ "${SWUPDATE_SURICATTA_ARGS}" != "" ]; then
+  SWUPDATE_ARGS="${SWUPDATE_ARGS} -u '${SWUPDATE_SURICATTA_ARGS}'"
+fi
+
+# Handle shell command arguments using eval to get expected effect from quoting
+# Use exec to forward open filedescriptors from systemd open.
+eval exec /usr/bin/swupdate ${SWUPDATE_ARGS}
