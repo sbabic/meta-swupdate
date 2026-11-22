@@ -3,7 +3,7 @@ Description=swupdate progress service
 After=swupdate.service
 
 [Service]
-ExecStart=/usr/bin/swupdate-progress -r -w
+ExecStart=/usr/bin/swupdate-progress -q -w -r /sbin/reboot
 
 [Install]
 WantedBy=swupdate.service
